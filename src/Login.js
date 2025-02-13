@@ -1,0 +1,306 @@
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
+import {useUserContext} from './Context';
+import axios from 'axios';
+import Snackbar from 'react-native-snackbar';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
+const BASE_URL = process.env.BASE_URL;
+
+export default function Login({navigation}) {
+  const {userData, fetchUserData, setUserDataInStorage} = useUserContext();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState('Student');
+
+  useEffect(() => {
+    fetchUserData();
+    if (userData?.email && userData.email !== 'guest') {
+      navigation.navigate(userData.role === 'Faculty' ? 'Faculty' : 'Student');
+    }
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Snackbar.show({
+        text: 'Username and password cannot be empty!',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${BASE_URL}/login`, {
+        email,
+        password,
+        role: selectedRole,
+      });
+
+      if (response.status === 200 && response.data.login === 'success') {
+        Snackbar.show({
+          text: 'Login Successful!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
+
+        setTimeout(() => {
+          setUserDataInStorage({email, role: selectedRole});
+          setEmail('');
+          setPassword('');
+          navigation.navigate(
+            selectedRole === 'Faculty' ? 'Faculty' : 'Student',
+          );
+        }, 5000);
+      } else {
+        Snackbar.show({
+          text: 'Invalid Credentials',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+        setPassword('');
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          Snackbar.show({
+            text: 'Invalid Username or Password',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: '#D9534F',
+            textColor: '#fff',
+          });
+        } else if (error.response.status === 401) {
+          Snackbar.show({
+            text: 'Unauthorized! Please check your credentials.',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: '#D9534F',
+            textColor: '#fff',
+          });
+        } else if (error.response.status === 500) {
+          Snackbar.show({
+            text: 'Server error! Please try again later.',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: '#D9534F',
+            textColor: '#fff',
+          });
+        } else {
+          Snackbar.show({
+            text: `Error: ${
+              error.response.data.message || 'Something went wrong'
+            }`,
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: '#D9534F',
+            textColor: '#fff',
+          });
+        }
+      } else if (error.request) {
+        Snackbar.show({
+          text: 'No response from server. Check your internet.',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      } else {
+        Snackbar.show({
+          text: 'An unexpected error occurred!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          <View style={styles.container1}>
+            <Image style={styles.image} source={require('../assets/nit.png')} />
+          </View>
+
+          <View style={styles.container2}>
+            <View style={styles.headContainer}>
+              <Text style={styles.loginText}>LOGIN</Text>
+              <Text style={styles.headText}>Hello there!</Text>
+              <Text style={styles.headText}>Welcome Back</Text>
+            </View>
+
+            {/* Role Selection */}
+            <View style={styles.roleContainer}>
+              <Text style={styles.roleText}>Are You ?</Text>
+              <View style={styles.roleButtons}>
+                {['Faculty', 'Student'].map(role => (
+                  <TouchableOpacity
+                    key={role}
+                    style={[
+                      styles.roleButton,
+                      selectedRole === role && styles.selectedRole,
+                    ]}
+                    onPress={() => setSelectedRole(role)}>
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        selectedRole === role && styles.selectedRoleText,
+                      ]}>
+                      {role}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Username & Password Input Fields */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+              />
+
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                secureTextEntry={true}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  container1: {
+    height: windowHeight / 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: windowWidth - 60,
+    height: windowHeight / 6,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    borderRadius: 10,
+  },
+  container2: {},
+  loginText: {
+    fontSize: 30,
+    color: '#88BDF2',
+    fontWeight: 'bold',
+    marginBottom: 30,
+  },
+  headContainer: {
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  headText: {
+    fontSize: 25,
+    fontFamily: 'Convergence-Regular',
+    textAlign: 'center',
+    color: '#384959',
+  },
+  roleContainer: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  roleText: {
+    fontSize: 17,
+    color: '#384959',
+    marginBottom: 5,
+  },
+  roleButtons: {
+    flexDirection: 'row',
+  },
+  roleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 0.5,
+    borderColor: '#2B8781',
+    marginHorizontal: 5,
+  },
+  selectedRole: {
+    backgroundColor: '#2B8781',
+  },
+  selectedRoleText: {
+    color: '#fff',
+  },
+  roleButtonText: {
+    fontSize: 13,
+    color: '#000',
+  },
+  inputContainer: {},
+  label: {
+    fontSize: 10,
+    paddingVertical: 5,
+    color: 'grey',
+  },
+  input: {
+    borderWidth: 0.5,
+    padding: 10,
+    fontSize: 17,
+    borderRadius: 10,
+    borderColor: '#ccc',
+    marginBottom: 5,
+    color: '#384959',
+  },
+  forgotPassword: {
+    fontSize: 12,
+    color: '#2B8781',
+    textAlign: 'right',
+    marginVertical: 5,
+  },
+  submitButton: {
+    backgroundColor: '#2B8781',
+    paddingVertical: 12,
+    borderRadius: 50,
+    marginTop: 10,
+  },
+  buttonText: {
+    fontSize: 13,
+    color: '#fff',
+    textAlign: 'center',
+  },
+});
