@@ -24,7 +24,7 @@ import PasswordResetOTPVerification from "./src/PasswordResetOtpVerification";
 import ResetPassword from "./src/ResetPassword";
 import EmailOTPVerification from "./src/EmailOTPVerification";
 
-enableScreens();
+// enableScreens();
 
 const App = () => {
   return (
@@ -51,7 +51,7 @@ const App = () => {
           <Stack.Navigator
             initialRouteName="Start"
             screenOptions={{ 
-              animation: 'slide_from_right',
+              // animation: 'slide_from_right',
               headerShown: false,
              }}
           >

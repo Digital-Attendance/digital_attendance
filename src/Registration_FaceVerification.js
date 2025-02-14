@@ -47,6 +47,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
       if (permission === 'denied') await Linking.openSettings();
       setHasPermission(permission === 'granted');
     })();
+    console.log('Hi');
   }, []);
 
   const takephoto = async () => {

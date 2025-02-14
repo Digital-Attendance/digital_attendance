@@ -1,55 +1,51 @@
-import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useMemo,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const GUEST_USER_DATA = Object.freeze({ email: "guest", role: "guest" });
+import axios from 'axios';
 const AsyncStorageContext = createContext();
 
-export const AsyncStorageProvider = ({ children }) => {
-  const [userData, setUserData] = useState(GUEST_USER_DATA);
+export const AsyncStorageProvider = ({children}) => {
+  const BASE_URL = process.env.BASE_URL;
 
-  const handleStorageOperation = async (operation, key, value = null) => {
-    try {
-      if (operation === 'get') {
-        const storedData = await AsyncStorage.getItem(key);
-        return storedData ? JSON.parse(storedData) : null;
-      } else if (operation === 'set') {
-        await AsyncStorage.setItem(key, JSON.stringify(value));
-      } else if (operation === 'remove') {
-        await AsyncStorage.removeItem(key);
-      }
-    } catch (error) {
-      console.error(`AsyncStorage ${operation} error:`, error);
-    }
-    return null;
-  };
-
-  const fetchUserData = useCallback(async () => {
-    const storedUserData = await handleStorageOperation('get', 'userData');
-    setUserData(storedUserData || GUEST_USER_DATA);
-  }, []);
-
-  const setUserDataInStorage = useCallback(async (data) => {
-    await handleStorageOperation('set', 'userData', data);
-    setUserData(data);
-  }, []);
-
-  const clearUserDataFromStorage = useCallback(async () => {
-    await handleStorageOperation('remove', 'userData');
-    setUserData(GUEST_USER_DATA);
-  }, []);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+    checkLoginStatus();
+  }, []);
+
+  const checkLoginStatus = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      try {
+        const response = await axios.get(`${BASE_URL}/session_status`, {
+          headers: {Authorization: `Bearer ${token}`},
+        });
+        setUser(response.data);
+      } catch (error) {
+        await AsyncStorage.removeItem('access_token');
+      }
+    }
+  };
+
+  const logout = async () => {
+    await axios.post(`${BASE_URL}/logout`);
+    await AsyncStorage.removeItem('access_token');
+    setUser(null);
+  };
 
   const contextValue = useMemo(
     () => ({
-      userData,
-      fetchUserData,
-      setUserDataInStorage,
-      clearUserDataFromStorage,
+      user,
+      checkLoginStatus,
+      logout,
     }),
-    [userData, fetchUserData, setUserDataInStorage, clearUserDataFromStorage]
+    [user, checkLoginStatus, logout],
   );
 
   return (
@@ -62,7 +58,9 @@ export const AsyncStorageProvider = ({ children }) => {
 export const useUserContext = () => {
   const context = useContext(AsyncStorageContext);
   if (!context) {
-    throw new Error("useUserContext must be used within an AsyncStorageProvider");
+    throw new Error(
+      'useUserContext must be used within an AsyncStorageProvider',
+    );
   }
   return context;
 };

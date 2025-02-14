@@ -49,8 +49,7 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
   
 
   const handleVerify = useCallback(() => {
-    const otpCode = useMemo(() => otp.join(''), [otp]);
-
+    const otpCode = otp.join('');
     
     if (otpCode.length < 4) {
       Snackbar.show({

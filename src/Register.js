@@ -8,13 +8,15 @@ import {
   Platform,
   TextInput,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 // import {Dropdown} from 'react-native-element-dropdown';
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import axios from 'axios';
-
+import {ScrollView} from 'react-native-gesture-handler';
 
 const Register = ({navigation}) => {
   const BASE_URL = process.env.BASE_URL;
@@ -27,12 +29,16 @@ const Register = ({navigation}) => {
     registration_number: '',
     selectedRole: 'Student',
   });
-  const [selectedRole, setSelectedRole] = useState('Student');
+  const [Role, setRole] = useState('Student');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
-  const handleChange = useCallback((field, value) => {
+  // useEffect(() => {
+  //   console.log('Form:', form);
+  // }, [form]);
+
+  const handleChange = (field, value) => {
     setForm(prev => ({...prev, [field]: value}));
 
     if (field === 'password') {
@@ -45,7 +51,7 @@ const Register = ({navigation}) => {
     if (field === 'email') {
       setEmailError(!value.endsWith('.nits.ac.in'));
     }
-  }, []);
+  };
 
   const handleNext = useCallback(async () => {
     const {
@@ -145,132 +151,126 @@ const Register = ({navigation}) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-      <Image
-        source={require('../assets/registration.gif')}
-        style={styles.animation}
-      />
-      <Text style={styles.title}>Register</Text>
-
-      <View style={styles.roleContainer}>
-        <Text style={styles.roleText}>Are You ?</Text>
-        <View style={styles.roleButtons}>
-          {['Faculty', 'Student'].map(role => (
-            <TouchableOpacity
-              key={role}
-              style={[
-                styles.roleButton,
-                selectedRole === role && styles.selectedRole,
-              ]}
-              onPress={() => {
-                setSelectedRole(role);
-                handleChange('selectedRole', selectedRole);
-              }}>
-              <Text
-                style={[
-                  styles.roleButtonText,
-                  selectedRole === role && styles.selectedRoleText,
-                ]}>
-                {role}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <View style={styles.inputRow}>
-          <View style={{flex: 1, marginRight: 10}}>
-            <Text style={styles.label}>First Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Piyush"
-              placeholderTextColor={'#ccc'}
-              value={form.firstname}
-              onChangeText={text => handleChange('firstname', text)}
-            />
-          </View>
-          <View style={{flex: 1}}>
-            <Text style={styles.label}>Last Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Kumar"
-              placeholderTextColor={'#ccc'}
-              value={form.lastname}
-              onChangeText={text => handleChange('lastname', text)}
-            />
-          </View>
-        </View>
-        <View style={styles.emailContainer}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.infoText}>Enter Institute Email ID</Text>
-        </View>
-        <TextInput
-          style={[styles.input, emailError && styles.errorInput]}
-          placeholder="piyush@ei.nits.ac.in"
-          placeholderTextColor={'#ccc'}
-          value={form.email}
-          onChangeText={text => handleChange('email', text)}
-        />
-
-        <View style={styles.labelContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TouchableOpacity onPress={showPasswordInfo}>
-            <Icon name="information-outline" size={20} color="gray" />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={[
-            styles.passwordContainer,
-            passwordError && styles.errorInput,
-          ]}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
-            secureTextEntry={!passwordVisible}
-            value={form.password}
-            onChangeText={text => handleChange('password', text)}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          <Image
+            source={require('../assets/registration.gif')}
+            style={styles.animation}
           />
-          <TouchableOpacity
-            onPress={() => setPasswordVisible(!passwordVisible)}>
-            <Icon
-              name={passwordVisible ? 'eye-off' : 'eye'}
-              size={24}
-              color="gray"
+          <Text style={styles.title}>Register</Text>
+
+          <View style={styles.roleContainer}>
+            <Text style={styles.roleText}>Are You ?</Text>
+            <View style={styles.roleButtons}>
+              {['Faculty', 'Student'].map(role => (
+                <TouchableOpacity
+                  key={role}
+                  style={[styles.roleButton, Role === role && styles.Role]}
+                  onPress={() => {
+                    setRole(role);
+                    setForm(prev => {
+                      const updatedForm = {...prev, selectedRole: role};
+                      // console.log('Updated form:', updatedForm);
+                      return updatedForm;
+                    });
+                  }}>
+                  <Text
+                    style={[
+                      styles.roleButtonText,
+                      Role === role && styles.RoleText,
+                    ]}>
+                    {role}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <View style={styles.inputRow}>
+              <View style={{flex: 1, marginRight: 10}}>
+                <Text style={styles.label}>First Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Piyush"
+                  placeholderTextColor={'#ccc'}
+                  value={form.firstname}
+                  onChangeText={text => handleChange('firstname', text)}
+                />
+              </View>
+              <View style={{flex: 1}}>
+                <Text style={styles.label}>Last Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Kumar"
+                  placeholderTextColor={'#ccc'}
+                  value={form.lastname}
+                  onChangeText={text => handleChange('lastname', text)}
+                />
+              </View>
+            </View>
+            <View style={styles.emailContainer}>
+              <Text style={styles.label}>Email</Text>
+              <Text style={styles.infoText}>Enter Institute Email ID</Text>
+            </View>
+            <TextInput
+              style={[styles.input, emailError && styles.errorInput]}
+              placeholder="piyush@ei.nits.ac.in"
+              placeholderTextColor={'#ccc'}
+              value={form.email}
+              onChangeText={text => handleChange('email', text)}
             />
-          </TouchableOpacity>
-        </View>
 
-        {/* <Dropdown
-          style={styles.dropdown}
-          data={options}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Account Type"
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          itemTextStyle={styles.itemTextStyle}
-          value={form.selectedRole}
-          onChange={item => handleChange('selectedRole', item.value)}
-        /> */}
-        {selectedRole === 'Faculty' ? (
-          <Text style={styles.label}>Faculty ID</Text>
-        ) : (
-          <Text style={styles.label}>Scholar ID</Text>
-        )}
-        <TextInput
-          style={styles.input}
-          placeholder={selectedRole === 'Faculty' ? 'FACXXXX' : '211XXXX'}
-          placeholderTextColor={'#ccc'}
-          value={form.registration_number}
-          onChangeText={text => handleChange('registration_number', text)}
-        />
+            <View style={styles.labelContainer}>
+              <Text style={styles.label}>Password</Text>
+              <TouchableOpacity onPress={showPasswordInfo}>
+                <Icon name="information-outline" size={12} color="gray" />
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                styles.passwordContainer,
+                passwordError && styles.errorInput,
+              ]}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="XYZ@1234"
+                placeholderTextColor={'#ccc'}
+                secureTextEntry={!passwordVisible}
+                value={form.password}
+                onChangeText={text => handleChange('password', text)}
+              />
+              <TouchableOpacity
+                onPress={() => setPasswordVisible(!passwordVisible)}>
+                <Icon
+                  name={passwordVisible ? 'eye-off' : 'eye'}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            {Role === 'Faculty' ? (
+              <Text style={styles.label}>Faculty ID</Text>
+            ) : (
+              <Text style={styles.label}>Scholar ID</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              placeholder={Role === 'Faculty' ? 'FACXXXX' : '211XXXX'}
+              placeholderTextColor={'#ccc'}
+              value={form.registration_number}
+              onChangeText={text => handleChange('registration_number', text)}
+            />
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
@@ -278,10 +278,13 @@ const Register = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 20,
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   animation: {
     width: 200,
@@ -291,7 +294,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Raleway-Bold',
   },
   roleContainer: {
     alignItems: 'center',
@@ -299,6 +302,7 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: 17,
+    fontFamily: 'Raleway-Medium',
     color: '#384959',
     marginBottom: 5,
   },
@@ -313,25 +317,28 @@ const styles = StyleSheet.create({
     borderColor: '#2B8781',
     marginHorizontal: 5,
   },
-  selectedRole: {
+  Role: {
     backgroundColor: '#2B8781',
   },
-  selectedRoleText: {
+  RoleText: {
     color: '#fff',
   },
   roleButtonText: {
     fontSize: 13,
     color: '#000',
+    fontFamily: 'Raleway-Medium',
   },
   inputContainer: {
     width: '100%',
+    paddingHorizontal: 10,
   },
   inputRow: {
     flexDirection: 'row',
     width: '100%',
   },
   label: {
-    fontSize: 14,
+    fontSize: 10,
+    fontFamily: 'Raleway-Medium',
     paddingVertical: 5,
     color: '#000',
   },
@@ -341,7 +348,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 8,
+    fontFamily: 'Raleway-Medium',
     color: 'gray',
     textAlign: 'right',
   },
@@ -349,7 +357,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 5,
   },
   input: {
     width: '100%',
@@ -380,26 +387,18 @@ const styles = StyleSheet.create({
     flex: 1,
     color: 'black',
   },
-  dropdown: {
-    width: '100%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingLeft: 10,
-    marginVertical: 5,
-  },
   nextButton: {
     backgroundColor: '#2B8781',
     padding: 12,
     borderRadius: 50,
     marginTop: 10,
     alignItems: 'center',
+    elevation: 3,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 13,
+    fontFamily: 'Raleway-Bold',
   },
 });
 

@@ -17,23 +17,17 @@ import {useUserContext} from './Context';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const BASE_URL = process.env.BASE_URL;
 
 export default function Login({navigation}) {
-  const {userData, fetchUserData, setUserDataInStorage} = useUserContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('Student');
-
-  useEffect(() => {
-    fetchUserData();
-    if (userData?.email && userData.email !== 'guest') {
-      navigation.navigate(userData.role === 'Faculty' ? 'Faculty' : 'Student');
-    }
-  }, []);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -53,7 +47,15 @@ export default function Login({navigation}) {
         role: selectedRole,
       });
 
-      if (response.status === 200 && response.data.login === 'success') {
+      if (response.status === 200) {
+        console.log('Login Successful:', response.data);
+        
+        await AsyncStorage.setItem('access_token', response.data.access_token);
+        await AsyncStorage.setItem(
+          'refresh_token',
+          response.data.refresh_token,
+        );
+        await AsyncStorage.setItem('role', selectedRole);
         Snackbar.show({
           text: 'Login Successful!',
           duration: Snackbar.LENGTH_SHORT,
@@ -62,13 +64,12 @@ export default function Login({navigation}) {
         });
 
         setTimeout(() => {
-          setUserDataInStorage({email, role: selectedRole});
           setEmail('');
           setPassword('');
           navigation.navigate(
             selectedRole === 'Faculty' ? 'Faculty' : 'Student',
           );
-        }, 5000);
+        }, 3000);
       } else {
         Snackbar.show({
           text: 'Invalid Credentials',
@@ -186,7 +187,8 @@ export default function Login({navigation}) {
                 value={password}
                 onChangeText={setPassword}
               />
-              <TouchableOpacity  onPress={() => navigation.navigate('ForgotPassword')}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
               </TouchableOpacity>
             </View>
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
   loginText: {
     fontSize: 30,
     color: '#88BDF2',
-    fontWeight: 'bold',
+    fontFamily: 'Raleway-Bold',
     marginBottom: 30,
   },
   headContainer: {
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
   },
   headText: {
     fontSize: 25,
-    fontFamily: 'Convergence-Regular',
+    fontFamily: 'Raleway-Medium',
     textAlign: 'center',
     color: '#384959',
   },
@@ -247,6 +249,7 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: 17,
+    fontFamily: 'Raleway-Medium',
     color: '#384959',
     marginBottom: 5,
   },
@@ -256,6 +259,10 @@ const styles = StyleSheet.create({
   roleButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
+    // height: 30,
+    // width: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 10,
     borderWidth: 0.5,
     borderColor: '#2B8781',
@@ -270,10 +277,12 @@ const styles = StyleSheet.create({
   roleButtonText: {
     fontSize: 13,
     color: '#000',
+    fontFamily: 'Raleway-Medium',
   },
   inputContainer: {},
   label: {
     fontSize: 10,
+    fontFamily: 'Raleway-Medium',
     paddingVertical: 5,
     color: 'grey',
   },
@@ -288,6 +297,7 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     fontSize: 12,
+    fontFamily: 'Raleway-Medium',
     color: '#2B8781',
     textAlign: 'right',
     marginVertical: 5,
@@ -297,9 +307,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 50,
     marginTop: 10,
+    elevation: 3,
   },
   buttonText: {
     fontSize: 13,
+    fontFamily: 'Raleway-Bold',
     color: '#fff',
     textAlign: 'center',
   },

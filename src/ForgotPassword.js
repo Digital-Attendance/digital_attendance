@@ -68,6 +68,10 @@ const ForgotPassword = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Reset Password</Text>
+      <Text style={styles.subtitle}>
+        No worries! Enter your email address below and we will send you an OTP
+        to reset password.
+      </Text>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email Address</Text>
         <TextInput
@@ -97,14 +101,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: '600',
+    // fontWeight: '600',
+    fontFamily: 'Raleway-Bold',
     textAlign: 'center',
     marginVertical: 20,
     color: 'black',
   },
+  subtitle: {
+    fontSize: 12,
+    fontFamily: 'Raleway-Regular',
+    textAlign: 'center',
+    color: '#384959',
+  },
   label: {
     fontSize: 12,
-    fontWeight: '500',
+    // fontWeight: '500',
+    fontFamily: 'Raleway-Bold',
     marginTop: 50,
     marginBottom: 10,
     alignSelf: 'flex-start',
@@ -134,7 +146,8 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Raleway-Bold',
+    // fontWeight: '600',
     color: '#fff',
   },
 });

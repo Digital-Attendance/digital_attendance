@@ -27,6 +27,7 @@ const EmailOTPVerification = ({navigation, route}) => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const inputs = useRef([]);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const EmailOTPVerification = ({navigation, route}) => {
     newOtp[index] = value;
 
     setOtp(newOtp);
+    console.log(otp);
 
     if (value.length === 1 && index < 3) {
       inputs.current[index + 1]?.focus();
@@ -56,7 +58,8 @@ const EmailOTPVerification = ({navigation, route}) => {
   };
 
   const handleVerify = useCallback(() => {
-    const otpCode = useMemo(() => otp.join(''), [otp]);
+    // const otpCode = useMemo(() => otp.join(''), [otp]);
+    const otpCode = otp.join('');
 
     if (otpCode.length < 4) {
       Snackbar.show({
@@ -83,12 +86,24 @@ const EmailOTPVerification = ({navigation, route}) => {
             backgroundColor: '#5CB85C',
             textColor: '#fff',
           });
-          if (selectedRole === 'student') {
+          console.log('OTP verified successfully!');
+          if (selectedRole === 'Student') {
             setTimeout(() => {
-              navigation.replace('Registration_FaceVerification', {form});
+              console.log('Navigating to FaceVerification');
+              navigation.replace('FaceVerification', {
+                form
+              });
             }, 2000);
-          } else {
+          } else if (selectedRole === 'Faculty') {
+            console.log('Registering Faculty...');
             await registerFaculty();
+          } else {
+            Snackbar.show({
+              text: 'Invalid Role',
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: '#D9534F',
+              textColor: '#fff',
+            });
           }
         } else {
           Snackbar.show({
@@ -99,6 +114,7 @@ const EmailOTPVerification = ({navigation, route}) => {
           });
         }
       } catch (error) {
+        console.log(error);
         Snackbar.show({
           text: 'An error occurred while verifying the OTP!',
           duration: Snackbar.LENGTH_SHORT,
@@ -111,6 +127,8 @@ const EmailOTPVerification = ({navigation, route}) => {
 
   const registerFaculty = async () => {
     setIsRegistering(true);
+    console.log('Registering Faculty...');
+    
     Snackbar.show({
       text: 'Registering Faculty...',
       duration: Snackbar.LENGTH_INDEFINITE,

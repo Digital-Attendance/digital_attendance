@@ -19,23 +19,23 @@ const Student = ({ navigation }) => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [scholarId, setScholarId] = useState("");
   const [subjectData, setSubjectData] = useState([]);
-  const { userData, clearUserDataFromStorage } = useUserContext();
-  const { username } = userData;
+  const { user, logout } = useUserContext();
+  // const { username } = userData;
   const BASE_URL = process.env.BASE_URL;
 
-  useEffect(() => {
-    fetchSubjects();
-    fetchSubjectData();
-    console.log("User info in Student Page:", userData);
-  }, []);
+  // useEffect(() => {
+  //   fetchSubjects();
+  //   fetchSubjectData();
+  //   console.log("User info in Student Page:", userData);
+  // }, []);
 
   const handleMarkAttendance = () => {
     navigation.navigate("AttendanceStudent");
   };
 
-  const logout = async () => {
+  const Logout = async () => {
     try {
-      clearUserDataFromStorage();
+      await logout();
       navigation.navigate("Start");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -89,7 +89,7 @@ const Student = ({ navigation }) => {
     >
       <View style={styles.container}>
         <View style={styles.topNameWrapper}>
-          <Text style={styles.text}>Welcome {username} !!</Text>
+          <Text style={styles.text}>Welcome!!</Text>
         </View>
         <TouchableOpacity style={styles.button} onPress={enrollInSubject}>
           <Text style={styles.buttonText}>Enroll in a Subject</Text>
@@ -129,7 +129,7 @@ const Student = ({ navigation }) => {
         <TouchableOpacity style={styles.button} onPress={handleMarkAttendance}>
           <Text style={styles.buttonText}>Mark Attendance</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={logout}>
+        <TouchableOpacity style={styles.button} onPress={Logout}>
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
 
