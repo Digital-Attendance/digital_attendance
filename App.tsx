@@ -17,11 +17,14 @@ import AttendanceStudent from "./src/AttendanceStudent";
 import Registration_FaceVerification from "./src/Registration_FaceVerification";
 
 const Stack = createStackNavigator();
-// import { Easing } from "react-native-reanimated";
+
 import { enableScreens } from 'react-native-screens';
+import ForgotPassword from "./src/ForgotPassword";
+import PasswordResetOTPVerification from "./src/PasswordResetOtpVerification";
+import ResetPassword from "./src/ResetPassword";
+import EmailOTPVerification from "./src/EmailOTPVerification";
+
 enableScreens();
-
-
 
 const App = () => {
   return (
@@ -59,6 +62,10 @@ const App = () => {
             <Stack.Screen name="Faculty" component={Faculty} />
             <Stack.Screen name="Student" component={Student} />
             <Stack.Screen name="AttendanceStudent" component={AttendanceStudent} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+            <Stack.Screen name="OTPVerification" component={PasswordResetOTPVerification} />
+            <Stack.Screen name="EmailVerification" component={EmailOTPVerification} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
           </Stack.Navigator>
         </NavigationContainer>
       </AsyncStorageProvider>

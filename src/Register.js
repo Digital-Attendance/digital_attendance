@@ -13,27 +13,24 @@ import {
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import axios from 'axios';
+
+
 const Register = ({navigation}) => {
+  const BASE_URL = process.env.BASE_URL;
+
   const [form, setForm] = useState({
     firstname: '',
     lastname: '',
     email: '',
     password: '',
     registration_number: '',
-    selectedRole: null,
+    selectedRole: 'Student',
   });
   const [selectedRole, setSelectedRole] = useState('Student');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [emailError, setEmailError] = useState(false);
-
-  // const options = useMemo(
-  //   () => [
-  //     {label: 'Student', value: 'Student'},
-  //     {label: 'Faculty', value: 'Faculty'},
-  //   ],
-  //   [],
-  // );
 
   const handleChange = useCallback((field, value) => {
     setForm(prev => ({...prev, [field]: value}));
@@ -50,7 +47,7 @@ const Register = ({navigation}) => {
     }
   }, []);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     const {
       firstname,
       lastname,
@@ -96,8 +93,43 @@ const Register = ({navigation}) => {
       });
       return;
     }
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/send-otp-first-time`,
+        {email},
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
-    navigation.navigate('FaceVerification', {form});
+      if (response.data.success) {
+        Snackbar.show({
+          text: response.data.message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
+        setTimeout(() => {
+          navigation.replace('EmailVerification', {form});
+        }, 2000);
+      } else {
+        Snackbar.show({
+          text: response.data.message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
+    } catch (error) {
+      Snackbar.show({
+        text: error.message,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    }
   }, [form, navigation, passwordError]);
 
   const showPasswordInfo = () => {
@@ -223,7 +255,7 @@ const Register = ({navigation}) => {
         {selectedRole === 'Faculty' ? (
           <Text style={styles.label}>Faculty ID</Text>
         ) : (
-          <Text style={styles.label}>Registration Number</Text>
+          <Text style={styles.label}>Scholar ID</Text>
         )}
         <TextInput
           style={styles.input}

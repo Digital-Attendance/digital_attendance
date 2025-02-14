@@ -104,7 +104,6 @@ const Registration_FaceVerification = ({navigation, route}) => {
     formData.append('image', file);
     formData.append('role', selectedRole);
 
-    console.log('formData', formData);
 
     try {
       const response = await fetch(`${BASE_URL}/register`, {
@@ -125,16 +124,15 @@ const Registration_FaceVerification = ({navigation, route}) => {
         }, 5000);
       } else {
         Snackbar.show({
-          text: 'Registration failed.',
+          text: response.statusText,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
         });
-        console.log('Registration failed', response);
       }
     } catch (error) {
       Snackbar.show({
-        text: 'Error registering.',
+        text: error.message,
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',
