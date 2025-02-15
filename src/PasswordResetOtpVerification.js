@@ -78,7 +78,7 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
           });
           setTimeout(() => {
             navigation.replace('ResetPassword', { email });
-          }, 5000);
+          }, 1000);
         } else {
           Snackbar.show({
             text: response.data.message,

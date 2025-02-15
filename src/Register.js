@@ -10,8 +10,9 @@ import {
   Image,
   TouchableWithoutFeedback,
   Keyboard,
+  Modal,
 } from 'react-native';
-// import {Dropdown} from 'react-native-element-dropdown';
+
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -33,10 +34,7 @@ const Register = ({navigation}) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [emailError, setEmailError] = useState(false);
-
-  // useEffect(() => {
-  //   console.log('Form:', form);
-  // }, [form]);
+  const [passwordInfoVisible, setPasswordInfoVisible] = useState(false);
 
   const handleChange = (field, value) => {
     setForm(prev => ({...prev, [field]: value}));
@@ -48,9 +46,9 @@ const Register = ({navigation}) => {
       setPasswordError(!isValid);
     }
 
-    if (field === 'email') {
-      setEmailError(!value.endsWith('.nits.ac.in'));
-    }
+    // if (field === 'email') {
+    //   setEmailError(!value.endsWith('.nits.ac.in'));
+    // }
   };
 
   const handleNext = useCallback(async () => {
@@ -80,15 +78,15 @@ const Register = ({navigation}) => {
       return;
     }
 
-    if (!email.endsWith('.nits.ac.in')) {
-      Snackbar.show({
-        text: 'Please enter an institute email ID',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
-      });
-      return;
-    }
+    // if (!email.endsWith('.nits.ac.in')) {
+    //   Snackbar.show({
+    //     text: 'Please enter an institute email ID',
+    //     duration: Snackbar.LENGTH_SHORT,
+    //     backgroundColor: '#D9534F',
+    //     textColor: '#fff',
+    //   });
+    //   return;
+    // }
 
     if (passwordError) {
       Snackbar.show({
@@ -138,14 +136,14 @@ const Register = ({navigation}) => {
     }
   }, [form, navigation, passwordError]);
 
-  const showPasswordInfo = () => {
-    Snackbar.show({
-      text: 'Password must be at least 8 characters long, include a letter, a number, and a special character (@#$%^&+=!)',
-      duration: Snackbar.LENGTH_LONG,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
-    });
-  };
+  // const showPasswordInfo = () => {
+  //   Snackbar.show({
+  //     text: 'Password must be at least 8 characters long, include a letter, a number, and a special character (@#$%^&+=!)',
+  //     duration: Snackbar.LENGTH_LONG,
+  //     backgroundColor: '#2B8781',
+  //     textColor: '#fff',
+  //   });
+  // };
 
   return (
     <KeyboardAvoidingView
@@ -170,7 +168,6 @@ const Register = ({navigation}) => {
                     setRole(role);
                     setForm(prev => {
                       const updatedForm = {...prev, selectedRole: role};
-                      // console.log('Updated form:', updatedForm);
                       return updatedForm;
                     });
                   }}>
@@ -192,7 +189,7 @@ const Register = ({navigation}) => {
                 <Text style={styles.label}>First Name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Piyush"
+                  // placeholder="Piyush"
                   placeholderTextColor={'#ccc'}
                   value={form.firstname}
                   onChangeText={text => handleChange('firstname', text)}
@@ -202,7 +199,7 @@ const Register = ({navigation}) => {
                 <Text style={styles.label}>Last Name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Kumar"
+                  // placeholder="Kumar"
                   placeholderTextColor={'#ccc'}
                   value={form.lastname}
                   onChangeText={text => handleChange('lastname', text)}
@@ -215,16 +212,17 @@ const Register = ({navigation}) => {
             </View>
             <TextInput
               style={[styles.input, emailError && styles.errorInput]}
-              placeholder="piyush@ei.nits.ac.in"
+              // placeholder="piyush@ei.nits.ac.in"
               placeholderTextColor={'#ccc'}
+              autoCapitalize='none'
               value={form.email}
               onChangeText={text => handleChange('email', text)}
             />
 
             <View style={styles.labelContainer}>
               <Text style={styles.label}>Password</Text>
-              <TouchableOpacity onPress={showPasswordInfo}>
-                <Icon name="information-outline" size={12} color="gray" />
+              <TouchableOpacity onPress={() => setPasswordInfoVisible(true)}>
+                <Icon name="information-outline" size={15} color="gray" />
               </TouchableOpacity>
             </View>
             <View
@@ -234,7 +232,7 @@ const Register = ({navigation}) => {
               ]}>
               <TextInput
                 style={styles.passwordInput}
-                placeholder="XYZ@1234"
+                // placeholder="XYZ@1234"
                 placeholderTextColor={'#ccc'}
                 secureTextEntry={!passwordVisible}
                 value={form.password}
@@ -249,6 +247,24 @@ const Register = ({navigation}) => {
                 />
               </TouchableOpacity>
             </View>
+            
+            <Modal
+              transparent
+              visible={passwordInfoVisible}
+              animationType="fade"
+              onRequestClose={() => setPasswordInfoVisible(false)}>
+              <TouchableWithoutFeedback
+                onPress={() => setPasswordInfoVisible(false)}>
+                <View style={styles.overlay}>
+                  <View style={styles.tooltip}>
+                    <Text style={styles.tooltipText}>
+                      Password must be at least 8 characters long, include a
+                      letter, a number, and a special character (@#$%^&+=!)
+                    </Text>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
 
             {Role === 'Faculty' ? (
               <Text style={styles.label}>Faculty ID</Text>
@@ -257,7 +273,7 @@ const Register = ({navigation}) => {
             )}
             <TextInput
               style={styles.input}
-              placeholder={Role === 'Faculty' ? 'FACXXXX' : '211XXXX'}
+              // placeholder={Role === 'Faculty' ? 'FACXXXX' : '211XXXX'}
               placeholderTextColor={'#ccc'}
               value={form.registration_number}
               onChangeText={text => handleChange('registration_number', text)}
@@ -386,6 +402,27 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     color: 'black',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  tooltip: {
+    padding: 10,
+    top: 130,
+    left: 70,
+    width: 140,
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
+    borderRadius: 5,
+    // elevation: 3,
+  },
+  tooltipText: {
+    color: '#fff',
+    fontSize: 8,
+    fontFamily: 'Raleway-Regular',
+    textAlign: 'center',
   },
   nextButton: {
     backgroundColor: '#2B8781',

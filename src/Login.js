@@ -49,7 +49,7 @@ export default function Login({navigation}) {
 
       if (response.status === 200) {
         console.log('Login Successful:', response.data);
-        
+
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem(
           'refresh_token',
@@ -147,7 +147,6 @@ export default function Login({navigation}) {
               <Text style={styles.headText}>Welcome Back</Text>
             </View>
 
-            {/* Role Selection */}
             <View style={styles.roleContainer}>
               <Text style={styles.roleText}>Are You ?</Text>
               <View style={styles.roleButtons}>
@@ -171,13 +170,13 @@ export default function Login({navigation}) {
               </View>
             </View>
 
-            {/* Username & Password Input Fields */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
+                autoCapitalize="none"
               />
 
               <Text style={styles.label}>Password</Text>
@@ -193,7 +192,6 @@ export default function Login({navigation}) {
               </TouchableOpacity>
             </View>
 
-            {/* Submit Button */}
             <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>

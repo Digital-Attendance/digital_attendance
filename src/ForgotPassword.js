@@ -27,17 +27,17 @@ const ForgotPassword = ({navigation}) => {
     }
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/send-otp`,
-        {email},
-        {
-          validateStatus: function (status) {
-            return status < 500;
-          },
-        },
-      );
+      // const response = await axios.post(
+      //   `${BASE_URL}/send-otp`,
+      //   {email},
+      //   {
+      //     validateStatus: function (status) {
+      //       return status < 500;
+      //     },
+      //   },
+      // );
 
-      if (response.data.success) {
+      if (true) {//response.data.success
         Snackbar.show({
           text: 'OTP sent to your email!',
           duration: Snackbar.LENGTH_SHORT,
@@ -45,8 +45,9 @@ const ForgotPassword = ({navigation}) => {
           textColor: '#fff',
         });
         setTimeout(() => {
-          navigation.replace('OTPVerification', {email});
-        }, 5000);
+          // navigation.replace('OTPVerification', {email});
+          navigation.replace('ResetPassword', {email});
+        }, 1000);
       } else {
         Snackbar.show({
           text: response.data.message,
@@ -80,12 +81,15 @@ const ForgotPassword = ({navigation}) => {
           onChangeText={setEmail}
           placeholder="Enter your email"
           keyboardType="email-address"
+          placeholderTextColor={'#ccc'}
+          autoCapitalize='none'
+                  
         />
       </View>
       <TouchableOpacity
-        style={styles.resetButton}
+        style={styles.sendOtpButton}
         onPress={handlePasswordResetRequest}>
-        <Text style={styles.resetButtonText}>Send OTP</Text>
+        <Text style={styles.sendOtpButtonText}>Send OTP</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -101,7 +105,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    // fontWeight: '600',
     fontFamily: 'Raleway-Bold',
     textAlign: 'center',
     marginVertical: 20,
@@ -127,14 +130,16 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 0.5,
-    padding: 10,
-    fontSize: 17,
+    // padding: 10,
+    paddingHorizontal: 5,
+    height: 45,
+    fontSize: 12,
     borderRadius: 10,
     borderColor: '#ccc',
     marginBottom: 5,
     color: '#384959',
   },
-  resetButton: {
+  sendOtpButton: {
     width: '100%',
     paddingVertical: 12,
     backgroundColor: '#2B8781',
@@ -144,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     elevation: 3,
   },
-  resetButtonText: {
+  sendOtpButtonText: {
     fontSize: 13,
     fontFamily: 'Raleway-Bold',
     // fontWeight: '600',

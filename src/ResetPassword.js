@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,15 +10,13 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-
-const ResetPassword = ({ navigation,route }) => {
+const ResetPassword = ({navigation, route}) => {
   const BASE_URL = process.env.BASE_URL;
-  
+
   const {email} = route.params;
-  console.log('email:',email)
+  console.log('email:', email);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
 
   const handlePasswordReset = async () => {
     if (!newPassword || !confirmPassword) {
@@ -30,10 +28,12 @@ const ResetPassword = ({ navigation,route }) => {
       Alert.alert('Passwords do not match');
       return;
     }
-    console.log(newPassword)
+    console.log(newPassword);
 
     try {
-      const response = await axios.post(`${BASE_URL}/resetPassword`, { email:email, newPassword:newPassword },
+      const response = await axios.post(
+        `${BASE_URL}/resetPassword`,
+        {email: email, newPassword: newPassword},
         {
           validateStatus: function (status) {
             return status < 500;
@@ -42,12 +42,14 @@ const ResetPassword = ({ navigation,route }) => {
       );
 
       if (response.data.success) {
-        Alert.alert('Password Reset', 'Your password has been reset successfully.');
-        
-        setInterval(()=>{
+        Alert.alert(
+          'Password Reset',
+          'Your password has been reset successfully.',
+        );
+
+        setInterval(() => {
           navigation.navigate('Login');
-        
-        },3000)
+        }, 3000);
       } else {
         Alert.alert('Error', response.data.message);
       }
@@ -60,13 +62,17 @@ const ResetPassword = ({ navigation,route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Reset Password</Text>
-      <Text style={styles.label}>New Password</Text>
+      <Text style={styles.subtitle}>
+        Please enter and confirm your new password. You will need to login after you reset.
+      </Text>
       <View style={styles.inputContainer}>
+        <Text style={styles.label}>New Password</Text>
         <TextInput
           style={styles.input}
           value={newPassword}
           onChangeText={setNewPassword}
           placeholder="Enter new password"
+          placeholderTextColor={'#ccc'}
           secureTextEntry
         />
       </View>
@@ -77,10 +83,13 @@ const ResetPassword = ({ navigation,route }) => {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           placeholder="Confirm new password"
+          placeholderTextColor={'#ccc'}
           secureTextEntry
         />
       </View>
-      <TouchableOpacity style={styles.resetButton} onPress={handlePasswordReset}>
+      <TouchableOpacity
+        style={styles.resetButton}
+        onPress={handlePasswordReset}>
         <Text style={styles.resetButtonText}>Reset Password</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -90,54 +99,65 @@ const ResetPassword = ({ navigation,route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   title: {
     fontSize: 30,
-    fontWeight: '600',
+    // fontWeight: '600',
+    fontFamily: 'Raleway-Bold',
     textAlign: 'center',
     marginVertical: 20,
     color: 'black',
   },
+  subtitle: {
+    fontSize: 12,
+    fontFamily: 'Raleway-Regular',
+    textAlign: 'center',
+    color: '#384959',
+  },
   label: {
     fontSize: 12,
-    fontWeight: '500',
-    marginTop: 20,
+    fontFamily: 'Raleway-Bold',
+    marginTop: 25,
     marginBottom: 10,
-    marginLeft: 10,
     alignSelf: 'flex-start',
     color: 'black',
   },
   inputContainer: {
     width: '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
+    // backgroundColor: '#ffffff',
+    // borderRadius: 14,
+    // paddingHorizontal: 14,
+    // flexDirection: 'row',
+    // alignItems: 'center',
   },
   input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    color: 'black',
+    borderWidth: 0.5,
+    paddingHorizontal: 5,
+    height: 45,
+    fontSize: 12,
+    borderRadius: 10,
+    borderColor: '#ccc',
+    // marginBottom: 5,
+    color: '#384959',
   },
   resetButton: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#007bff',
-    borderRadius: 14,
+    paddingVertical: 12,
+    backgroundColor: '#2B8781',
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 24,
     elevation: 3,
   },
   resetButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: 'Raleway-Bold',
+    // fontWeight: '600',
     color: '#fff',
   },
 });

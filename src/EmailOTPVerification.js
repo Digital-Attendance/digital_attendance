@@ -25,7 +25,7 @@ const EmailOTPVerification = ({navigation, route}) => {
   } = form;
 
   const [otp, setOtp] = useState(['', '', '', '']);
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(3000);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const inputs = useRef([]);
@@ -91,7 +91,7 @@ const EmailOTPVerification = ({navigation, route}) => {
             setTimeout(() => {
               console.log('Navigating to FaceVerification');
               navigation.replace('FaceVerification', {
-                form
+                form,
               });
             }, 2000);
           } else if (selectedRole === 'Faculty') {
@@ -128,7 +128,7 @@ const EmailOTPVerification = ({navigation, route}) => {
   const registerFaculty = async () => {
     setIsRegistering(true);
     console.log('Registering Faculty...');
-    
+
     Snackbar.show({
       text: 'Registering Faculty...',
       duration: Snackbar.LENGTH_INDEFINITE,
@@ -248,18 +248,28 @@ const EmailOTPVerification = ({navigation, route}) => {
         </TouchableOpacity>
 
         <View style={styles.resendContainer}>
-          <TouchableOpacity
-            onPress={handleResend}
-            disabled={isResendDisabled}
-            style={[
-              styles.resendButton,
-              isResendDisabled && styles.resendButtonDisabled,
-            ]}>
-            <Text style={styles.resendText}>Resend Code</Text>
-          </TouchableOpacity>
-          <Text style={styles.timerText}>
-            {timer > 0 ? `00:${timer.toString().padStart(2, '0')}` : ''}
-          </Text>
+          <View style={styles.resendButtonContainer}>
+            <Text style={styles.resendTitle}>Didn't receive the code?</Text>
+            <TouchableOpacity
+              onPress={handleResend}
+              disabled={isResendDisabled}
+              style={[styles.resendButton]}>
+              <Text
+                style={[
+                  styles.resendText,
+                  isResendDisabled && styles.resendButtonDisabledText,
+                ]}>
+                Resend Code
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>
+              {timer > 0
+                ? `Resend Code in 00:${timer.toString().padStart(2, '0')}`
+                : ''}
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -275,29 +285,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    // flex: 1,
     alignItems: 'center',
     paddingTop: 20,
     width: '100%',
   },
   title: {
-    fontSize: 34,
-    fontWeight: '800',
-    fontFamily: 'Raleway',
+    fontSize: 30,
+    fontFamily: 'Raleway-Bold',
     color: '#000',
   },
   subtitle: {
-    fontSize: 15,
-    fontFamily: 'Raleway',
+    fontSize: 12,
+    fontFamily: 'Raleway-Regular',
     textAlign: 'center',
-    paddingHorizontal: 40,
-    paddingTop: 10,
-    color: '#000',
+    color: '#384959',
   },
   label: {
     fontSize: 25,
     fontWeight: 'bold',
-    fontFamily: 'Raleway',
+    fontFamily: 'Raleway-Medium',
     paddingTop: 100,
     paddingLeft: 30,
     alignSelf: 'flex-start',
@@ -331,44 +337,51 @@ const styles = StyleSheet.create({
   },
   verifyButton: {
     backgroundColor: '#2B8781',
-    paddingVertical: 12,
+    padding: 12,
     borderRadius: 50,
     marginTop: 10,
+    alignItems: 'center',
+    elevation: 3,
     width: '90%',
   },
   verifyButtonText: {
     color: '#fff',
     fontSize: 13,
-    textAlign: 'center',
+    fontFamily: 'Raleway-Bold',
   },
   resendContainer: {
+    marginTop: 20,
     alignItems: 'center',
-    // borderWidth: 1,
+  },
+  resendButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  resendTitle: {
+    fontSize: 14,
+    fontFamily: 'Raleway-Medium',
+    color: '#000',
   },
   resendButton: {
-    backgroundColor: '#fff',
-    borderColor: '#1E293B',
-    borderWidth: 1,
-    borderRadius: 50,
-    marginVertical: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
-  resendButtonDisabled: {
-    backgroundColor: '#bdc3c7',
-    borderColor: '#bdc3c7',
-    borderWidth: 0.5,
+  resendButtonDisabled: {},
+  resendButtonDisabledText: {
+    color: 'rgba(0, 0, 0, 0.24)',
   },
   resendText: {
-    color: '#000',
+    color: '#ccc',
     fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Raleway',
+    fontFamily: 'Raleway-Light',
     textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  timerContainer: {
+    marginTop: 5,
   },
   timerText: {
-    fontSize: 14,
-    fontFamily: 'Raleway',
+    fontSize: 12,
+    fontFamily: 'Raleway-Regular',
     color: '#000',
   },
 });

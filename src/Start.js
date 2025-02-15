@@ -8,6 +8,7 @@ const Start = ({navigation}) => {
 
   const checkUserSession = async () => {
     const token = await AsyncStorage.getItem('access_token');
+    console.log('Token:', token);
     const selectedRole = await AsyncStorage.getItem('role');
     if (token) {
       navigation.navigate(selectedRole === 'Faculty' ? 'Faculty' : 'Student');
