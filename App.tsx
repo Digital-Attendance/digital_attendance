@@ -11,8 +11,8 @@ import { AsyncStorageProvider } from "./src/Context";
 import Login from "./src/Login";
 import Register from "./src/Register";
 import Start from "./src/Start";
-import Faculty from "./src/Faculty";
-import Student from "./src/Student";
+import Faculty from "./src/Faculty/Faculty";
+import Student from "./src/Student/MainPage";
 import AttendanceStudent from "./src/AttendanceStudent";
 import Registration_FaceVerification from "./src/Registration_FaceVerification";
 
@@ -23,6 +23,7 @@ import ForgotPassword from "./src/ForgotPassword";
 import PasswordResetOTPVerification from "./src/PasswordResetOtpVerification";
 import ResetPassword from "./src/ResetPassword";
 import EmailOTPVerification from "./src/EmailOTPVerification";
+import Faculty_Home from "./src/Faculty/Faculty_Home";
 
 // enableScreens();
 
@@ -31,27 +32,9 @@ const App = () => {
     <SafeAreaView style={styles.container}>
       <AsyncStorageProvider>
         <NavigationContainer>
-          {/* <Stack.Navigator
-            initialRouteName="Start"
-            screenOptions={{
-              headerShown: false,
-              transitionSpec: {
-                open: { animation: 'timing', config: { duration: 500, easing: Easing.inOut(Easing.ease) } },
-                close: { animation: 'timing', config: { duration: 500, easing: Easing.inOut(Easing.ease) } },
-              },
-              cardStyleInterpolator: ({ current, next }) => ({
-                cardStyle: {
-                  transform: [
-                    { translateY: current.progress.interpolate({ inputRange: [0, 1], outputRange: [600, 0] }) },
-                  ],
-                },
-              }),
-            }}
-          > */}
           <Stack.Navigator
             initialRouteName="Start"
             screenOptions={{ 
-              // animation: 'slide_from_right',
               headerShown: false,
              }}
           >
@@ -66,6 +49,8 @@ const App = () => {
             <Stack.Screen name="OTPVerification" component={PasswordResetOTPVerification} />
             <Stack.Screen name="EmailVerification" component={EmailOTPVerification} />
             <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            {/* Faculty Screens */}
+            <Stack.Screen name="Faculty_Home" component={Faculty_Home} />
           </Stack.Navigator>
         </NavigationContainer>
       </AsyncStorageProvider>

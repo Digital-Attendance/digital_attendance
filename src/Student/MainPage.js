@@ -11,7 +11,7 @@ import {
 
 import axios from "axios";
 
-import { useUserContext } from "./Context";
+import { useUserContext } from "../Context";
 
 const Student = ({ navigation }) => {
   const [subjects, setSubjects] = useState([]);
@@ -83,7 +83,7 @@ const Student = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require("../assets/classroom.png")}
+      source={require("../../assets/classroom.png")}
       style={styles.backgroundImage}
       blurRadius={3}
     >

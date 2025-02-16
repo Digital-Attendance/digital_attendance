@@ -25,7 +25,7 @@ const EmailOTPVerification = ({navigation, route}) => {
   } = form;
 
   const [otp, setOtp] = useState(['', '', '', '']);
-  const [timer, setTimer] = useState(3000);
+  const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const inputs = useRef([]);

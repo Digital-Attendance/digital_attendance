@@ -1,5 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+
 
 const Start = ({navigation}) => {
   useEffect(() => {
@@ -11,7 +13,7 @@ const Start = ({navigation}) => {
     console.log('Token:', token);
     const selectedRole = await AsyncStorage.getItem('role');
     if (token) {
-      navigation.navigate(selectedRole === 'Faculty' ? 'Faculty' : 'Student');
+      navigation.navigate(selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student');
     }
   };
 

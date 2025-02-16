@@ -13,7 +13,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import {useUserContext} from './Context';
+
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
 
@@ -23,11 +24,13 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const BASE_URL = process.env.BASE_URL;
+console.log('BASE_URL:', BASE_URL);
 
 export default function Login({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('Student');
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -41,6 +44,7 @@ export default function Login({navigation}) {
     }
 
     try {
+      console.log(`Logging in...${BASE_URL}/login`);
       const response = await axios.post(`${BASE_URL}/login`, {
         email,
         password,
@@ -67,7 +71,7 @@ export default function Login({navigation}) {
           setEmail('');
           setPassword('');
           navigation.navigate(
-            selectedRole === 'Faculty' ? 'Faculty' : 'Student',
+            selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student',
           );
         }, 3000);
       } else {
@@ -180,12 +184,25 @@ export default function Login({navigation}) {
               />
 
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                secureTextEntry={true}
-                value={password}
-                onChangeText={setPassword}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordinput}
+                  secureTextEntry={!passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setPasswordVisible(!passwordVisible);
+                  }}>
+                  <Icon
+                    name={passwordVisible ? 'eye-off' : 'eye'}
+                    size={20}
+                    color="gray"
+                  />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
@@ -277,12 +294,25 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: 'Raleway-Medium',
   },
-  inputContainer: {},
+  
   label: {
     fontSize: 10,
     fontFamily: 'Raleway-Medium',
     paddingVertical: 5,
     color: 'grey',
+  },
+  passwordContainer: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    height: 45,
+    // padding: 10,
+    borderWidth: 0.5,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   input: {
     borderWidth: 0.5,
@@ -292,6 +322,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     marginBottom: 5,
     color: '#384959',
+  },
+  passwordinput: {
+    flex: 1,
+    color: 'black',
   },
   forgotPassword: {
     fontSize: 12,

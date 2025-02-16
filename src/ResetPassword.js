@@ -84,7 +84,7 @@ const ResetPassword = ({navigation, route}) => {
           onChangeText={setConfirmPassword}
           placeholder="Confirm new password"
           placeholderTextColor={'#ccc'}
-          secureTextEntry
+          secureTextEntry={false}
         />
       </View>
       <TouchableOpacity

@@ -14,7 +14,7 @@ import {
   BackHandler,
 } from 'react-native';
 
-import {useUserContext} from './Context';
+import {useUserContext} from '../Context';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';

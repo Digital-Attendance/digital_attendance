@@ -15,9 +15,9 @@ export const AsyncStorageProvider = ({children}) => {
 
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
+  // useEffect(() => {
+  //   checkLoginStatus();
+  // }, []);
 
   const checkLoginStatus = async () => {
     const token = await AsyncStorage.getItem('access_token');
