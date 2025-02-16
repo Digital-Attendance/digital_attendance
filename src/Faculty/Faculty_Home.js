@@ -7,13 +7,13 @@ import {
 import Navbar from './components/Navbar';
 import SummaryCard from './components/SummaryCard';
 import Subjects from './components/Subjects';
-
+import SubjectCard from './components/SubjectCard';
 const Faculty_Home = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Navbar/>
-        <SummaryCard/>
+        <SubjectCard/>
         <Subjects/>
       </ScrollView>
     </SafeAreaView>

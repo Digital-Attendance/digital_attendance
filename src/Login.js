@@ -24,7 +24,6 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const BASE_URL = process.env.BASE_URL;
-console.log('BASE_URL:', BASE_URL);
 
 export default function Login({navigation}) {
   const [email, setEmail] = useState('');

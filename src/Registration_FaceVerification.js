@@ -8,7 +8,11 @@ import {
   Linking,
   ActivityIndicator,
 } from 'react-native';
-import {Camera, useCameraDevices, useCameraFormat} from 'react-native-vision-camera';
+import {
+  Camera,
+  useCameraDevices,
+  useCameraFormat,
+} from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
 
@@ -18,6 +22,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [photoDataUri, setPhotoDataUri] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  // const [responseText, setResponseText] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -27,9 +32,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
   );
 
   const format = useCameraFormat(cameraDevice, [
-    { photoResolution: { width: 4320, height: 5760 } }
-  ])
-  
+    {photoResolution: {width: 4320, height: 5760}},
+  ]);
 
   const {form} = route.params;
   const {
@@ -47,22 +51,65 @@ const Registration_FaceVerification = ({navigation, route}) => {
       if (permission === 'denied') await Linking.openSettings();
       setHasPermission(permission === 'granted');
     })();
-    console.log('Hi');
   }, []);
+
+  // const sendBase64ToAPI = async (base64String) => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           email: "rajivsah240@gmail.com",
+  //           image: base64String,
+  //           registration: true,
+  //         }),
+  //       }
+  //     );
+  
+  //     // ✅ Check if response is JSON
+  //     const contentType = response.headers.get("content-type");
+  //     let responseData;
+      
+  //     if (contentType && contentType.includes("application/json")) {
+  //       responseData = await response.json();
+  //     } else {
+  //       responseData = await response.text(); // Fallback to text if not JSON
+  //     }
+  
+  //     console.log("API Response:", responseData);
+  
+  //     // ✅ Handle response correctly
+  //     if (typeof responseData === "object" && responseData.label && responseData.confidence) {
+  //       setResponseText(
+  //         `Liveness: ${responseData.label}, Confidence: ${responseData.confidence.toFixed(2)}`
+  //       );
+  //     } else {
+  //       setResponseText("Unexpected response format: " + JSON.stringify(responseData));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error sending Base64 image:", error);
+  //     setResponseText("Error processing request");
+  //   }
+  // };
+  
 
   const takephoto = async () => {
     if (cameraRef.current && hasPermission) {
       setIsCapturing(true);
       setPhotoDataUri(null);
-  
+
       try {
         const photo = await cameraRef.current.takePhoto({quality: 85});
         const timestamp = new Date().getTime();
         const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
-        
+
         await RNFS.moveFile(photo.path, newPath);
         setPhotoDataUri(`file://${newPath}`);
+        console.log('Photo', photo);
         console.log('Photo captured', newPath);
+        // sendBase64ToAPI(base64String);
       } catch (error) {
         Snackbar.show({
           text: 'Error capturing photo.',
@@ -75,7 +122,6 @@ const Registration_FaceVerification = ({navigation, route}) => {
       }
     }
   };
-  
 
   const handleRegister = async () => {
     if (!photoDataUri) {
@@ -104,7 +150,6 @@ const Registration_FaceVerification = ({navigation, route}) => {
     formData.append('registration_number', registration_number);
     formData.append('image', file);
     formData.append('role', selectedRole);
-
 
     try {
       const response = await fetch(`${BASE_URL}/register`, {
@@ -157,7 +202,11 @@ const Registration_FaceVerification = ({navigation, route}) => {
             photo={true}
           />
         ) : photoDataUri ? (
-          <Image key={photoDataUri} source={{uri: photoDataUri}} style={styles.photoPreview} />
+          <Image
+            key={photoDataUri}
+            source={{uri: photoDataUri}}
+            style={styles.photoPreview}
+          />
         ) : (
           <ActivityIndicator size="large" color="#007BFF" />
         )}
