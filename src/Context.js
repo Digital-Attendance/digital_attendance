@@ -12,6 +12,7 @@ const AsyncStorageContext = createContext();
 
 export const AsyncStorageProvider = ({children}) => {
   const BASE_URL = process.env.BASE_URL;
+  console.log('BASE_URL:', BASE_URL);
 
   const [user, setUser] = useState(null);
 

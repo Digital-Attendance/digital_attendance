@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, View, Image, TouchableOpacity, Text} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Avatar, Badge } from '@rneui/themed'
 
 const Navbar = () => {
   const today = new Date();
@@ -12,20 +13,13 @@ const Navbar = () => {
   });
   return (
     <View style={styles.navContainer}>
-      {/* <TouchableOpacity style={styles.profilePicContainer}>
-        <Image
-          source={{
-            uri: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-          }}
-          style={styles.profilePic}
-        />
-      </TouchableOpacity> */}
       <View style={styles.navbarTextHeader}>
         <Text style={styles.navbarText}>{dayName}</Text>
         <Text style={styles.navbarSubText}>{formattedDate}</Text>
       </View>
       <TouchableOpacity style={styles.iconButton}>
         <Icon name="notifications-outline" size={24} color="#1E1E1E" />
+        <View style={styles.badge}/>
       </TouchableOpacity>
     </View>
   );
@@ -41,20 +35,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
   },
-  //   profilePicContainer: {
-  //     width: 40,
-  //     height: 40,
-  //     borderRadius: 20,
-  //     overflow: 'hidden',
-  //   },
-  //   profilePic: {
-  //     width: '100%',
-  //     height: '100%',
-  //     resizeMode: 'cover',
-  //   },
-  navbarTextHeader: {},
   navbarText: {
     color: '#1E1E1E',
     fontSize: 35,
@@ -67,5 +49,14 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 8,
+  },
+  badge: {
+    position: 'absolute',
+    top: 5,
+    right: 8,
+    backgroundColor: '#e3000f',
+    width: 10,
+    height: 10,
+    borderRadius: 10,
   },
 });
