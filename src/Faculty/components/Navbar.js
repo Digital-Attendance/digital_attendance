@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, View, Image, TouchableOpacity, Text} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Avatar, Badge } from '@rneui/themed'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Navbar = () => {
   const today = new Date();
@@ -18,8 +19,9 @@ const Navbar = () => {
         <Text style={styles.navbarSubText}>{formattedDate}</Text>
       </View>
       <TouchableOpacity style={styles.iconButton}>
-        <Icon name="notifications-outline" size={24} color="#1E1E1E" />
-        <View style={styles.badge}/>
+        {/* <Icon name="notifications-outline" size={24} color="#1E1E1E" />
+        <View style={styles.badge}/> */}
+        <MaterialCommunityIcons name="shape-square-plus" size={30} color="#005758" />
       </TouchableOpacity>
     </View>
   );

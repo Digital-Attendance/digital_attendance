@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, SafeAreaView, ScrollView} from 'react-native';
 import Navbar from './components/Navbar';
 import SubjectCard from './components/SubjectCard';
+import SwipeButton from './components/SwipeButton';
 
 const Faculty_Home = () => {
   return (
@@ -10,6 +11,7 @@ const Faculty_Home = () => {
         <Navbar />
         <SubjectCard />
       </ScrollView>
+      <SwipeButton/>
     </SafeAreaView>
   );
 };

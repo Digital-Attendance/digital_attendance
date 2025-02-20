@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { Vibration, Text, StyleSheet, Dimensions } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, interpolateColor, interpolate } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, interpolate, interpolateColor } from 'react-native-reanimated';
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
-const BUTTON_WIDTH = width - 100;
-const BUTTON_HEIGHT = 45;
+const BUTTON_WIDTH = width - 40;
+const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
 const SwipeButton = () => {
@@ -18,23 +19,28 @@ const SwipeButton = () => {
     translateX.value = newTranslateX;
   };
 
-  const onHandlerStateChange = (event) => {
-    if (event.nativeEvent.state === 5) { // State.END
-      if (translateX.value > SWIPE_RANGE / 2) {
-        translateX.value = withTiming(SWIPE_RANGE, {}, () => runOnJS(setIsStarted)(true));
-      } else {
-        translateX.value = withTiming(0, {}, () => runOnJS(setIsStarted)(false));
-      }
-    }
-  };
+  
 
-  // Background color transition
-  const backgroundStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      translateX.value,
-      [0, SWIPE_RANGE], 
-      ['#4CAF50', '#FF3B30'] // Green to Red transition
-    ),
+const onHandlerStateChange = (event) => {
+  if (event.nativeEvent.state === 5) {
+    if (translateX.value > SWIPE_RANGE / 2) {
+      translateX.value = withTiming(SWIPE_RANGE, {}, () => {
+        runOnJS(setIsStarted)(true);
+        runOnJS(Vibration.vibrate)();
+      });
+    } else {
+      translateX.value = withTiming(0, {}, () => {
+        runOnJS(setIsStarted)(false);
+        runOnJS(Vibration.vibrate)();
+      });
+    }
+  }
+};
+
+
+  // Dynamic gradient overlay (Green to Red)
+  const animatedOverlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(translateX.value, [0, SWIPE_RANGE], [0, 1]), // Fade-in effect
   }));
 
   // Move button slider smoothly
@@ -51,7 +57,24 @@ const SwipeButton = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Animated.View style={[styles.button, backgroundStyle]}>
+      {/* Base Green Gradient */}
+      <LinearGradient 
+        colors={['#28a745', '#218838']} 
+        // colors={['#004d4d', '#007a7a']}
+        start={{ x: 0, y: 0.5 }} 
+        end={{ x: 1, y: 0.5 }} 
+        style={styles.button}
+      >
+        {/* Dynamic Overlay (Transitions to Red) */}
+        <Animated.View style={[styles.overlay, animatedOverlayStyle]}>
+          <LinearGradient 
+            colors={['#FF3B30', '#D32F2F']} // Red gradient
+            start={{ x: 0, y: 0.5 }} 
+            end={{ x: 1, y: 0.5 }} 
+            style={styles.button}
+          />
+        </Animated.View>
+
         <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
           <Animated.View style={[styles.slider, animatedStyle]}>
             <Animated.View style={arrowRotation}>
@@ -60,7 +83,7 @@ const SwipeButton = () => {
           </Animated.View>
         </PanGestureHandler>
         <Text style={styles.text}>{isStarted ? 'Stop Attendance' : 'Start Attendance'}</Text>
-      </Animated.View>
+      </LinearGradient>
     </GestureHandlerRootView>
   );
 };
@@ -68,7 +91,7 @@ const SwipeButton = () => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: -60,
+    bottom: 2,
     width: '100%',
     alignItems: 'center',
   },
@@ -82,22 +105,29 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // Covers full button
+    borderRadius: BUTTON_HEIGHT / 2,
+  },
   slider: {
     width: BUTTON_HEIGHT,
     height: BUTTON_HEIGHT,
     borderRadius: BUTTON_HEIGHT / 2,
-    backgroundColor: '#147df5',
-    position: 'absolute',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    position: 'absolute',    
     left: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: 'rgba(255, 255, 255, 0.26)',
+    
   },
   text: {
     color: 'white',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Raleway-Bold',
+    // zIndex: 1, // Keeps text visible above the overlay
   },
 });
 

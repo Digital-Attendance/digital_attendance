@@ -1,70 +1,116 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+  Modal,
+  TouchableOpacity,
+} from 'react-native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import LottieView from 'lottie-react-native';
-
-const Performers = () => {
-  return (
-    <View style={styles.performersContainer}>
-      <TouchableOpacity
-        style={[styles.profilePicContainer, styles.profilePic1]}>
-        <Image
-          source={{
-            uri: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-          }}
-          style={styles.profilePic}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.profilePicContainer, styles.profilePic2]}>
-        <Image
-          source={{
-            uri: 'https://i.pravatar.cc/250?u=mail@ashallendesign.co.uk',
-          }}
-          style={styles.profilePic}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.profilePicContainer, styles.profilePic3]}>
-        <Image
-          source={{
-            uri: 'http://placebear.com/250/250',
-          }}
-          style={styles.profilePic}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const SummaryCard = () => {
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import LinearGradient from 'react-native-linear-gradient';
+import {
+  LinearGradient as SVGLinearGradient,
+  Stop,
+  Defs,
+} from 'react-native-svg';
+import Performers from './Performers';
+import performerImages from '../../DummyDatas/performersImages';
+const SummaryCard = ({onTogglePerformers}) => {
   const [progress, setProgress] = useState(70);
-  const getTintColor = progress => {
-    const lightness = 30 + (progress / 100) * 60;
-    return `hsl(90, 100%, 55.70%)`;
-  };
+  const [menuVisible, setMenuVisible] = useState(false);
 
+  const toggleMenu = () => {
+    setMenuVisible(prev => !prev);
+  };
   return (
     <View style={styles.wrapper}>
       <View style={styles.backgroundCard1} />
-      {/* <View style={styles.backgroundCard2} /> */}
-      <View style={styles.mainCard}>
-        <View style={styles.subjectNameContainer}>
-          <Text style={styles.subjectName}>Digital Circuit</Text>
+      <LinearGradient colors={['#004d4d', '#007a7a']} style={styles.mainCard}>
+        <View style={styles.subjectName_ButtonContainer}>
+          <View style={styles.subjectNameContainer}>
+            <Text style={styles.subjectName}>CS 101</Text>
+            <Text style={styles.subjectSubName}>Introduction to Computing</Text>
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={toggleMenu}>
+              <MaterialCommunityIcons
+                name="dots-vertical"
+                color="#fff"
+                size={20}
+              />
+            </TouchableOpacity>
+          </View>
+          {/* Dropdown Menu */}
+          <Modal transparent={true} visible={menuVisible} animationType="fade">
+            <Pressable style={styles.overlay} onPress={toggleMenu}>
+              <View style={styles.menuContainer}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  // onPress={() => alert('Edit Pressed')}
+                  >
+                  <MaterialCommunityIcons
+                    name="pencil"
+                    size={10}
+                    color="#000"
+                  />
+                  <Text style={styles.menuText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  // onPress={() => alert('Delete Pressed')}
+                  >
+                  <MaterialCommunityIcons
+                    name="delete"
+                    size={10}
+                    color="#d9534f"
+                  />
+                  <Text style={[styles.menuText, {color: '#d9534f'}]}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Modal>
         </View>
         <View style={styles.statsContainer}>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressSection}>
+              <AnimatedCircularProgress
+                size={80}
+                width={9}
+                fill={progress}
+                rotation={-90}
+                arcSweepAngle={180}
+                // tintColor="#8eff1d"
+                backgroundColor="#005758"
+                tintColor="url(#gradient)"
+                renderCap={({center}) => (
+                  <Defs>
+                    <SVGLinearGradient
+                      id="gradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="0%">
+                      <Stop offset="0%" stopColor="#00F260" stopOpacity="1" />
+                      <Stop offset="100%" stopColor="#0575E6" stopOpacity="1" />
+                    </SVGLinearGradient>
+                  </Defs>
+                )}
+              />
+              <Text style={styles.progressText}>{progress}%</Text>
+              <Text style={styles.progressTitle}>AVG Attendance</Text>
+              <Text style={styles.progressSubTitle}>Last 5 Days</Text>
+            </View>
+          </View>
           <View style={styles.statsDataContainer}>
             <View style={styles.statsSubContainer}>
               <View style={styles.statsSubContainerData}>
-                {/* <MaterialCommunityIcons
-                  name="account"
-                  size={20}
-                  color="#EB5939"
-                /> */}
                 <LottieView
-                  source={require('../../../assets/animations/person.json')}
+                  source={require('../../../assets/animations/person_3.json')}
                   autoPlay
                   loop
                   style={{width: 45, height: 45}}
@@ -81,30 +127,8 @@ const SummaryCard = () => {
                 </View>
               </View>
             </View>
-          </View>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressSection}>
-              <AnimatedCircularProgress
-                size={80}
-                width={9}
-                fill={progress}
-                rotation={0}
-                tintColor={getTintColor(progress)}
-                backgroundColor="#005758"
-              />
-              <Text style={styles.progressText}>{progress}%</Text>
-              <Text style={styles.progressTitle}>AVG Attendance</Text>
-              <Text style={styles.progressSubTitle}>Last 5 Days</Text>
-            </View>
-          </View>
-          <View style={styles.statsDataContainer}>
             <View style={styles.statsSubContainer}>
               <View style={styles.statsSubContainerData}>
-                {/* <MaterialCommunityIcons
-                  name="counter"
-                  size={20}
-                  color="#851DE0"
-                /> */}
                 <LottieView
                   source={require('../../../assets/animations/classes_3.json')}
                   autoPlay
@@ -126,16 +150,14 @@ const SummaryCard = () => {
           </View>
         </View>
         <View style={styles.sectionContainer}>
-          <View style={styles.performanceContainer}>
+          <TouchableOpacity
+            style={styles.performanceContainer}
+            onPress={onTogglePerformers}>
             <Text style={styles.performanceTitle}>Leaderboard</Text>
-            <Performers />
-          </View>
+            <Performers performers={performerImages} />
+          </TouchableOpacity>
           <View style={styles.lastClassContainer}>
             <View style={styles.lastClassIconContainer}>
-              {/* <MaterialCommunityIcons
-                name="book-variant"
-                size={12}
-                color="#daa520"></MaterialCommunityIcons> */}
               <LottieView
                 source={require('../../../assets/animations/lastclass.json')}
                 autoPlay
@@ -147,7 +169,7 @@ const SummaryCard = () => {
             <Text style={styles.lastClassDateText}>12/02/2025</Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };
@@ -160,8 +182,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
+    paddingBottom: 20,
     // borderWidth: 1,
-    // paddingBottom: 10,
     // borderColor: '#f00',
   },
 
@@ -170,7 +192,6 @@ const styles = StyleSheet.create({
     top: 15,
     width: '100%',
     height: '100%',
-    // backgroundColor: 'skyblue',
     backgroundColor: '#005758',
     opacity: 0.5,
     borderRadius: 30,
@@ -192,54 +213,100 @@ const styles = StyleSheet.create({
     backgroundColor: '#005758',
     borderRadius: 30,
     paddingHorizontal: 20,
-    paddingBottom: 15,
+    paddingBottom: 10,
     // borderWidth: 1,
     // borderColor: '#0f0',
   },
-
+  subjectName_ButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // borderWidth: 1,
+  },
   subjectNameContainer: {
     marginTop: 10,
     // borderWidth: 1,
     // borderColor: '#0f0',
   },
   subjectName: {
-    fontSize: 30,
+    fontSize: 32,
+    letterSpacing: 1,
     color: '#fff',
+    fontFamily: 'JosefinSans-Bold',
+  },
+  subjectSubName: {
+    fontSize: 8,
+    color: '#ffea00',
     fontFamily: 'Raleway-Bold',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.07)',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  menuContainer: {
+    position: 'absolute',
+    top : 150,
+    right: 40,
+    backgroundColor: '#004d4d',
+    paddingHorizontal: 10,
+    borderWidth: 0.1,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    width: 80,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  menuText: {
+    fontSize: 10,
+    marginLeft: 10,
+    color: '#fff',
   },
   statsContainer: {
     flexDirection: 'row',
     width: '100%',
     alignItems: 'center',
-    // marginTop: 15,
-    justifyContent: 'space-evenly',
-    // borderWidth: 1,
     padding: 10,
+    // justifyContent: 'space-evenly',
+    // marginTop: 15,
+    // borderWidth: 1,
     // borderColor: '#f00',
   },
 
   progressContainer: {
-    // marginRight: 40,
+    marginRight: 40,
     // borderWidth: 1,
   },
   progressSection: {
     alignItems: 'center',
     justifyContent: 'center',
+    // borderWidth: 1,
   },
   progressText: {
     position: 'absolute',
-    top: 30,
+    top: 20,
     fontSize: 14,
     fontFamily: 'Raleway-Bold',
     color: '#fff',
   },
   progressTitle: {
+    position: 'absolute',
+    top: 50,
     fontSize: 8,
-    marginTop: 3,
     color: 'skyblue',
     fontFamily: 'Raleway-SemiBold',
   },
   progressSubTitle: {
+    position: 'absolute',
+    top: 60,
     fontSize: 6,
     color: 'skyblue',
     fontFamily: 'Raleway-SemiBold',
@@ -251,7 +318,7 @@ const styles = StyleSheet.create({
     // borderColor: '#f0f',
   },
   statsSubContainer: {
-    // flexDirection: 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     // borderWidth: 1,
@@ -260,7 +327,7 @@ const styles = StyleSheet.create({
   },
   statsSubContainerData: {
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     // justifyContent: 'space-around',
     // padding: 8,
     // borderWidth: 1,
@@ -286,41 +353,11 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
     // borderColor: '#fff',
   },
+
   performanceTitle: {
     fontSize: 12,
     color: '#fff',
     fontFamily: 'Raleway-Bold',
-  },
-  performersContainer: {
-    // marginTop: 5,
-    // borderWidth: 1,
-    // borderColor: '#fff',
-  },
-  profilePicContainer: {
-    position: 'absolute',
-    top: 8,
-    width: 30,
-    height: 30,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-
-  profilePic1: {
-    left: 0,
-  },
-
-  profilePic2: {
-    left: 15,
-  },
-
-  profilePic3: {
-    left: 30,
-  },
-
-  profilePic: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   },
   lastClassContainer: {
     alignItems: 'flex-end',
