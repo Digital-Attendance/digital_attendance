@@ -16,6 +16,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const {width} = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
@@ -110,14 +111,14 @@ const SwipeButton = ({ setIsSwipeActive }) => {
 const styles = StyleSheet.create({
   container: {
     // position: 'absolute',
-    // bottom: 2,
+    // bottom : 0 ,
     width: '100%',
     alignItems: 'center',
   },
   button: {
     width: BUTTON_WIDTH,
     height: BUTTON_HEIGHT,
-    borderRadius: BUTTON_HEIGHT * 0.4,
+    borderRadius: BUTTON_HEIGHT * 0.5,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: BUTTON_HEIGHT,
     height: BUTTON_HEIGHT,
-    borderRadius: BUTTON_HEIGHT * 0.4,
+    borderRadius: BUTTON_HEIGHT * 0.5,
     // borderTopRightRadius: BUTTON_HEIGHT * 0.5,
     // borderBottomRightRadius: BUTTON_HEIGHT * 0.5,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',

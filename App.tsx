@@ -2,6 +2,7 @@ import React from "react";
 import {
   SafeAreaView,
   StyleSheet,
+  StatusBar
 } from "react-native";
 
 
@@ -34,6 +35,7 @@ import SplashScreen from "./src/SplashScreen"
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={'#1E1E1E'} />
       <AsyncStorageProvider>
         <NavigationContainer>
           <Stack.Navigator
@@ -47,8 +49,8 @@ const App = () => {
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="FaceVerification" component={Registration_FaceVerification} />
-            <Stack.Screen name="Faculty" component={Faculty} />
-            <Stack.Screen name="Student" component={Student} />
+            {/* <Stack.Screen name="Faculty" component={Faculty} />
+            <Stack.Screen name="Student" component={Student} /> */}
             <Stack.Screen name="AttendanceStudent" component={AttendanceStudent} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="OTPVerification" component={PasswordResetOTPVerification} />

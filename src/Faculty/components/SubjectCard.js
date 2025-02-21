@@ -71,8 +71,15 @@ const SubjectCard = () => {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
+    // borderWidth: 1,
+    // borderColor: '#fff',
   },
-  subcontainer: {},
+  subcontainer: {
+    flex : 1,
+    // justifyContent: 'flex-start',
+    // borderWidth: 1,
+    // borderColor: '#f0f',
+  },
 });
 
 export default SubjectCard;

@@ -42,7 +42,7 @@ const SummaryCard = () => {
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.backgroundCard1} />
+      {/* <View style={styles.backgroundCard1} /> */}
       <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
         <TouchableOpacity
           onPress={() => {
@@ -50,8 +50,8 @@ const SummaryCard = () => {
           }}
           style={styles.subjectName_ButtonContainer}>
           <View style={styles.subjectNameContainer}>
-            <Text style={styles.subjectName}>CS 101</Text>
-            <Text style={styles.subjectSubName}>Introduction to Computing</Text>
+            <Text style={styles.subjectName}>CS101</Text>
+            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.subjectSubName}>Introduction to Computing</Text>
           </View>
           <View style={styles.buttonContainer}>
             <View>
@@ -141,21 +141,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    paddingBottom: 20,
     // borderWidth: 1,
     // borderColor: '#f00',
   },
 
-  backgroundCard1: {
-    position: 'absolute',
-    top: 12,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'skyblue',
-    opacity: 0.85,
-    borderRadius: 30,
-    zIndex: 0,
-  },
+  // backgroundCard1: {
+  //   position: 'absolute',
+  //   top: 12,
+  //   width: '100%',
+  //   height: '100%',
+  //   backgroundColor: 'skyblue',
+  //   opacity: 0.85,
+  //   borderRadius: 30,
+  //   zIndex: 0,
+  // },
 
   mainCard: {
     width: '100%',
@@ -163,9 +162,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     paddingBottom: 10,
-    // borderWidth: 0.1,
-    // borderBottomWidth : 2,
-    // borderBottomColor : 'skyblue',
+    borderWidth: 0.1,
+    borderBottomWidth : 2,
+    borderColor : 'skyblue',
   },
   subjectName_ButtonContainer: {
     flexDirection: 'row',
