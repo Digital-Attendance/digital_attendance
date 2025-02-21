@@ -10,9 +10,9 @@ import {
 import axios from 'axios';
 
 import Snackbar from 'react-native-snackbar';
-
+import {BASE_URL} from '@env';
 const EmailOTPVerification = ({navigation, route}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
 
   const {form} = route.params;
   const {

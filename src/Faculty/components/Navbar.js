@@ -1,10 +1,10 @@
 import React from 'react';
 import {StyleSheet, View, Image, TouchableOpacity, Text} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { Avatar, Badge } from '@rneui/themed'
+import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Navbar = () => {
+  const navigation = useNavigation();
   const today = new Date();
   const dayName = today.toLocaleDateString('en-US', {weekday: 'long'});
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -18,10 +18,16 @@ const Navbar = () => {
         <Text style={styles.navbarText}>{dayName}</Text>
         <Text style={styles.navbarSubText}>{formattedDate}</Text>
       </View>
-      <TouchableOpacity style={styles.iconButton}>
-        {/* <Icon name="notifications-outline" size={24} color="#1E1E1E" />
-        <View style={styles.badge}/> */}
-        <MaterialCommunityIcons name="shape-square-plus" size={30} color="#005758" />
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('AddSubject');
+        }}
+        style={styles.iconButton}>
+        <MaterialCommunityIcons
+          name="shape-square-plus"
+          size={30}
+          color="#009f9f"
+        />
       </TouchableOpacity>
     </View>
   );
@@ -32,33 +38,27 @@ export default Navbar;
 const styles = StyleSheet.create({
   navContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 16,
     justifyContent: 'space-between',
     alignItems: 'center',
-    // marginBottom: 20,
+  },
+  navbarTextHeader: {
+    // borderWidth: 1,
+    // borderColor: '#005758',
   },
   navbarText: {
-    color: '#1E1E1E',
+    color: '#f0f0f0',
     fontSize: 35,
-    fontFamily: 'Raleway-ExtraBold',
+    fontFamily: 'Teko-Bold',
   },
   navbarSubText: {
+    top: -20,
     color: '#ccc',
     fontSize: 15,
     fontFamily: 'JosefinSans-Regular',
   },
   iconButton: {
-    padding: 8,
-  },
-  badge: {
-    position: 'absolute',
-    top: 5,
-    right: 8,
-    backgroundColor: '#e3000f',
-    width: 10,
-    height: 10,
-    borderRadius: 10,
+    padding: 12,
   },
 });

@@ -15,9 +15,9 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
-
+import {BASE_URL} from '@env';
 const Registration_FaceVerification = ({navigation, route}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
   const [hasPermission, setHasPermission] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [photoDataUri, setPhotoDataUri] = useState(null);

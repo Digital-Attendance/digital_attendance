@@ -9,9 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-
+import {BASE_URL} from '@env';
 const ResetPassword = ({navigation, route}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
 
   const {email} = route.params;
   console.log('email:', email);

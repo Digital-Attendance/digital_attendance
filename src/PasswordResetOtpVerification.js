@@ -8,11 +8,11 @@ import {
   Keyboard,
 } from 'react-native';
 import axios from 'axios';
-
+import {BASE_URL} from '@env';
 import Snackbar from 'react-native-snackbar';
 
 const PasswordResetOTPVerification = ({navigation, route}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
 
   const {email} = route.params;
   const [otp, setOtp] = useState(['', '', '', '']);

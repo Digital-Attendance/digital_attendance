@@ -11,7 +11,7 @@ const Faculty_Home = () => {
         <Navbar />
         <SubjectCard />
       </ScrollView>
-      <SwipeButton/>
+      {/* <SwipeButton text1={"Stop Attendance"} text2={"Start Attendance"}/> */}
     </SafeAreaView>
   );
 };
@@ -21,6 +21,6 @@ export default Faculty_Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#1E1E1E',//151b23
   },
 });

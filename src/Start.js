@@ -1,23 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
 
-
 const Start = ({navigation}) => {
-  useEffect(() => {
-    checkUserSession();
-  }, []);
-
-  const checkUserSession = async () => {
-    const token = await AsyncStorage.getItem('access_token');
-    console.log('Token:', token);
-    
-    const selectedRole = await AsyncStorage.getItem('role');
-    if (token) {
-      navigation.navigate(selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student');
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Digital Attendance</Text>
@@ -50,14 +35,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    // paddingHorizontal: 20,
   },
   title: {
     padding: 10,
     paddingBottom: 40,
     fontSize: 25,
     textAlign: 'center',
-    // fontWeight: "bold",
     fontFamily: 'Monoton-Regular',
     color: '#333',
   },
@@ -67,7 +50,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonContainer: {
-    // flexDirection: "column",
     marginTop: 20,
     width: '100%',
     justifyContent: 'center',

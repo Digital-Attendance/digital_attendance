@@ -14,8 +14,12 @@ const StudentList = ({name, attended, progress}) => {
   return (
     <View style={styles.studentListCard}>
       <View style={styles.studentDetails}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.classAttended}>Classes Attended : {attended}</Text>
+        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
+        <Text style={styles.scholarID}>Scholar ID : 2115085</Text>
+      </View>
+      <View style={styles.classAttendedContainer}>
+        <Text style={styles.classAttendedText}>{attended}</Text>
+        <Text style={styles.classAttended}>Classes</Text>
       </View>
 
       <View style={styles.progressSection}>
@@ -36,17 +40,18 @@ const Leaderboard = ({students}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Leaderboard</Text>
-
-      <ScrollView contentContainerStyle={styles.studentList}>
-        {students.map((student, index) => (
-          <StudentList
-            key={index}
-            name={student.name}
-            attended={student.attended}
-            progress={student.progress}
-          />
-        ))}
-      </ScrollView>
+      <View style={styles.scrollContainer}>
+        <ScrollView contentContainerStyle={styles.studentList}>
+          {students.map((student, index) => (
+            <StudentList
+              key={index}
+              name={student.name}
+              attended={student.attended}
+              progress={student.progress}
+            />
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -54,47 +59,72 @@ const Leaderboard = ({students}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 10,
-    padding: 10,
+    width: '100%',
+    paddingTop: 15,
+    paddingHorizontal: 20,
   },
   title: {
-    color: '#000',
-    fontSize: 20,
-    fontFamily: 'Raleway-Bold',
+    color: '#fff',
+    fontSize: 28,
+    fontFamily: 'Teko-Bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
-
-  studentList: {
-    justifyContent: 'space-between',
+  scrollContainer: {
+    height: 450,
+    backgroundColor: '#000',
     borderRadius: 14,
-    borderWidth: 0.1,
+    borderWidth: 0.2,
+    // borderTopWidth: 2,
+    // borderTopColor: 'skyblue',
     borderBottomWidth: 2,
     borderBottomColor: 'skyblue',
+    overflow: 'hidden',
+  },
+  studentList: {
+    flexGrow: 1,
     padding: 10,
-    // height: 150,
-    // marginTop: 10,
   },
   studentListCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
-    // borderWidth: 1,
+    borderWidth: 1,
+    borderBottomColor: '#333',
   },
   studentDetails: {
     flexDirection: 'column',
     alignItems: 'flex-start',
+    borderRightWidth: 1,
+    width: '40%',
   },
   name: {
-    color: '#000',
-    fontSize: 12,
+    color: '#fff',
+    fontSize: 13,
+    fontFamily: 'Raleway-SemiBold',
+  },
+  scholarID: {
+    color: '#ccc',
+    fontSize: 8,
     fontFamily: 'Raleway-Medium',
+    marginTop: 4,
+  },
+  classAttendedText: {
+    color: '#fff',
+    fontSize: 8,
+    fontFamily: 'Raleway-Bold',
   },
   classAttended: {
     color: '#ccc',
     fontSize: 8,
     fontFamily: 'Raleway-Medium',
     marginTop: 4,
+  },
+  classAttendedContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    // borderRightWidth: 1,
   },
   progressSection: {
     alignItems: 'center',
@@ -104,7 +134,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     fontSize: 8,
     fontFamily: 'Raleway-Medium',
-    color: '#000',
+    color: '#fff',
   },
 });
 

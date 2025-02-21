@@ -1,14 +1,9 @@
-import React, {useState} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-  Modal,
-  TouchableOpacity,
-} from 'react-native';
+import React, {useState, useMemo} from 'react';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -18,144 +13,108 @@ import {
 } from 'react-native-svg';
 import Performers from './Performers';
 import performerImages from '../../DummyDatas/performersImages';
-const SummaryCard = ({onTogglePerformers}) => {
+const SummaryCard = () => {
   const [progress, setProgress] = useState(70);
-  const [menuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation();
 
-  const toggleMenu = () => {
-    setMenuVisible(prev => !prev);
-  };
+  const CircularProgress = useMemo(
+    () => (
+      <AnimatedCircularProgress
+        size={80}
+        width={9}
+        fill={progress}
+        rotation={-90}
+        arcSweepAngle={180}
+        backgroundColor="#005758"
+        tintColor="url(#gradient)"
+        renderCap={({center}) => (
+          <Defs>
+            <SVGLinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <Stop offset="0%" stopColor="#00F260" stopOpacity="1" />
+              <Stop offset="100%" stopColor="#0575E6" stopOpacity="1" />
+            </SVGLinearGradient>
+          </Defs>
+        )}
+      />
+    ),
+    [progress],
+  );
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.backgroundCard1} />
-      <LinearGradient colors={['#004d4d', '#007a7a']} style={styles.mainCard}>
-        <View style={styles.subjectName_ButtonContainer}>
+      <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('AttendanceScreen');
+          }}
+          style={styles.subjectName_ButtonContainer}>
           <View style={styles.subjectNameContainer}>
             <Text style={styles.subjectName}>CS 101</Text>
             <Text style={styles.subjectSubName}>Introduction to Computing</Text>
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={toggleMenu}>
-              <MaterialCommunityIcons
-                name="dots-vertical"
-                color="#fff"
-                size={20}
+            <View>
+              <LottieView
+                source={require('../../../assets/animations/loading.json')}
+                autoPlay
+                loop
+                style={{width: 50, height: 50}}
               />
-            </TouchableOpacity>
-          </View>
-          {/* Dropdown Menu */}
-          <Modal transparent={true} visible={menuVisible} animationType="fade">
-            <Pressable style={styles.overlay} onPress={toggleMenu}>
-              <View style={styles.menuContainer}>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  // onPress={() => alert('Edit Pressed')}
-                  >
-                  <MaterialCommunityIcons
-                    name="pencil"
-                    size={10}
-                    color="#000"
-                  />
-                  <Text style={styles.menuText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  // onPress={() => alert('Delete Pressed')}
-                  >
-                  <MaterialCommunityIcons
-                    name="delete"
-                    size={10}
-                    color="#d9534f"
-                  />
-                  <Text style={[styles.menuText, {color: '#d9534f'}]}>
-                    Delete
-                  </Text>
-                </TouchableOpacity>
+              <View style={{position: 'absolute', top: 21, left: 21}}>
+                <MaterialCommunityIcons name="circle" size={8} color={'#fff'} />
               </View>
-            </Pressable>
-          </Modal>
-        </View>
+            </View>
+          </View>
+        </TouchableOpacity>
         <View style={styles.statsContainer}>
           <View style={styles.progressContainer}>
             <View style={styles.progressSection}>
-              <AnimatedCircularProgress
-                size={80}
-                width={9}
-                fill={progress}
-                rotation={-90}
-                arcSweepAngle={180}
-                // tintColor="#8eff1d"
-                backgroundColor="#005758"
-                tintColor="url(#gradient)"
-                renderCap={({center}) => (
-                  <Defs>
-                    <SVGLinearGradient
-                      id="gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="0%">
-                      <Stop offset="0%" stopColor="#00F260" stopOpacity="1" />
-                      <Stop offset="100%" stopColor="#0575E6" stopOpacity="1" />
-                    </SVGLinearGradient>
-                  </Defs>
-                )}
-              />
+              {CircularProgress}
               <Text style={styles.progressText}>{progress}%</Text>
               <Text style={styles.progressTitle}>AVG Attendance</Text>
               <Text style={styles.progressSubTitle}>Last 5 Days</Text>
             </View>
           </View>
           <View style={styles.statsDataContainer}>
-            <View style={styles.statsSubContainer}>
-              <View style={styles.statsSubContainerData}>
-                <LottieView
-                  source={require('../../../assets/animations/person_3.json')}
-                  autoPlay
-                  loop
-                  style={{width: 45, height: 45}}
-                />
-              </View>
-              <View style={styles.statsSubContainerData}>
-                <View style={styles.statsSubContainerDataHeaderContainer}>
-                  <Text style={styles.statsSubContainerDataHeaderTitle}>
-                    Students
-                  </Text>
-                </View>
-                <View style={styles.statsSubContainerDataDataContainer}>
-                  <Text style={styles.statsSubContainerDataHeaderText}>41</Text>
-                </View>
-              </View>
+            <View style={styles.statsIconContainer}>
+              <LottieView
+                source={require('../../../assets/animations/person_3.json')}
+                autoPlay
+                loop
+                style={{width: 50, height: 50}}
+              />
+
+              <LottieView
+                source={require('../../../assets/animations/classes_3.json')}
+                autoPlay
+                loop
+                style={{width: 45, height: 45}}
+              />
             </View>
-            <View style={styles.statsSubContainer}>
-              <View style={styles.statsSubContainerData}>
-                <LottieView
-                  source={require('../../../assets/animations/classes_3.json')}
-                  autoPlay
-                  loop
-                  style={{width: 45, height: 45}}
-                />
+            <View style={styles.statsDataSubContainer}>
+              <View style={styles.statsDataSubContainerBox}>
+                <Text style={styles.statsDataSubContainerBoxTitle}>
+                  Students
+                </Text>
+
+                <Text style={styles.statsDataSubContainerBoxText}>41</Text>
               </View>
-              <View style={styles.statsSubContainerData}>
-                <View style={styles.statsSubContainerDataHeaderContainer}>
-                  <Text style={styles.statsSubContainerDataHeaderTitle}>
-                    Classes
-                  </Text>
-                </View>
-                <View style={styles.statsSubContainerDataDataContainer}>
-                  <Text style={styles.statsSubContainerDataHeaderText}>2</Text>
-                </View>
+              <View style={styles.statsDataSubContainerBox}>
+                <Text style={styles.statsDataSubContainerBoxTitle}>
+                  Classes
+                </Text>
+
+                <Text style={styles.statsDataSubContainerBoxText}>2</Text>
               </View>
             </View>
           </View>
         </View>
         <View style={styles.sectionContainer}>
-          <TouchableOpacity
-            style={styles.performanceContainer}
-            onPress={onTogglePerformers}>
+          <View style={styles.performanceContainer}>
             <Text style={styles.performanceTitle}>Leaderboard</Text>
             <Performers performers={performerImages} />
-          </TouchableOpacity>
+          </View>
           <View style={styles.lastClassContainer}>
             <View style={styles.lastClassIconContainer}>
               <LottieView
@@ -189,33 +148,24 @@ const styles = StyleSheet.create({
 
   backgroundCard1: {
     position: 'absolute',
-    top: 15,
+    top: 12,
     width: '100%',
     height: '100%',
-    backgroundColor: '#005758',
-    opacity: 0.5,
+    backgroundColor: 'skyblue',
+    opacity: 0.85,
     borderRadius: 30,
     zIndex: 0,
   },
 
-  // backgroundCard2: {
-  //   position: 'absolute',
-  //   // top: -10,
-  //   width: '100%',
-  //   height: 158,
-  //   backgroundColor: '#F5EEE7',
-  //   opacity: 0.75,
-  //   borderRadius: 30,
-  //   zIndex: 1,
-  // },
   mainCard: {
     width: '100%',
     backgroundColor: '#005758',
     borderRadius: 30,
     paddingHorizontal: 20,
     paddingBottom: 10,
-    // borderWidth: 1,
-    // borderColor: '#0f0',
+    // borderWidth: 0.1,
+    // borderBottomWidth : 2,
+    // borderBottomColor : 'skyblue',
   },
   subjectName_ButtonContainer: {
     flexDirection: 'row',
@@ -224,8 +174,9 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
   },
   subjectNameContainer: {
-    marginTop: 10,
+    // marginTop: 10,
     // borderWidth: 1,
+    // marginRight : 50,
     // borderColor: '#0f0',
   },
   subjectName: {
@@ -239,36 +190,8 @@ const styles = StyleSheet.create({
     color: '#ffea00',
     fontFamily: 'Raleway-Bold',
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.07)',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  menuContainer: {
-    position: 'absolute',
-    top : 150,
-    right: 40,
-    backgroundColor: '#004d4d',
-    paddingHorizontal: 10,
-    borderWidth: 0.1,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-    width: 80,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  menuText: {
-    fontSize: 10,
-    marginLeft: 10,
-    color: '#fff',
+  buttonContainer: {
+    left: 10,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -312,32 +235,42 @@ const styles = StyleSheet.create({
     fontFamily: 'Raleway-SemiBold',
   },
   statsDataContainer: {
+    flexDirection: 'row',
     justifyContent: 'space-evenly',
-    padding: 10,
+    top: -10,
+    // padding: 10,
     // borderWidth: 1,
     // borderColor: '#f0f',
   },
-  statsSubContainer: {
-    flexDirection: 'row',
+  statsIconContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
+    // flexDirection: 'row',
     // borderWidth: 1,
     // padding: 5,
     // borderColor: '#f0f',
   },
-  statsSubContainerData: {
+  statsDataSubContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    // flexDirection: 'row',
+    // borderWidth: 1,
+    // padding: 5,
+    // borderColor: '#f0f',
+  },
+  statsDataSubContainerBox: {
     alignItems: 'center',
     // justifyContent: 'center',
     // justifyContent: 'space-around',
     // padding: 8,
     // borderWidth: 1,
   },
-  statsSubContainerDataHeaderTitle: {
+  statsDataSubContainerBoxTitle: {
     fontSize: 8,
     color: '#fff',
     fontFamily: 'Raleway-Bold',
   },
-  statsSubContainerDataHeaderText: {
+  statsDataSubContainerBoxText: {
     fontSize: 16,
     color: '#ffea00',
     fontFamily: 'Raleway-Bold',

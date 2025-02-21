@@ -12,7 +12,7 @@ import {
   Keyboard,
   Modal,
 } from 'react-native';
-
+import {BASE_URL} from '@env';
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -20,7 +20,7 @@ import axios from 'axios';
 import {ScrollView} from 'react-native-gesture-handler';
 
 const Register = ({navigation}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
 
   const [form, setForm] = useState({
     firstname: '',

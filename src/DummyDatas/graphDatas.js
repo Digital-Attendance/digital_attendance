@@ -4,7 +4,7 @@ const graphValues = [
     {value: 90, label: 'T'},
     {value: 60, label: 'W'},
     {value: 20, label: 'T'},
-    {value: 78, label: 'F'},
+    {value: 120, label: 'F'},
     {value: 86, label: 'S'},
     {value: 42, label: 'S'},
   ],

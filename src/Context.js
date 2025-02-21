@@ -8,10 +8,11 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {BASE_URL} from '@env';
 const AsyncStorageContext = createContext();
 
 export const AsyncStorageProvider = ({children}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
   console.log('BASE_URL:', BASE_URL);
 
   const [user, setUser] = useState(null);
