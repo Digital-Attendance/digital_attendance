@@ -12,7 +12,8 @@ import {
   Keyboard,
   Modal,
 } from 'react-native';
-import {BASE_URL} from '@env';
+// import {BASE_URL} from '@env';
+import BASE_URL from '../url';
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 

@@ -24,7 +24,8 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 // const BASE_URL = process.env.BASE_URL;
-import {BASE_URL} from '@env';
+// import {BASE_URL} from '@env';
+import BASE_URL from '../url';
 
 export default function Login({navigation}) {
   const [email, setEmail] = useState('');
@@ -71,7 +72,7 @@ export default function Login({navigation}) {
           setEmail('');
           setPassword('');
           navigation.navigate(
-            selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student',
+            selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
           );
         }, 3000);
       } else {

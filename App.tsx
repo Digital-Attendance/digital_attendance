@@ -5,7 +5,7 @@ import {
   StatusBar
 } from "react-native";
 
-
+import { PaperProvider } from "react-native-paper";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AsyncStorageProvider } from "./src/Context";
@@ -29,11 +29,16 @@ import Faculty_Home from "./src/Faculty/Faculty_Home";
 import AttendanceScreen from "./src/Faculty/AttendanceScreen";
 import AddSubject from "./src/Faculty/AddSubject";
 import SplashScreen from "./src/SplashScreen"
+import Student_Home from "./src/Student/Student_Home";
+import SubjectOverview from "./src/Student/SubjectOverview";
+import VerifyLocation from "./src/Student/VerifyLocation";
+import LivenessDetection from "./src/Student/LivenessDetection";
 
 // enableScreens();
 
 const App = () => {
   return (
+    <PaperProvider>
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#1E1E1E'} />
       <AsyncStorageProvider>
@@ -60,10 +65,16 @@ const App = () => {
             <Stack.Screen name="Faculty_Home" component={Faculty_Home} />
             <Stack.Screen name="AddSubject" component={AddSubject} />
             <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} />
+            {/* Student Screens */}
+            <Stack.Screen name="Student_Home" component={Student_Home} />
+            <Stack.Screen name="SubjectOverview" component={SubjectOverview} />
+            <Stack.Screen name="VerifyLocation" component={VerifyLocation} />
+            <Stack.Screen name="LivenessDetection" component={LivenessDetection} />
           </Stack.Navigator>
         </NavigationContainer>
       </AsyncStorageProvider>
     </SafeAreaView>
+    </PaperProvider>
   );
 };
 

@@ -8,7 +8,8 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {BASE_URL} from '@env';
+// import {BASE_URL} from '@env';
+import BASE_URL from '../url';
 const AsyncStorageContext = createContext();
 
 export const AsyncStorageProvider = ({children}) => {

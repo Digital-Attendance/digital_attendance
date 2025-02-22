@@ -26,7 +26,7 @@ const Navbar = () => {
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('AddSubject');
+          navigation.navigate('EnrollSubject');
         }}
         style={styles.iconButton}>
         <MaterialCommunityIcons

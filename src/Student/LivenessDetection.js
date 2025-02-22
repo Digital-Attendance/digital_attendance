@@ -15,15 +15,14 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
-// import {BASE_URL} from '@env';
-import BASE_URL from '../url';
-const Registration_FaceVerification = ({navigation, route}) => {
-  // const BASE_URL = process.env.BASE_URL;
+import {BASE_URL} from '@env';
+const LivenessDetection = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [photoDataUri, setPhotoDataUri] = useState(null);
-  const [isRegistering, setIsRegistering] = useState(false);
-  // const [responseText, setResponseText] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [responseText, setResponseText] = useState(null);
+  const [base64Data, setBase64Data] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -33,18 +32,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
   );
 
   const format = useCameraFormat(cameraDevice, [
-    {photoResolution: {width: 4320, height: 5760}},
+    {photoResolution: {width: 432, height: 576}},
   ]);
-
-  const {form} = route.params;
-  const {
-    firstname,
-    lastname,
-    email,
-    password,
-    selectedRole,
-    registration_number,
-  } = form;
 
   useEffect(() => {
     (async () => {
@@ -54,47 +43,41 @@ const Registration_FaceVerification = ({navigation, route}) => {
     })();
   }, []);
 
-  // const sendBase64ToAPI = async (base64String) => {
-  //   try {
-  //     const response = await fetch(
-  //       "https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/",
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           email: "rajivsah240@gmail.com",
-  //           image: base64String,
-  //           registration: true,
-  //         }),
-  //       }
-  //     );
-  
-  //     // ✅ Check if response is JSON
-  //     const contentType = response.headers.get("content-type");
-  //     let responseData;
-      
-  //     if (contentType && contentType.includes("application/json")) {
-  //       responseData = await response.json();
-  //     } else {
-  //       responseData = await response.text(); // Fallback to text if not JSON
-  //     }
-  
-  //     console.log("API Response:", responseData);
-  
-  //     // ✅ Handle response correctly
-  //     if (typeof responseData === "object" && responseData.label && responseData.confidence) {
-  //       setResponseText(
-  //         `Liveness: ${responseData.label}, Confidence: ${responseData.confidence.toFixed(2)}`
+  //   const sendBase64ToAPI = async base64String => {
+  //     try {
+  //       const response = await fetch(
+  //         'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
+  //         {
+  //           method: 'POST',
+  //           headers: {'Content-Type': 'application/json'},
+  //           body: JSON.stringify({image: base64String}),
+  //         },
   //       );
-  //     } else {
-  //       setResponseText("Unexpected response format: " + JSON.stringify(responseData));
+
+  //     //   const responseData = await response.json();
+  //       const textResponse = await response.text(); // Read response as text
+  //       console.log('Raw API Response:', textResponse); // Log it before JSON parsing
+
+  //       try {
+  //         const responseData = JSON.parse(textResponse); // Parse only if it's valid JSON
+  //         console.log('API Response (Parsed JSON):', responseData);
+  //       } catch (error) {
+  //         console.error('JSON Parsing Error:', error);
+  //         setResponseText('Server returned invalid response.');
+  //         return;
+  //       }
+  //     } catch (error) {
+  //       console.error('Error sending Base64 image:', error);
+  //       setResponseText('Error processing request');
   //     }
-  //   } catch (error) {
-  //     console.error("Error sending Base64 image:", error);
-  //     setResponseText("Error processing request");
-  //   }
-  // };
-  
+
+  //     Snackbar.show({
+  //       text: responseText,
+  //       duration: Snackbar.LENGTH_INDEFINITE,
+  //       backgroundColor: '#17A2B8',
+  //       textColor: '#fff',
+  //     });
+  //   };
 
   const takephoto = async () => {
     if (cameraRef.current && hasPermission) {
@@ -110,7 +93,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
         setPhotoDataUri(`file://${newPath}`);
         console.log('Photo', photo);
         console.log('Photo captured', newPath);
-        // sendBase64ToAPI(base64String);
+        const base64String = await RNFS.readFile(newPath, 'base64');
+        setBase64Data(base64String);
       } catch (error) {
         Snackbar.show({
           text: 'Error capturing photo.',
@@ -124,7 +108,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
     }
   };
 
-  const handleRegister = async () => {
+  const handleVerification = async () => {
     if (!photoDataUri) {
       Snackbar.show({
         text: 'Please capture a photo first.',
@@ -135,63 +119,72 @@ const Registration_FaceVerification = ({navigation, route}) => {
       return;
     }
 
-    setIsRegistering(true);
+    setIsVerifying(true);
     Snackbar.show({
-      text: 'Registering...',
+      text: 'Verifying...',
       duration: Snackbar.LENGTH_INDEFINITE,
       backgroundColor: '#17A2B8',
       textColor: '#fff',
     });
 
-    const file = {uri: photoDataUri, type: 'image/jpeg', name: 'photo.jpg'};
-    const formData = new FormData();
-    formData.append('name', `${firstname} ${lastname}`);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('registration_number', registration_number);
-    formData.append('image', file);
-    formData.append('role', selectedRole);
-
     try {
-      const response = await fetch(`${BASE_URL}/register`, {
-        method: 'POST',
-        body: formData,
-        headers: {'Content-Type': 'multipart/form-data'},
-      });
+      const response = await fetch(
+        'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({image: base64Data}),
+        },
+      );
 
-      if (response.ok) {
-        Snackbar.show({
-          text: 'Registration successful!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
-        });
-        setTimeout(() => {
-          navigation.navigate('SplashScreen');
-        }, 3000);
-      } else {
-        Snackbar.show({
-          text: response.statusText,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
-        });
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        throw new Error('Invalid JSON response from server');
       }
-    } catch (error) {
+
+      console.log('API Response:', responseData);
+
+      let message = 'Invalid response';
+      if (
+        responseData.label !== undefined &&
+        responseData.confidence !== undefined
+      ) {
+        message = `Liveness: ${
+          responseData.label
+        }, Confidence: ${responseData.confidence.toFixed(2)}`;
+      } else if (responseData.Message) {
+        message = responseData.Message;
+      }
+
+      setResponseText(message);
+
       Snackbar.show({
-        text: error.message,
-        duration: Snackbar.LENGTH_SHORT,
+        text: message,
+        duration: Snackbar.LENGTH_LONG,
+        backgroundColor: '#5CB85C',
+        textColor: '#fff',
+      });
+    } catch (error) {
+      console.error('Error sending Base64 image:', error);
+      const errorMessage = error.message || 'Error processing request';
+      setResponseText(errorMessage);
+
+      Snackbar.show({
+        text: errorMessage,
+        duration: Snackbar.LENGTH_LONG,
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
     } finally {
-      setIsRegistering(false);
+      setIsVerifying(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Face Verification</Text>
+      <Text style={styles.header}>Liveness Detection</Text>
       <View style={styles.cameraContainer}>
         {hasPermission && cameraDevice && !photoDataUri ? (
           <Camera
@@ -231,8 +224,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
         )}
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={handleRegister}>
-          <Text style={styles.buttonText}>Register</Text>
+          onPress={handleVerification}>
+          <Text style={styles.buttonText}>Check Liveness</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -290,4 +283,4 @@ const styles = StyleSheet.create({
   buttonText: {color: '#FFF', fontSize: 16, fontWeight: 'bold'},
 });
 
-export default Registration_FaceVerification;
+export default LivenessDetection;

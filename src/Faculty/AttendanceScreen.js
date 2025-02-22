@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import { format, subMonths, eachDayOfInterval } from 'date-fns';
+import {format, subMonths, eachDayOfInterval} from 'date-fns';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Leaderboard from './components/Leaderboard';
@@ -21,39 +21,45 @@ const AttendanceScreen = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
-  
   const today = new Date();
   const dates = useMemo(() => {
     const startDate = subMonths(today, 4);
-    return eachDayOfInterval({ start: startDate, end: today }).reverse();
+    return eachDayOfInterval({start: startDate, end: today}).reverse();
   }, []);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible(prev => !prev);
   }, []);
 
-  
-  const handleDateSelect = useCallback(
-    date => {
-      setSelectedDate(prev =>
-        prev?.getTime() === date.getTime() ? null : new Date(date)
-      );
-    },
-    []
-  );
+  const handleDateSelect = useCallback(date => {
+    setSelectedDate(prev =>
+      prev?.getTime() === date.getTime() ? null : new Date(date),
+    );
+  }, []);
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={['#005758', '#004d4d']} style={styles.header}>
+      <LinearGradient
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        colors={['#007a7a', '#005758']}
+        style={styles.header}>
         <View style={styles.subjectContainer}>
-          <Text style={styles.subjectName} numberOfLines={1} ellipsizeMode="tail">
+          <Text
+            style={styles.subjectName}
+            numberOfLines={1}
+            ellipsizeMode="tail">
             Introduction to Computing
           </Text>
           <Text style={styles.subjectCode}>CS101</Text>
         </View>
         <TouchableOpacity style={styles.deleteButton} onPress={toggleMenu}>
-          <MaterialCommunityIcons name="trash-can-outline" size={24} color="#fff" />
+          <MaterialCommunityIcons
+            name="trash-can-outline"
+            size={24}
+            color="#fff"
+          />
         </TouchableOpacity>
         <Modal transparent visible={menuVisible} animationType="fade">
           <Pressable style={styles.overlay} onPress={toggleMenu}>
@@ -76,14 +82,22 @@ const AttendanceScreen = () => {
           horizontal
           data={dates}
           keyExtractor={date => date.toString()}
-          renderItem={({ item: date }) => {
+          renderItem={({item: date}) => {
             const isSelected = selectedDate?.getTime() === date.getTime();
             return (
-              <View style={{ alignItems: 'center' }}>
+              <View style={{alignItems: 'center'}}>
                 <TouchableOpacity
                   onPress={() => handleDateSelect(date)}
-                  style={[styles.dateItem, isSelected ? styles.selectedDate : styles.unselectedDate]}>
-                  <Text style={isSelected ? styles.selectedDateText : styles.unselectedDateText}>
+                  style={[
+                    styles.dateItem,
+                    isSelected ? styles.selectedDate : styles.unselectedDate,
+                  ]}>
+                  <Text
+                    style={
+                      isSelected
+                        ? styles.selectedDateText
+                        : styles.unselectedDateText
+                    }>
                     {format(date, 'dd')}
                   </Text>
                   <Text style={styles.dateText}>{format(date, 'EEE')}</Text>
@@ -96,12 +110,15 @@ const AttendanceScreen = () => {
         />
       </View>
 
-      {selectedDate === null ? <Leaderboard students={students} /> : <Records selectedDate={format(selectedDate, 'dd MMM yyyy')} />}
+      {selectedDate === null ? (
+        <Leaderboard students={students} />
+      ) : (
+        <Records selectedDate={format(selectedDate, 'dd MMM yyyy')} />
+      )}
       <DownloadButton />
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -114,7 +131,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    borderRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     marginBottom: 20,
     width: '100%',
   },

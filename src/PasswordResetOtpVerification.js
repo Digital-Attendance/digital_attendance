@@ -8,7 +8,8 @@ import {
   Keyboard,
 } from 'react-native';
 import axios from 'axios';
-import {BASE_URL} from '@env';
+// import {BASE_URL} from '@env';
+import BASE_URL from '../url';
 import Snackbar from 'react-native-snackbar';
 
 const PasswordResetOTPVerification = ({navigation, route}) => {

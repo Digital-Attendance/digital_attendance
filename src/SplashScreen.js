@@ -16,7 +16,7 @@ export default function SplashScreen({navigation}) {
       const selectedRole = await AsyncStorage.getItem('role');
       if (token) {
         navigation.replace(
-          selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student',
+          selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
         );
       } else {
         navigation.replace('Start');

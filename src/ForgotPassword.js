@@ -12,7 +12,7 @@ import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
 
 const ForgotPassword = ({navigation}) => {
-  const BASE_URL = process.env.BASE_URL;
+  // const BASE_URL = process.env.BASE_URL;
   const [email, setEmail] = useState('');
 
   const handlePasswordResetRequest = async () => {
