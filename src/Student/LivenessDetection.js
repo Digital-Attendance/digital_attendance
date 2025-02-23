@@ -43,42 +43,7 @@ const LivenessDetection = () => {
     })();
   }, []);
 
-  //   const sendBase64ToAPI = async base64String => {
-  //     try {
-  //       const response = await fetch(
-  //         'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
-  //         {
-  //           method: 'POST',
-  //           headers: {'Content-Type': 'application/json'},
-  //           body: JSON.stringify({image: base64String}),
-  //         },
-  //       );
-
-  //     //   const responseData = await response.json();
-  //       const textResponse = await response.text(); // Read response as text
-  //       console.log('Raw API Response:', textResponse); // Log it before JSON parsing
-
-  //       try {
-  //         const responseData = JSON.parse(textResponse); // Parse only if it's valid JSON
-  //         console.log('API Response (Parsed JSON):', responseData);
-  //       } catch (error) {
-  //         console.error('JSON Parsing Error:', error);
-  //         setResponseText('Server returned invalid response.');
-  //         return;
-  //       }
-  //     } catch (error) {
-  //       console.error('Error sending Base64 image:', error);
-  //       setResponseText('Error processing request');
-  //     }
-
-  //     Snackbar.show({
-  //       text: responseText,
-  //       duration: Snackbar.LENGTH_INDEFINITE,
-  //       backgroundColor: '#17A2B8',
-  //       textColor: '#fff',
-  //     });
-  //   };
-
+  
   const takephoto = async () => {
     if (cameraRef.current && hasPermission) {
       setIsCapturing(true);

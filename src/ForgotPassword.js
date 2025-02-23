@@ -14,8 +14,10 @@ import Snackbar from 'react-native-snackbar';
 const ForgotPassword = ({navigation}) => {
   // const BASE_URL = process.env.BASE_URL;
   const [email, setEmail] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handlePasswordResetRequest = async () => {
+    setIsVerifying(true);
     if (!email) {
       Snackbar.show({
         text: 'Email cannot be empty!',
@@ -23,8 +25,16 @@ const ForgotPassword = ({navigation}) => {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
+      setIsVerifying(false);
       return;
     }
+
+    Snackbar.show({
+      text: 'Sending OTP...',
+      duration: Snackbar.LENGTH_SHORT,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    });
 
     try {
       // const response = await axios.post(
@@ -37,7 +47,8 @@ const ForgotPassword = ({navigation}) => {
       //   },
       // );
 
-      if (true) {//response.data.success
+      if (true) {
+        //response.data.success
         Snackbar.show({
           text: 'OTP sent to your email!',
           duration: Snackbar.LENGTH_SHORT,
@@ -47,7 +58,7 @@ const ForgotPassword = ({navigation}) => {
         setTimeout(() => {
           // navigation.replace('OTPVerification', {email});
           navigation.replace('ResetPassword', {email});
-        }, 1000);
+        }, 500);
       } else {
         Snackbar.show({
           text: response.data.message,
@@ -64,6 +75,7 @@ const ForgotPassword = ({navigation}) => {
         textColor: '#fff',
       });
     }
+    setIsVerifying(false);
   };
 
   return (
@@ -82,12 +94,12 @@ const ForgotPassword = ({navigation}) => {
           placeholder="Enter your email"
           keyboardType="email-address"
           placeholderTextColor={'#ccc'}
-          autoCapitalize='none'
-                  
+          autoCapitalize="none"
         />
       </View>
       <TouchableOpacity
         style={styles.sendOtpButton}
+        disabled={isVerifying}
         onPress={handlePasswordResetRequest}>
         <Text style={styles.sendOtpButtonText}>Send OTP</Text>
       </TouchableOpacity>

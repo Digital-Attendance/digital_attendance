@@ -36,6 +36,7 @@ const Register = ({navigation}) => {
   const [passwordError, setPasswordError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordInfoVisible, setPasswordInfoVisible] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const handleChange = (field, value) => {
     setForm(prev => ({...prev, [field]: value}));
@@ -53,6 +54,7 @@ const Register = ({navigation}) => {
   };
 
   const handleNext = useCallback(async () => {
+    setIsRegistering(true);
     const {
       firstname,
       lastname,
@@ -76,6 +78,7 @@ const Register = ({navigation}) => {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
+      setIsRegistering(false);
       return;
     }
 
@@ -86,6 +89,7 @@ const Register = ({navigation}) => {
     //     backgroundColor: '#D9534F',
     //     textColor: '#fff',
     //   });
+    //   setIsRegistering(false);
     //   return;
     // }
 
@@ -96,8 +100,15 @@ const Register = ({navigation}) => {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
+      setIsRegistering(false);
       return;
     }
+    Snackbar.show({
+      text: 'Please wait while we are sending OTP to your email ID!',
+      duration: Snackbar.LENGTH_INDEFINITE,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    });
     try {
       const response = await axios.post(
         `${BASE_URL}/send-otp-first-time`,
@@ -134,17 +145,10 @@ const Register = ({navigation}) => {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
+    }finally{
+      setIsRegistering(false);
     }
   }, [form, navigation, passwordError]);
-
-  // const showPasswordInfo = () => {
-  //   Snackbar.show({
-  //     text: 'Password must be at least 8 characters long, include a letter, a number, and a special character (@#$%^&+=!)',
-  //     duration: Snackbar.LENGTH_LONG,
-  //     backgroundColor: '#2B8781',
-  //     textColor: '#fff',
-  //   });
-  // };
 
   return (
     <KeyboardAvoidingView
@@ -281,7 +285,7 @@ const Register = ({navigation}) => {
             />
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+              <TouchableOpacity style={styles.nextButton} disabled={isRegistering} onPress={handleNext}>
                 <Text style={styles.buttonText}>Next</Text>
               </TouchableOpacity>
             </View>

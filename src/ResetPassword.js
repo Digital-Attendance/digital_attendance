@@ -10,25 +10,46 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import {BASE_URL} from '@env';
+import Snackbar from 'react-native-snackbar';
+import {set} from 'date-fns';
 const ResetPassword = ({navigation, route}) => {
   // const BASE_URL = process.env.BASE_URL;
 
   const {email} = route.params;
-  console.log('email:', email);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handlePasswordReset = async () => {
+    setIsVerifying(true);
     if (!newPassword || !confirmPassword) {
-      Alert.alert('Please fill all the fields');
+      Snackbar.show({
+        text: 'Please enter all fields',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      setIsVerifying(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Passwords do not match');
+      Snackbar.show({
+        text: 'Passwords do not match',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      setIsVerifying(false);
       return;
     }
-    console.log(newPassword);
+
+    Snackbar.show({
+      text: 'Resetting password...',
+      duration: Snackbar.LENGTH_INDEFINITE,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    });
 
     try {
       const response = await axios.post(
@@ -42,20 +63,34 @@ const ResetPassword = ({navigation, route}) => {
       );
 
       if (response.data.success) {
-        Alert.alert(
-          'Password Reset',
-          'Your password has been reset successfully.',
-        );
+        Snackbar.show({
+          text: 'Password reset successful. Redirecting to login...',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
 
         setInterval(() => {
           navigation.navigate('Login');
-        }, 3000);
+        }, 500);
       } else {
-        Alert.alert('Error', response.data.message);
+        Snackbar.show({
+          text: response.data.message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
       }
     } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'An error occurred while resetting the password.');
+      Snackbar.show({
+        text: error,
+        
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -63,7 +98,8 @@ const ResetPassword = ({navigation, route}) => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Reset Password</Text>
       <Text style={styles.subtitle}>
-        Please enter and confirm your new password. You will need to login after you reset.
+        Please enter and confirm your new password. You will need to login after
+        you reset.
       </Text>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>New Password</Text>
@@ -89,6 +125,7 @@ const ResetPassword = ({navigation, route}) => {
       </View>
       <TouchableOpacity
         style={styles.resetButton}
+        disabled={isVerifying}
         onPress={handlePasswordReset}>
         <Text style={styles.resetButtonText}>Reset Password</Text>
       </TouchableOpacity>

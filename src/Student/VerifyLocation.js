@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {View, StyleSheet, Platform} from 'react-native';
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   Button,
   ActivityIndicator,
 } from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
@@ -20,20 +20,8 @@ const FIXED_LOCATION = {
 
 const THRESHOLD_METERS = 0.01;
 
-// Helper function to calculate distance using the Haversine formula
-// const getDistance = (lat1, lon1, lat2, lon2) => {
-//   const toRad = value => (value * Math.PI) / 180;
-//   const R = 6371000; // Earth's radius in meters
-//   const dLat = toRad(lat2 - lat1);
-//   const dLon = toRad(lon2 - lon1);
-//   const a =
-//     Math.sin(dLat / 2) ** 2 +
-//     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//   return R * c;
-// };
-
 const VerifyLocation = () => {
+  const watchId = useRef(null);
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -41,81 +29,12 @@ const VerifyLocation = () => {
 
   const navigation = useNavigation();
 
-  //   const verifyLocation = async () => {
-  //     setVerifying(true);
-  //     setErrorMsg('');
-  //     setLocationVerified(null);
-  //     setCurrentLocation(null);
-  //     let hasPermission = false;
-
-  //     try {
-  //       if (Platform.OS === 'android') {
-  //         const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-  //         if (result !== RESULTS.GRANTED) {
-  //           const reqResult = await request(
-  //             PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-  //           );
-  //           hasPermission = reqResult === RESULTS.GRANTED;
-  //         } else {
-  //           hasPermission = true;
-  //         }
-  //       } else {
-  //         const result = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-  //         if (result !== RESULTS.GRANTED) {
-  //           const reqResult = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-  //           hasPermission = reqResult === RESULTS.GRANTED;
-  //         } else {
-  //           hasPermission = true;
-  //         }
-  //       }
-  //     } catch (error) {
-  //       setErrorMsg('Permission error: ' + error.message);
-  //       setVerifying(false);
-  //       return;
-  //     }
-
-  //     if (!hasPermission) {
-  //       setErrorMsg('Location permission denied');
-  //       setVerifying(false);
-  //       return;
-  //     }
-  //     console.log('Requesting location update...');
-
-  //     const watchid = Geolocation.watchPosition(
-  //       position => {
-  //         const {latitude, longitude} = position.coords;
-  //         setCurrentLocation({latitude, longitude});
-  //         console.log('Current Location:', latitude, longitude);
-  //         const isVerified =
-  //           Math.abs(FIXED_LOCATION.latitude - latitude) < THRESHOLD_METERS &&
-  //           Math.abs(FIXED_LOCATION.longitude - longitude) < THRESHOLD_METERS;
-  //         setLocationVerified(isVerified);
-  //         console.log('Location Verified:', isVerified);
-
-  //         // if (isVerified) {
-  //         //   setTimeout(() => {
-  //         //     navigation.replace('LivenessDetection');
-  //         //   }, 500);
-  //         // }
-  //         setVerifying(false);
-  //       },
-  //       error => {
-  //         console.log('Location Error:', error.message);
-  //         setErrorMsg('Location Error: ' + error.message);
-  //         setVerifying(false);
-  //       },
-  //       {
-  //         enableHighAccuracy: false,
-  //         distanceFilter: 1,
-  //       },
-  //     );
-  //   };
-
-  const verifyLocation = async (watchId) => {
+  const verifyLocation = async () => {
     setVerifying(true);
     setErrorMsg('');
     setLocationVerified(null);
     setCurrentLocation(null);
+
     let hasPermission = false;
 
     try {
@@ -132,9 +51,7 @@ const VerifyLocation = () => {
       } else {
         const result = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
         if (result !== RESULTS.GRANTED) {
-          const reqResult = await request(
-            PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-          );
+          const reqResult = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
           hasPermission = reqResult === RESULTS.GRANTED;
         } else {
           hasPermission = true;
@@ -151,9 +68,16 @@ const VerifyLocation = () => {
       setVerifying(false);
       return;
     }
+
     console.log('Requesting location update...');
 
-    watchId = Geolocation.watchPosition(
+    
+    if (watchId.current !== null) {
+      Geolocation.clearWatch(watchId.current);
+      console.log('Clearing previous location watch...');
+    }
+
+    watchId.current = Geolocation.watchPosition(
       position => {
         const {latitude, longitude} = position.coords;
         setCurrentLocation({latitude, longitude});
@@ -164,12 +88,6 @@ const VerifyLocation = () => {
           Math.abs(FIXED_LOCATION.longitude - longitude) < THRESHOLD_METERS;
         setLocationVerified(isVerified);
         console.log('Location Verified:', isVerified);
-        
-        // if (isVerified) {
-        //   setTimeout(() => {
-        //     navigation.replace('LivenessDetection');
-        //   }, 500);
-        // }
 
         setVerifying(false);
       },
@@ -183,13 +101,12 @@ const VerifyLocation = () => {
   };
 
   useEffect(() => {
-    let watchId = null;  
-    verifyLocation(watchId);
+    verifyLocation();
 
     return () => {
-      if (watchId !== null) {
-        Geolocation.clearWatch(watchId);
-        console.log('Clearing location watch...');
+      if (watchId.current !== null) {
+        Geolocation.clearWatch(watchId.current);
+        console.log('Clearing location watch on unmount...');
       }
     };
   }, []);

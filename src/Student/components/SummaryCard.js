@@ -85,7 +85,7 @@ const SummaryCard = () => {
           </View>
           <View style={styles.statsDataContainer}>
             <View style={styles.statsData}>
-              <MaterialCommunityIcons name="book" size={20} color={'#fff'} />
+              <MaterialCommunityIcons name="google-classroom" size={20} color={'#7ddb0a'} />
               <View style={styles.statsBox}>
                 <Text style={styles.statsTitle}>Total</Text>
                 <Text style={styles.statsText}>20</Text>
@@ -95,7 +95,7 @@ const SummaryCard = () => {
               <MaterialCommunityIcons
                 name="account-check"
                 size={20}
-                color={'#fff'}
+                color={'orange'}
               />
               <View style={styles.statsBox}>
                 <Text style={styles.statsTitle}>Present</Text>

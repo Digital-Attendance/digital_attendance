@@ -32,8 +32,10 @@ export default function Login({navigation}) {
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('Student');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [logging, setLogging] = useState(false);
 
   const handleLogin = async () => {
+    setLogging(true);
     if (!email.trim() || !password.trim()) {
       Snackbar.show({
         text: 'Username and password cannot be empty!',
@@ -41,11 +43,17 @@ export default function Login({navigation}) {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
+      setLogging(false);
       return;
     }
+    Snackbar.show({
+      text: 'Logging in...',
+      duration: Snackbar.LENGTH_INDEFINITE,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    })
 
     try {
-      console.log(`Logging in...${BASE_URL}/login`);
       const response = await axios.post(`${BASE_URL}/login`, {
         email,
         password,
@@ -53,8 +61,6 @@ export default function Login({navigation}) {
       });
 
       if (response.status === 200) {
-        console.log('Login Successful:', response.data);
-
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem(
           'refresh_token',
@@ -74,7 +80,7 @@ export default function Login({navigation}) {
           navigation.navigate(
             selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
           );
-        }, 3000);
+        }, 500);
       } else {
         Snackbar.show({
           text: 'Invalid Credentials',
@@ -132,6 +138,8 @@ export default function Login({navigation}) {
           textColor: '#fff',
         });
       }
+    }finally{
+      setLogging(false);
     }
   };
 
@@ -210,7 +218,7 @@ export default function Login({navigation}) {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
+            <TouchableOpacity disabled={logging} style={styles.submitButton} onPress={handleLogin}>
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
           </View>
