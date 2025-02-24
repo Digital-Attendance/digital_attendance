@@ -15,14 +15,13 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {BASE_URL} from '@env';
 const LivenessDetection = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [photoDataUri, setPhotoDataUri] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [responseText, setResponseText] = useState(null);
-  const [base64Data, setBase64Data] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -43,34 +42,20 @@ const LivenessDetection = () => {
     })();
   }, []);
 
-  
   const takephoto = async () => {
     if (cameraRef.current && hasPermission) {
       setIsCapturing(true);
-      setPhotoDataUri(null);
 
       try {
         const photo = await cameraRef.current.takePhoto({quality: 10});
         const timestamp = new Date().getTime();
         const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
-
         await RNFS.moveFile(photo.path, newPath);
-        setPhotoDataUri(`file://${newPath}`);
-        console.log('Photo', photo);
-        console.log('Photo captured', newPath);
         const base64String = await RNFS.readFile(newPath, 'base64');
         setBase64Data(base64String);
-        setTimeout(()=>{
-          Snackbar.show({
-            text: 'Photo captured successfully!',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#5CB85C',
-            textColor: '#fff',
-          });
-        }, 5000);
       } catch (error) {
         Snackbar.show({
-          text: 'Error capturing photo.',
+          text: error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -82,20 +67,32 @@ const LivenessDetection = () => {
   };
 
   const handleVerification = async () => {
-    if (!photoDataUri) {
-      Snackbar.show({
-        text: 'Please capture a photo first.',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
-      });
-      return;
-    }
-
     setIsVerifying(true);
+    let base64Data = '';
+    if (cameraRef.current && hasPermission) {
+      setIsCapturing(true);
+      try {
+        const photo = await cameraRef.current.takePhoto({quality: 10});
+        const timestamp = new Date().getTime();
+        const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
+        await RNFS.moveFile(photo.path, newPath);
+        const base64String = await RNFS.readFile(newPath, 'base64');
+        base64Data = base64String;
+      } catch (error) {
+        Snackbar.show({
+          text: error,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+        setIsVerifying(false);
+      } finally {
+        setIsCapturing(false);
+      }
+    }
     Snackbar.show({
       text: 'Verifying...',
-      duration: Snackbar.LENGTH_INDEFINITE,
+      duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#17A2B8',
       textColor: '#fff',
     });
@@ -141,7 +138,7 @@ const LivenessDetection = () => {
       });
     } catch (error) {
       console.error('Error sending Base64 image:', error);
-      const errorMessage = error.message || 'Error processing request';
+      const errorMessage = error;
       setResponseText(errorMessage);
 
       Snackbar.show({
@@ -157,8 +154,13 @@ const LivenessDetection = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Liveness Detection</Text>
-      <Text style={styles.subtitle}>"Time for a quick identity check—let’s make sure it’s really you!"</Text>
+      <View style={styles.header}>
+        <Icon name="webcam" size={30} color="#2B8781" />
+        <Text style={styles.title}>Liveness Detection</Text>
+      </View>
+      <Text style={styles.subtitle}>
+        "Time for a quick identity check—let’s make sure it’s really you!"
+      </Text>
       <View style={styles.cameraContainer}>
         {hasPermission && cameraDevice ? (
           <Camera
@@ -174,24 +176,8 @@ const LivenessDetection = () => {
         )}
       </View>
       <View style={styles.buttonContainer}>
-        {!photoDataUri ? (
-          <TouchableOpacity
-            style={styles.captureButton}
-            onPress={takephoto}
-            disabled={isCapturing}>
-            <Text style={styles.buttonText}>
-              {isCapturing ? 'Capturing...' : 'Capture'}
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.recaptureButton}
-            onPress={() => setPhotoDataUri(null)}>
-            <Text style={styles.buttonText}>Recapture</Text>
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
-          style={styles.registerButton}
+          style={styles.liveButton}
           disabled={isVerifying}
           onPress={handleVerification}>
           <Text style={styles.buttonText}>Check Liveness</Text>
@@ -206,10 +192,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#1E1E1E',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
   },
   title: {
     fontSize: 28,
+    color: '#fff',
     fontFamily: 'Raleway-Bold',
     marginVertical: 5,
   },
@@ -219,47 +211,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Raleway-Italic',
     textAlign: 'center',
-    color: '#384959',
+    color: '#ccc',
   },
   cameraContainer: {
-    width: '90%',
-    height: 400,
+    width: '80%',
+    height: 350,
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E9ECEF',
+    shadowColor: 'white',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
   },
+
   camera: {width: '100%', height: '100%'},
-  photoPreview: {width: '100%', height: '100%', borderRadius: 10},
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '90%',
+    width: '50%',
   },
-  captureButton: {
-    backgroundColor: '#3C9AFB',
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  recaptureButton: {
-    backgroundColor: '#1E293B',
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  registerButton: {
+  liveButton: {
     backgroundColor: '#2B8781',
     padding: 12,
     borderRadius: 8,
     flex: 1,
     alignItems: 'center',
+    shadowColor: 'white',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 10,
   },
   buttonText: {color: '#FFF', fontSize: 16, fontWeight: 'bold'},
 });

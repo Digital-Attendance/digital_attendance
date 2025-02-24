@@ -106,7 +106,7 @@ const Register = ({navigation}) => {
     }
     Snackbar.show({
       text: 'Please wait while we are sending OTP to your email ID!',
-      duration: Snackbar.LENGTH_INDEFINITE,
+      duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#2B8781',
       textColor: '#fff',
     });
@@ -130,7 +130,8 @@ const Register = ({navigation}) => {
         });
         setTimeout(() => {
           navigation.replace('EmailVerification', {form});
-        }, 2000);
+          // navigation.replace('FaceVerification', {form});
+        }, 500);
       } else {
         Snackbar.show({
           text: response.data.message,

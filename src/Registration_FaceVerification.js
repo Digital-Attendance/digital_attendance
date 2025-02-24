@@ -15,15 +15,13 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
-// import {BASE_URL} from '@env';
 import BASE_URL from '../url';
 const Registration_FaceVerification = ({navigation, route}) => {
-  // const BASE_URL = process.env.BASE_URL;
   const [hasPermission, setHasPermission] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [photoDataUri, setPhotoDataUri] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
-  // const [responseText, setResponseText] = useState(null);
+  const [base64Data, setBase64Data] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -33,7 +31,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
   );
 
   const format = useCameraFormat(cameraDevice, [
-    {photoResolution: {width: 4320, height: 5760}},
+    {photoResolution: {width: 640, height: 480}},
   ]);
 
   const {form} = route.params;
@@ -54,66 +52,23 @@ const Registration_FaceVerification = ({navigation, route}) => {
     })();
   }, []);
 
-  // const sendBase64ToAPI = async (base64String) => {
-  //   try {
-  //     const response = await fetch(
-  //       "https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/",
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           email: "rajivsah240@gmail.com",
-  //           image: base64String,
-  //           registration: true,
-  //         }),
-  //       }
-  //     );
-  
-  //     // ✅ Check if response is JSON
-  //     const contentType = response.headers.get("content-type");
-  //     let responseData;
-      
-  //     if (contentType && contentType.includes("application/json")) {
-  //       responseData = await response.json();
-  //     } else {
-  //       responseData = await response.text(); // Fallback to text if not JSON
-  //     }
-  
-  //     console.log("API Response:", responseData);
-  
-  //     // ✅ Handle response correctly
-  //     if (typeof responseData === "object" && responseData.label && responseData.confidence) {
-  //       setResponseText(
-  //         `Liveness: ${responseData.label}, Confidence: ${responseData.confidence.toFixed(2)}`
-  //       );
-  //     } else {
-  //       setResponseText("Unexpected response format: " + JSON.stringify(responseData));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error sending Base64 image:", error);
-  //     setResponseText("Error processing request");
-  //   }
-  // };
-  
-
   const takephoto = async () => {
     if (cameraRef.current && hasPermission) {
       setIsCapturing(true);
+      setBase64Data(null);
       setPhotoDataUri(null);
 
       try {
-        const photo = await cameraRef.current.takePhoto({quality: 85});
+        const photo = await cameraRef.current.takePhoto({quality: 10});
         const timestamp = new Date().getTime();
         const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
-
         await RNFS.moveFile(photo.path, newPath);
         setPhotoDataUri(`file://${newPath}`);
-        console.log('Photo', photo);
-        console.log('Photo captured', newPath);
-        // sendBase64ToAPI(base64String);
+        const base64String = await RNFS.readFile(newPath, 'base64');
+        setBase64Data(base64String);
       } catch (error) {
         Snackbar.show({
-          text: 'Error capturing photo.',
+          text: error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -124,8 +79,65 @@ const Registration_FaceVerification = ({navigation, route}) => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!photoDataUri) {
+  const saveEmbedding = async () => {
+    if (!base64Data) {
+      Snackbar.show({
+        text: 'Please capture a photo first.',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      return;
+    }
+    try {
+      const res = await fetch(
+        'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            email: email,
+            image: base64Data,
+            registration: true,
+          }),
+        },
+      );
+
+      console.log(res);
+      const resJson = await res.json();
+      console.log(resJson);
+      
+
+
+      if (!res.ok) {
+        Snackbar.show({
+          text: resJson.Message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+        return;
+      }
+
+      Snackbar.show({
+        text: 'Registration successful!',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#5CB85C',
+        textColor: '#fff',
+      });
+      navigation.navigate('SplashScreen');
+    } catch (error) {
+      Snackbar.show({
+        text: error,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    }
+  };
+
+  const studentRegister = async () => {
+    if (!base64Data) {
       Snackbar.show({
         text: 'Please capture a photo first.',
         duration: Snackbar.LENGTH_SHORT,
@@ -138,48 +150,45 @@ const Registration_FaceVerification = ({navigation, route}) => {
     setIsRegistering(true);
     Snackbar.show({
       text: 'Registering...',
-      duration: Snackbar.LENGTH_INDEFINITE,
+      duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#17A2B8',
       textColor: '#fff',
     });
 
-    const file = {uri: photoDataUri, type: 'image/jpeg', name: 'photo.jpg'};
-    const formData = new FormData();
-    formData.append('name', `${firstname} ${lastname}`);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('registration_number', registration_number);
-    formData.append('image', file);
-    formData.append('role', selectedRole);
+    const requestBody = {
+      name: `${firstname} ${lastname}`,
+      email: email,
+      password: password,
+      registration_number: registration_number,
+      selected_role : selectedRole,
+    };
 
     try {
-      const response = await fetch(`${BASE_URL}/register`, {
+      const response = await fetch(`${BASE_URL}/register-student`, {
         method: 'POST',
-        body: formData,
-        headers: {'Content-Type': 'multipart/form-data'},
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.ok) {
+      console.log(response);
+
+      if (!response.ok) {
+        const errorText = await response.json();
         Snackbar.show({
-          text: 'Registration successful!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
-        });
-        setTimeout(() => {
-          navigation.navigate('SplashScreen');
-        }, 3000);
-      } else {
-        Snackbar.show({
-          text: response.statusText,
+          text: errorText.message,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
         });
+        return;
       }
+
+      await saveEmbedding();
     } catch (error) {
       Snackbar.show({
-        text: error.message,
+        text: error,
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',
@@ -231,7 +240,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
         )}
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={handleRegister}>
+          onPress={studentRegister}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
       </View>

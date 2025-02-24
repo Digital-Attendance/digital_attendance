@@ -35,7 +35,6 @@ export default function Login({navigation}) {
   const [logging, setLogging] = useState(false);
 
   const handleLogin = async () => {
-    setLogging(true);
     if (!email.trim() || !password.trim()) {
       Snackbar.show({
         text: 'Username and password cannot be empty!',
@@ -43,12 +42,12 @@ export default function Login({navigation}) {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
-      setLogging(false);
       return;
     }
+    setLogging(true);
     Snackbar.show({
       text: 'Logging in...',
-      duration: Snackbar.LENGTH_INDEFINITE,
+      duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#2B8781',
       textColor: '#fff',
     })

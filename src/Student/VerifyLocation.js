@@ -1,12 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {View, Text, StyleSheet, Platform, TouchableOpacity} from 'react-native';
 import {
-  Card,
-  Title,
-  Paragraph,
-  Button,
-  ActivityIndicator,
-} from 'react-native-paper';
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  TouchableOpacity,
+  Linking,
+  Alert,
+} from 'react-native';
+import {Paragraph, ActivityIndicator} from 'react-native-paper';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from '@react-native-community/geolocation';
@@ -29,7 +31,25 @@ const VerifyLocation = () => {
 
   const navigation = useNavigation();
 
+  const checkGPSStatus = async () => {
+    Geolocation.getCurrentPosition(
+      () => {
+        console.log('GPS is ON');
+      },
+      error => {
+        if (error.code === 2) {
+          Alert.alert(
+            'GPS Disabled',
+            'Please enable GPS to verify your location.',
+          );
+        }
+      },
+      {enableHighAccuracy: true, timeout: 5000},
+    );
+  };
+
   const verifyLocation = async () => {
+    await checkGPSStatus();
     setVerifying(true);
     setErrorMsg('');
     setLocationVerified(null);
@@ -88,13 +108,12 @@ const VerifyLocation = () => {
         setLocationVerified(isVerified);
         console.log('Location Verified:', isVerified);
         setVerifying(false);
-        
+
         if(isVerified) {
           setTimeout(() => {
             navigation.replace('LivenessDetection');
           }, 2000);
         }
-
       },
       error => {
         console.log('Location Error:', error.message);
@@ -129,14 +148,10 @@ const VerifyLocation = () => {
       {verifying ? (
         <View style={styles.verifyingContainer}>
           <ActivityIndicator animating={true} color="#005758" size="large" />
-          <Text style={styles.statusText}>
-            Verifying your location...
-          </Text>
+          <Text style={styles.statusText}>Verifying your location...</Text>
         </View>
       ) : errorMsg ? (
-        <Text style={[styles.statusText, {color: '#F44336'}]}>
-          {errorMsg}
-        </Text>
+        <Text style={[styles.statusText, {color: '#F44336'}]}>{errorMsg}</Text>
       ) : locationVerified ? (
         <View style={styles.resultContainer}>
           <Icon name="check-circle-outline" size={50} color="#4CAF50" />
@@ -175,7 +190,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#1E1E1E',
     justifyContent: 'center',
   },
   header: {
@@ -185,6 +200,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    color: '#fff',
     fontFamily: 'Raleway-Bold',
     marginVertical: 20,
   },
@@ -192,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Raleway-Italic',
     textAlign: 'center',
-    color: '#384959',
+    color: '#ccc',
   },
   verifyingContainer: {
     marginTop: 5,
@@ -216,6 +232,7 @@ const styles = StyleSheet.create({
   statusText: {
     marginTop: 20,
     fontSize: 18,
+    color: '#fff',
     fontFamily: 'Raleway-SemiBold',
     textAlign: 'center',
   },

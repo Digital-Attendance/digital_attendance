@@ -46,7 +46,7 @@ const ResetPassword = ({navigation, route}) => {
 
     Snackbar.show({
       text: 'Resetting password...',
-      duration: Snackbar.LENGTH_INDEFINITE,
+      duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#2B8781',
       textColor: '#fff',
     });

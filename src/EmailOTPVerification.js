@@ -13,7 +13,6 @@ import Snackbar from 'react-native-snackbar';
 // import {BASE_URL} from '@env';
 import BASE_URL from '../url';
 const EmailOTPVerification = ({navigation, route}) => {
-  
   const {form} = route.params;
   const {
     firstname,
@@ -32,6 +31,7 @@ const EmailOTPVerification = ({navigation, route}) => {
 
   useEffect(() => {
     let interval;
+    setIsResendDisabled(true);
     if (timer > 0) {
       interval = setInterval(() => {
         setTimer(prevTimer => prevTimer - 1);
@@ -93,7 +93,7 @@ const EmailOTPVerification = ({navigation, route}) => {
               navigation.replace('FaceVerification', {
                 form,
               });
-            }, 2000);
+            }, 500);
           } else if (selectedRole === 'Faculty') {
             console.log('Registering Faculty...');
             await registerFaculty();
@@ -127,7 +127,6 @@ const EmailOTPVerification = ({navigation, route}) => {
 
   const registerFaculty = async () => {
     setIsRegistering(true);
-    console.log('Registering Faculty...');
 
     Snackbar.show({
       text: 'Registering Faculty...',
@@ -136,33 +135,34 @@ const EmailOTPVerification = ({navigation, route}) => {
       textColor: '#fff',
     });
 
-    const formData = new FormData();
-    formData.append('name', `${firstname} ${lastname}`);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('registration_number', registration_number);
-    formData.append('role', selectedRole);
+    const requestBody = {
+      name: `${firstname} ${lastname}`,
+      email: email,
+      password: password,
+      registration_number: registration_number,
+      selected_role : selectedRole
+    };
 
     try {
       const response = await fetch(`${BASE_URL}/register`, {
         method: 'POST',
-        body: formData,
-        headers: {'Content-Type': 'multipart/form-data'},
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
         Snackbar.show({
-          text: 'Faculty Registration Successful!',
+          text: 'Registration successful!',
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#5CB85C',
           textColor: '#fff',
         });
-        setTimeout(() => {
-          navigation.replace('Login');
-        }, 2000);
       } else {
+        const errorText = await response.text();
         Snackbar.show({
-          text: 'Faculty Registration Failed.',
+          text: errorText || 'Registration failed!',
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -170,7 +170,7 @@ const EmailOTPVerification = ({navigation, route}) => {
       }
     } catch (error) {
       Snackbar.show({
-        text: 'Error registering faculty.',
+        text: error,
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',
@@ -183,6 +183,13 @@ const EmailOTPVerification = ({navigation, route}) => {
   const handleResend = useCallback(() => {
     if (isResendDisabled) return;
     setIsResendDisabled(true);
+
+    Snackbar.show({
+      text: 'Sending OTP...',
+      duration: Snackbar.LENGTH_SHORT,
+      backgroundColor: '#17A2B8',
+      textColor: '#fff',
+    });
 
     setTimeout(async () => {
       try {
@@ -220,8 +227,7 @@ const EmailOTPVerification = ({navigation, route}) => {
   }, [email, isResendDisabled]);
 
   return (
-    // <SafeAreaView style={styles.container}>
-    <TouchableOpacity onPress={Keyboard.dismiss} style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>OTP Verification</Text>
         <Text style={styles.subtitle}>
@@ -254,13 +260,7 @@ const EmailOTPVerification = ({navigation, route}) => {
               onPress={handleResend}
               disabled={isResendDisabled}
               style={[styles.resendButton]}>
-              <Text
-                style={[
-                  styles.resendText,
-                  isResendDisabled && styles.resendButtonDisabledText,
-                ]}>
-                Resend Code
-              </Text>
+              <Text style={[styles.resendText]}>Resend Code</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.timerContainer}>
@@ -272,8 +272,7 @@ const EmailOTPVerification = ({navigation, route}) => {
           </View>
         </View>
       </View>
-    </TouchableOpacity>
-    // </SafeAreaView>
+    </View>
   );
 };
 
@@ -329,11 +328,9 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   buttonContainer: {
-    // flex: 1,
     paddingTop: 20,
     alignItems: 'center',
     width: '100%',
-    // borderWidth: 1,
   },
   verifyButton: {
     backgroundColor: '#2B8781',

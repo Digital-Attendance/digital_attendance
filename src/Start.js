@@ -7,7 +7,7 @@ const Start = ({navigation}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Digital Attendance</Text>
       <Image
-        source={require('../assets/startBackgroundImg.png')}
+        source={require('../assets/startBackgroundImg_black.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#1E1E1E',
   },
   title: {
     padding: 10,
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     textAlign: 'center',
     fontFamily: 'Monoton-Regular',
-    color: '#333',
+    color: '#fff',
   },
   logo: {
     width: '100%',
