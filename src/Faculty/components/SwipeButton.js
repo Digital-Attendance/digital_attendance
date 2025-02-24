@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {Vibration, Text, StyleSheet, Dimensions} from 'react-native';
 import {
   GestureHandlerRootView,
@@ -16,8 +16,12 @@ import Animated, {
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+import BASE_URL from '../../../url';
+import Geolocation from '@react-native-community/geolocation';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {Snackbar} from 'react-native-paper';
+
 const {width} = Dimensions.get('window');
-const {height} = Dimensions.get('window');
 const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
@@ -25,6 +29,135 @@ const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 const SwipeButton = ({setIsSwipeActive}) => {
   const translateX = useSharedValue(0);
   const [isStarted, setIsStarted] = useState(false);
+  const watchId = useRef(null);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  const fetchLocation = async () => {
+    setErrorMsg('');
+    setCurrentLocation(null);
+    let hasPermission = false;
+
+    try {
+      if (Platform.OS === 'android') {
+        const result = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        if (result !== RESULTS.GRANTED) {
+          const reqResult = await request(
+            PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+          );
+          hasPermission = reqResult === RESULTS.GRANTED;
+        } else {
+          hasPermission = true;
+        }
+      } else {
+        const result = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+        if (result !== RESULTS.GRANTED) {
+          const reqResult = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+          hasPermission = reqResult === RESULTS.GRANTED;
+        } else {
+          hasPermission = true;
+        }
+      }
+    } catch (error) {
+      setErrorMsg('Permission error: ' + error.message);
+      return;
+    }
+
+    if (!hasPermission) {
+      setErrorMsg('Location permission denied');
+      return;
+    }
+
+    console.log('Requesting location update...');
+    if (watchId.current !== null) {
+      Geolocation.clearWatch(watchId.current);
+      console.log('Clearing previous location watch...');
+    }
+
+    watchId.current = Geolocation.watchPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setCurrentLocation({latitude, longitude});
+        console.log('Current Location:', latitude, longitude);
+      },
+      error => {
+        console.log('Location Error:', error.message);
+        setErrorMsg('Location Error: ' + error.message);
+      },
+      {enableHighAccuracy: false, distanceFilter: 1},
+    );
+  };
+
+  const startAttendance = async () => {
+    await fetchLocation();
+
+    Snackbar.show({
+      text: 'Starting attendance...',
+      duration: Snackbar.LENGTH_SHORT,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    });
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/start-attendance`,
+        {email, location: currentLocation},
+        {validateStatus: status => status < 500},
+      );
+
+      if (response.data.success) {
+        Snackbar.show({
+          text: 'Attendance started successfully!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
+      } else {
+        Snackbar.show({
+          text: response.data.message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
+    } catch (error) {
+      Snackbar.show({
+        text: 'An error occurred while starting attendance!',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    }
+  };
+
+  const stopAttendance = async () => {
+    setCurrentLocation(null);
+    setErrorMsg('');
+    Geolocation.clearWatch(watchId.current);
+    watchId.current = null;
+
+    Snackbar.show({
+      text: 'Stopping attendance...',
+      duration: Snackbar.LENGTH_SHORT,
+      backgroundColor: '#2B8781',
+      textColor: '#fff',
+    });
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/stop-attendance`,
+        {email},
+        {validateStatus: status => status < 500},
+      );
+    } catch (error) {
+      Snackbar.show({
+        text: 'An error occurred while stopping attendance!',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    }
+  };
 
   const panGesture = Gesture.Pan()
     .onUpdate(event => {
@@ -38,28 +171,27 @@ const SwipeButton = ({setIsSwipeActive}) => {
         translateX.value = withTiming(SWIPE_RANGE, {}, () => {
           runOnJS(setIsStarted)(true);
           runOnJS(setIsSwipeActive)(true);
+          // runOnJS(startAttendance)();
           runOnJS(Vibration.vibrate)(100);
         });
       } else {
         translateX.value = withTiming(0, {}, () => {
           runOnJS(setIsStarted)(false);
           runOnJS(setIsSwipeActive)(false);
+          // runOnJS(stopAttendance)();
           runOnJS(Vibration.vibrate)(100);
         });
       }
     });
 
-  // Dynamic gradient overlay (Green to Red)
   const animatedOverlayStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateX.value, [0, SWIPE_RANGE], [0, 1]), // Fade-in effect
+    opacity: interpolate(translateX.value, [0, SWIPE_RANGE], [0, 1]),
   }));
 
-  // Move button slider smoothly
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{translateX: translateX.value}],
   }));
 
-  // Rotate arrow gradually as button moves
   const arrowRotation = useAnimatedStyle(() => ({
     transform: [
       {
@@ -105,8 +237,6 @@ const SwipeButton = ({setIsSwipeActive}) => {
 
 const styles = StyleSheet.create({
   container: {
-    // position: 'absolute',
-    // bottom : 0 ,
     width: '100%',
     alignItems: 'center',
   },
@@ -141,7 +271,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontFamily: 'Raleway-Bold',
-    // zIndex: 1, // Keeps text visible above the overlay
   },
 });
 

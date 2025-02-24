@@ -8,8 +8,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import axios from 'axios';
-
 import Snackbar from 'react-native-snackbar';
+import BASE_URL from '../url';
 
 const ForgotPassword = ({navigation}) => {
   // const BASE_URL = process.env.BASE_URL;
@@ -17,7 +17,6 @@ const ForgotPassword = ({navigation}) => {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handlePasswordResetRequest = async () => {
-    setIsVerifying(true);
     if (!email) {
       Snackbar.show({
         text: 'Email cannot be empty!',
@@ -25,10 +24,10 @@ const ForgotPassword = ({navigation}) => {
         backgroundColor: '#D9534F',
         textColor: '#fff',
       });
-      setIsVerifying(false);
       return;
     }
-
+    
+    setIsVerifying(true);
     Snackbar.show({
       text: 'Sending OTP...',
       duration: Snackbar.LENGTH_SHORT,
@@ -37,17 +36,17 @@ const ForgotPassword = ({navigation}) => {
     });
 
     try {
-      // const response = await axios.post(
-      //   `${BASE_URL}/send-otp`,
-      //   {email},
-      //   {
-      //     validateStatus: function (status) {
-      //       return status < 500;
-      //     },
-      //   },
-      // );
+      const response = await axios.post(
+        `${BASE_URL}/send-otp`,
+        {email},
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
-      if (true) {
+      if (response.data.success) {
         //response.data.success
         Snackbar.show({
           text: 'OTP sent to your email!',
@@ -56,8 +55,8 @@ const ForgotPassword = ({navigation}) => {
           textColor: '#fff',
         });
         setTimeout(() => {
-          // navigation.replace('OTPVerification', {email});
-          navigation.replace('ResetPassword', {email});
+          navigation.replace('OTPVerification', {email});
+          // navigation.replace('ResetPassword', {email});
         }, 500);
       } else {
         Snackbar.show({
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    fontFamily: 'Raleway-Regular',
+    fontFamily: 'Raleway-Italic',
     textAlign: 'center',
     color: '#384959',
   },

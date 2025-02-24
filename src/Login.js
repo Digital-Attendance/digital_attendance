@@ -150,7 +150,7 @@ export default function Login({navigation}) {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.container1}>
-            <Image style={styles.image} source={require('../assets/nit.png')} />
+            <Image style={styles.image} source={require('../assets/login.gif')} />
           </View>
 
           <View style={styles.container2}>
@@ -236,26 +236,27 @@ const styles = StyleSheet.create({
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   container1: {
     height: windowHeight / 3,
     alignItems: 'center',
     justifyContent: 'center',
+    // overflow: 'hidden',
   },
   image: {
-    width: windowWidth - 60,
-    height: windowHeight / 6,
+    // width: windowWidth - 60,
+    height: windowHeight / 2,
     resizeMode: 'contain',
-    alignSelf: 'center',
     borderRadius: 10,
   },
   container2: {},
   loginText: {
-    fontSize: 30,
-    color: '#88BDF2',
-    fontFamily: 'Raleway-Bold',
-    marginBottom: 30,
+    fontSize: 40,
+    color: '#2B8781',
+    fontFamily: 'Teko-Bold',
+    marginVertical: 15,
+    textAlign: 'center',
   },
   headContainer: {
     alignItems: 'flex-start',

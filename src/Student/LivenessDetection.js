@@ -32,7 +32,7 @@ const LivenessDetection = () => {
   );
 
   const format = useCameraFormat(cameraDevice, [
-    {photoResolution: {width: 432, height: 576}},
+    {photoResolution: {width: 640, height: 480}},
   ]);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const LivenessDetection = () => {
       setPhotoDataUri(null);
 
       try {
-        const photo = await cameraRef.current.takePhoto({quality: 85});
+        const photo = await cameraRef.current.takePhoto({quality: 10});
         const timestamp = new Date().getTime();
         const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
 
@@ -60,6 +60,14 @@ const LivenessDetection = () => {
         console.log('Photo captured', newPath);
         const base64String = await RNFS.readFile(newPath, 'base64');
         setBase64Data(base64String);
+        setTimeout(()=>{
+          Snackbar.show({
+            text: 'Photo captured successfully!',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: '#5CB85C',
+            textColor: '#fff',
+          });
+        }, 5000);
       } catch (error) {
         Snackbar.show({
           text: 'Error capturing photo.',
@@ -149,9 +157,10 @@ const LivenessDetection = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Liveness Detection</Text>
+      <Text style={styles.title}>Liveness Detection</Text>
+      <Text style={styles.subtitle}>"Time for a quick identity check—let’s make sure it’s really you!"</Text>
       <View style={styles.cameraContainer}>
-        {hasPermission && cameraDevice && !photoDataUri ? (
+        {hasPermission && cameraDevice ? (
           <Camera
             style={styles.camera}
             device={cameraDevice}
@@ -159,12 +168,6 @@ const LivenessDetection = () => {
             format={format}
             isActive={true}
             photo={true}
-          />
-        ) : photoDataUri ? (
-          <Image
-            key={photoDataUri}
-            source={{uri: photoDataUri}}
-            style={styles.photoPreview}
           />
         ) : (
           <ActivityIndicator size="large" color="#007BFF" />
@@ -189,6 +192,7 @@ const LivenessDetection = () => {
         )}
         <TouchableOpacity
           style={styles.registerButton}
+          disabled={isVerifying}
           onPress={handleVerification}>
           <Text style={styles.buttonText}>Check Liveness</Text>
         </TouchableOpacity>
@@ -204,7 +208,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#F8F9FA',
   },
-  header: {fontSize: 22, fontWeight: 'bold', marginBottom: 20, color: '#333'},
+  title: {
+    fontSize: 28,
+    fontFamily: 'Raleway-Bold',
+    marginVertical: 5,
+  },
+  subtitle: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    fontSize: 12,
+    fontFamily: 'Raleway-Italic',
+    textAlign: 'center',
+    color: '#384959',
+  },
   cameraContainer: {
     width: '90%',
     height: 400,

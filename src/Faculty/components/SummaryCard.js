@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     left: 10,
   },
+  
   statsContainer: {
     flexDirection: 'row',
     width: '100%',

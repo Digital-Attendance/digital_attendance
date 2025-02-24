@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   StyleSheet,
   Text,
@@ -51,6 +51,7 @@ const Register = ({navigation}) => {
     // if (field === 'email') {
     //   setEmailError(!value.endsWith('.nits.ac.in'));
     // }
+    
   };
 
   const handleNext = useCallback(async () => {

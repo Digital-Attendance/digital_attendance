@@ -10,6 +10,9 @@ import {
   Defs,
 } from 'react-native-svg';
 
+import Performers from '../../Faculty/components/Performers';
+import performerImages from '../../DummyDatas/performersImages';
+
 const getProgressColor = progress => {
   if (progress <= 50) return ['#ff0000', '#ff4d4d'];
   if (progress <= 75) return ['#f9ed39', '#f9f9ae'];
@@ -18,7 +21,7 @@ const getProgressColor = progress => {
 };
 
 const SummaryCard = () => {
-  const [progress, setProgress] = useState(40);
+  const [progress, setProgress] = useState(90);
   const progressColors = getProgressColor(progress);
 
   const CircularProgress = useMemo(
@@ -84,29 +87,56 @@ const SummaryCard = () => {
             </View>
           </View>
           <View style={styles.statsDataContainer}>
-            <View style={styles.statsData}>
-              <MaterialCommunityIcons name="google-classroom" size={20} color={'#7ddb0a'} />
-              <View style={styles.statsBox}>
-                <Text style={styles.statsTitle}>Total</Text>
-                <Text style={styles.statsText}>20</Text>
-              </View>
-            </View>
-            <View style={styles.statsData}>
-              <MaterialCommunityIcons
-                name="account-check"
-                size={20}
-                color={'orange'}
+            <View style={styles.statsIconContainer}>
+              <LottieView
+                source={require('../../../assets/animations/person_3.json')}
+                autoPlay
+                loop
+                style={{width: 50, height: 50}}
               />
-              <View style={styles.statsBox}>
-                <Text style={styles.statsTitle}>Present</Text>
-                <Text style={styles.statsText}>14</Text>
+
+              <LottieView
+                source={require('../../../assets/animations/classes_3.json')}
+                autoPlay
+                loop
+                style={{width: 45, height: 45}}
+              />
+            </View>
+            <View style={styles.statsDataSubContainer}>
+              <View style={styles.statsDataSubContainerBox}>
+                <Text style={styles.statsDataSubContainerBoxTitle}>
+                  Present
+                </Text>
+
+                <Text style={styles.statsDataSubContainerBoxText}>41</Text>
+              </View>
+              <View style={styles.statsDataSubContainerBox}>
+                <Text style={styles.statsDataSubContainerBoxTitle}>
+                  Classes
+                </Text>
+
+                <Text style={styles.statsDataSubContainerBoxText}>45</Text>
               </View>
             </View>
           </View>
         </View>
-        <View style={styles.lastClassContainer}>
-          <Text style={styles.lastClassText}>Last class</Text>
-          <Text style={styles.lastClassDate}>20/02/2025</Text>
+        <View style={styles.sectionContainer}>
+          <View style={styles.performanceContainer}>
+            <Text style={styles.performanceTitle}>Leaderboard</Text>
+            <Performers performers={performerImages} />
+          </View>
+          <View style={styles.lastClassContainer}>
+            <View style={styles.lastClassIconContainer}>
+              <LottieView
+                source={require('../../../assets/animations/lastclass.json')}
+                autoPlay
+                loop
+                style={{width: 20, height: 20}}
+              />
+              <Text style={styles.lastClassTitle}>Last Class</Text>
+            </View>
+            <Text style={styles.lastClassDateText}>12/02/2025</Text>
+          </View>
         </View>
       </LinearGradient>
     </View>
@@ -153,12 +183,16 @@ const styles = StyleSheet.create({
   buttonContainer: {
     left: 10,
   },
+
   statsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     width: '100%',
-    marginTop: 10,    
+    alignItems: 'center',
     padding: 10,
+    // justifyContent: 'space-evenly',
+    // marginTop: 15,
+    // borderWidth: 1,
+    // borderColor: '#f00',
   },
   progressContainer: {
     marginRight: 40,
@@ -182,42 +216,83 @@ const styles = StyleSheet.create({
     fontFamily: 'Raleway-SemiBold',
   },
   statsDataContainer: {
-    flex: 1,
     flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    top: -10,
+    // padding: 10,
+    // borderWidth: 1,
+    // borderColor: '#f0f',
+  },
+  statsIconContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
+    // flexDirection: 'row',
+    // borderWidth: 1,
+    // padding: 5,
+    // borderColor: '#f0f',
   },
-  statsData: {
-    flexDirection: 'row',
+  statsDataSubContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
+    // flexDirection: 'row',
+    // borderWidth: 1,
+    // padding: 5,
+    // borderColor: '#f0f',
   },
-  statsBox: {
+  statsDataSubContainerBox: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 5,
+    // justifyContent: 'center',
+    // justifyContent: 'space-around',
+    // padding: 8,
+    // borderWidth: 1,
   },
-  statsTitle: {
+  statsDataSubContainerBoxTitle: {
     fontSize: 8,
     color: '#fff',
     fontFamily: 'Raleway-Bold',
   },
-  statsText: {
+  statsDataSubContainerBoxText: {
     fontSize: 16,
     color: '#ffea00',
     fontFamily: 'Raleway-Bold',
   },
-  lastClassText: {
-    alignSelf: 'flex-end',
-    fontSize: 10,
-    color: '#fff',
-    fontFamily: 'Raleway-SemiBold',
-    marginTop: 5,
+  sectionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // marginTop: 10,
+    // borderWidth: 1,
+    // borderColor: '#f00',
   },
-  lastClassDate: {
-    alignSelf: 'flex-end',
+  performanceContainer: {
+    // borderWidth: 1,
+    // borderColor: '#fff',
+  },
+
+  performanceTitle: {
+    fontSize: 12,
+    color: '#fff',
+    fontFamily: 'Raleway-Bold',
+  },
+  lastClassContainer: {
+    alignItems: 'flex-end',
+    // borderWidth: 1,
+    // borderColor: '#fff',
+    // justifyContent : 'flex-end'
+  },
+  lastClassIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lastClassTitle: {
+    fontSize: 12,
+    color: '#fff',
+    fontFamily: 'Raleway-Bold',
+  },
+  lastClassDateText: {
     fontSize: 8,
     color: '#ffea00',
     fontFamily: 'Raleway-Bold',
+    textAlign: 'right',
   },
 });

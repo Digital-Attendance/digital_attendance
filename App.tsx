@@ -10,31 +10,27 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AsyncStorageProvider } from "./src/Context";
 
-import Login from "./src/Login";
-import Register from "./src/Register";
-import Start from "./src/Start";
-import Faculty from "./src/Faculty/Faculty";
-import Student from "./src/Student/MainPage";
-import AttendanceStudent from "./src/AttendanceStudent";
-import Registration_FaceVerification from "./src/Registration_FaceVerification";
-
 const Stack = createStackNavigator();
 
-import { enableScreens } from 'react-native-screens';
+import SplashScreen from "./src/SplashScreen"
+import Start from "./src/Start";
+import Login from "./src/Login";
+import Register from "./src/Register";
+import AttendanceStudent from "./src/AttendanceStudent";
+import Registration_FaceVerification from "./src/Registration_FaceVerification";
 import ForgotPassword from "./src/ForgotPassword";
 import PasswordResetOTPVerification from "./src/PasswordResetOtpVerification";
 import ResetPassword from "./src/ResetPassword";
 import EmailOTPVerification from "./src/EmailOTPVerification";
+
 import Faculty_Home from "./src/Faculty/Faculty_Home";
 import AttendanceScreen from "./src/Faculty/AttendanceScreen";
 import AddSubject from "./src/Faculty/AddSubject";
-import SplashScreen from "./src/SplashScreen"
 import Student_Home from "./src/Student/Student_Home";
-import SubjectOverview from "./src/Student/SubjectOverview";
 import VerifyLocation from "./src/Student/VerifyLocation";
 import LivenessDetection from "./src/Student/LivenessDetection";
+import EnrollSubject from "./src/Student/EnrollSubject";
 
-// enableScreens();
 
 const App = () => {
   return (
@@ -67,7 +63,7 @@ const App = () => {
             <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} />
             {/* Student Screens */}
             <Stack.Screen name="Student_Home" component={Student_Home} />
-            <Stack.Screen name="SubjectOverview" component={SubjectOverview} />
+            <Stack.Screen name="EnrollSubject" component={EnrollSubject} />
             <Stack.Screen name="VerifyLocation" component={VerifyLocation} />
             <Stack.Screen name="LivenessDetection" component={LivenessDetection} />
           </Stack.Navigator>

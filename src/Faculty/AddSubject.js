@@ -17,9 +17,7 @@ const AddSubject = ({ navigation }) => {
   const [form, setForm] = useState({
     subjectCode: '',
     subjectName: '',
-    credits: '',
     semester: '',
-    faculty: '',
   });
 
   const handleChange = (field, value) => {
@@ -27,9 +25,9 @@ const AddSubject = ({ navigation }) => {
   };
 
   const handleSubmit = () => {
-    const { subjectCode, subjectName, credits, semester, faculty } = form;
+    const { subjectCode, subjectName, semester } = form;
 
-    if (!subjectCode || !subjectName || !credits || !semester || !faculty) {
+    if (!subjectCode || !subjectName || !semester) {
       Snackbar.show({
         text: 'All fields are required!',
         duration: Snackbar.LENGTH_SHORT,
@@ -72,14 +70,6 @@ const AddSubject = ({ navigation }) => {
               onChangeText={text => handleChange('subjectName', text)}
             />
 
-            <Text style={styles.label}>Credits</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={form.credits}
-              onChangeText={text => handleChange('credits', text)}
-            />
-
             <Text style={styles.label}>Semester</Text>
             <TextInput
               style={styles.input}
@@ -88,12 +78,6 @@ const AddSubject = ({ navigation }) => {
               onChangeText={text => handleChange('semester', text)}
             />
 
-            <Text style={styles.label}>Faculty Name</Text>
-            <TextInput
-              style={styles.input}
-              value={form.faculty}
-              onChangeText={text => handleChange('faculty', text)}
-            />
 
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
               <Text style={styles.buttonText}>Submit</Text>

@@ -13,8 +13,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const {width} = Dimensions.get('window');
-const BUTTON_WIDTH = width - 40;
-const BUTTON_HEIGHT = 50;
+const BUTTON_WIDTH = width - 10;
+const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
 const AttendanceButton = ({setIsSwipeActive}) => {
@@ -76,7 +76,7 @@ const AttendanceButton = ({setIsSwipeActive}) => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#007FFF', '#6CB4EE']}
+        colors={['#004d4d', '#007a7a']}
         start={{x: 0, y: 0.5}}
         end={{x: 1, y: 0.5}}
         style={styles.track}>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   track: {
     width: BUTTON_WIDTH,
     height: BUTTON_HEIGHT,
-    borderRadius: BUTTON_HEIGHT / 2,
+    borderRadius: BUTTON_HEIGHT *0.4 ,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -112,19 +112,19 @@ const styles = StyleSheet.create({
   button: {
     width: BUTTON_HEIGHT,
     height: BUTTON_HEIGHT,
-    borderRadius: BUTTON_HEIGHT / 2,
+    borderRadius: BUTTON_HEIGHT * 0.4,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     position: 'absolute',
     left: 0,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: 'rgba(255, 255, 255, 0.26)',
   },
   text: {
     color: 'white',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily : 'Raleway-Bold',
     position: 'absolute',
   },
 });

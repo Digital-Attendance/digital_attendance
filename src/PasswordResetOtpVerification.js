@@ -33,25 +33,23 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
     }
     return () => clearInterval(interval);
   }, [timer]);
-  
 
   const focusNextInput = (index, value) => {
     const newOtp = [...otp];
     newOtp[index] = value;
-  
+
     setOtp(newOtp);
-  
+
     if (value.length === 1 && index < 3) {
       inputs.current[index + 1]?.focus();
     } else if (value.length === 0 && index > 0) {
       inputs.current[index - 1]?.focus();
     }
   };
-  
 
   const handleVerify = useCallback(() => {
     const otpCode = otp.join('');
-    
+
     if (otpCode.length < 4) {
       Snackbar.show({
         text: 'Please enter a valid OTP code!',
@@ -61,15 +59,15 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
       });
       return;
     }
-  
+
     setTimeout(async () => {
       try {
         const response = await axios.post(
           `${BASE_URL}/verify-otp`,
-          { email, otp: otpCode },
-          { validateStatus: status => status < 500 }
+          {email, otp: otpCode},
+          {validateStatus: status => status < 500},
         );
-  
+
         if (response.data.success) {
           Snackbar.show({
             text: 'OTP verified successfully!',
@@ -78,7 +76,7 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
             textColor: '#fff',
           });
           setTimeout(() => {
-            navigation.replace('ResetPassword', { email });
+            navigation.replace('ResetPassword', {email});
           }, 1000);
         } else {
           Snackbar.show({
@@ -97,22 +95,20 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
         });
       }
     }, 500);
-  
   }, [otp, email, navigation]);
-  
 
   const handleResend = useCallback(() => {
     if (isResendDisabled) return;
     setIsResendDisabled(true);
-  
+
     setTimeout(async () => {
       try {
         const response = await axios.post(
           `${BASE_URL}/send-otp`,
-          { email },
-          { validateStatus: status => status < 500 }
+          {email},
+          {validateStatus: status => status < 500},
         );
-  
+
         if (response.data.success) {
           Snackbar.show({
             text: 'OTP sent to your email!',
@@ -138,54 +134,62 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
         });
       }
     }, 500);
-  
   }, [email, isResendDisabled]);
-  
 
   return (
     // <SafeAreaView style={styles.container}>
-      <TouchableOpacity onPress={Keyboard.dismiss} style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>OTP Verification</Text>
-          <Text style={styles.subtitle}>
-            Please Check Your Email To See The Verification Code
-          </Text>
-          <Text style={styles.label}>OTP Code</Text>
-          <View style={styles.otpContainer}>
-            {otp.map((digit, index) => (
-              <TextInput
-                key={index}
-                style={styles.otpInput}
-                keyboardType="number-pad"
-                maxLength={1}
-                onChangeText={value => focusNextInput(index, value)}
-                value={digit}
-                ref={el => (inputs.current[index] = el)}
-              />
-            ))}
-          </View>
+    <TouchableOpacity onPress={Keyboard.dismiss} style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>OTP Verification</Text>
+        <Text style={styles.subtitle}>
+          Please Check Your Email To See The Verification Code
+        </Text>
+        <Text style={styles.label}>OTP Code</Text>
+        <View style={styles.otpContainer}>
+          {otp.map((digit, index) => (
+            <TextInput
+              key={index}
+              style={styles.otpInput}
+              keyboardType="number-pad"
+              maxLength={1}
+              onChangeText={value => focusNextInput(index, value)}
+              value={digit}
+              ref={el => (inputs.current[index] = el)}
+            />
+          ))}
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
-            <Text style={styles.verifyButtonText}>Verify</Text>
-          </TouchableOpacity>
-          
-          <View style={styles.resendContainer}>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
+          <Text style={styles.verifyButtonText}>Verify</Text>
+        </TouchableOpacity>
+
+        <View style={styles.resendContainer}>
+          <View style={styles.resendButtonContainer}>
+            <Text style={styles.resendTitle}>Didn't receive the code?</Text>
             <TouchableOpacity
               onPress={handleResend}
               disabled={isResendDisabled}
-              style={[
-                styles.resendButton,
-                isResendDisabled && styles.resendButtonDisabled,
-              ]}>
-              <Text style={styles.resendText}>Resend Code</Text>
+              style={[styles.resendButton]}>
+              <Text
+                style={[
+                  styles.resendText,
+                  isResendDisabled && styles.resendButtonDisabledText,
+                ]}>
+                Resend Code
+              </Text>
             </TouchableOpacity>
+          </View>
+          <View style={styles.timerContainer}>
             <Text style={styles.timerText}>
-              {timer > 0 ? `00:${timer.toString().padStart(2, '0')}` : ''}
+              {timer > 0
+                ? `Resend Code in 00:${timer.toString().padStart(2, '0')}`
+                : ''}
             </Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
     // </SafeAreaView>
   );
 };
@@ -196,7 +200,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   content: {
     // flex: 1,
@@ -258,41 +261,46 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 50,
     marginTop: 10,
-    width: '90%', 
-  },  
+    width: '90%',
+  },
   verifyButtonText: {
     color: '#fff',
     fontSize: 13,
     textAlign: 'center',
   },
   resendContainer: {
+    marginTop: 20,
     alignItems: 'center',
-    // borderWidth: 1,
+  },
+  resendButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  resendTitle: {
+    fontSize: 14,
+    fontFamily: 'Raleway-Medium',
+    color: '#000',
   },
   resendButton: {
-    backgroundColor: '#fff',
-    borderColor: '#1E293B',
-    borderWidth: 1,
-    borderRadius: 50,
-    marginVertical: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
-  resendButtonDisabled: {
-    backgroundColor: '#bdc3c7',
-    borderColor: '#bdc3c7',
-    borderWidth: 0.5,
+  resendButtonDisabled: {},
+  resendButtonDisabledText: {
+    color: 'rgba(0, 0, 0, 0.24)',
   },
   resendText: {
-    color: '#000',
+    color: '#ccc',
     fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Raleway',
+    fontFamily: 'Raleway-Light',
     textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  timerContainer: {
+    marginTop: 5,
   },
   timerText: {
-    fontSize: 14,
-    fontFamily: 'Raleway',
+    fontSize: 12,
+    fontFamily: 'Raleway-Regular',
     color: '#000',
   },
 });
