@@ -8,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import {format, subMonths, eachDayOfInterval} from 'date-fns';
+import {format, parseISO, subMonths, eachDayOfInterval} from 'date-fns';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Leaderboard from './components/Leaderboard';
@@ -17,15 +17,39 @@ import students from '../DummyDatas/studentsData';
 import DeleteSubject from './components/DeleteSubject';
 import DownloadButton from './components/DownloadButton';
 
-const AttendanceScreen = () => {
+const AttendanceScreen = ({route}) => {
+  const {subjectRecord} = route.params;
+  const {
+    attendanceRecords,
+    averageAttendanceLast5Days,
+    lastClassDate,
+    numberOfClassesTaken,
+    numberOfStudents,
+    subjectCode,
+    subjectName,
+  } = subjectRecord;
   const [selectedDate, setSelectedDate] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
   const today = new Date();
   const dates = useMemo(() => {
-    const startDate = subMonths(today, 4);
-    return eachDayOfInterval({start: startDate, end: today}).reverse();
-  }, []);
+    const uniqueDates = [];
+
+    attendanceRecords.forEach(record => {
+      const dateObj = parseISO(record.date); // Convert ISO string to Date object
+      const dateStr = format(dateObj, 'yyyy-MM-dd'); // Keep consistent format (ISO-like)
+
+      if (!uniqueDates.includes(dateStr)) {
+        uniqueDates.push(dateStr);
+      }
+    });
+
+    // Sort dates in descending order (most recent first)
+    uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+
+    // Convert back to Date objects
+    return uniqueDates.map(dateStr => parseISO(dateStr));
+  }, [attendanceRecords]);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible(prev => !prev);
@@ -50,9 +74,9 @@ const AttendanceScreen = () => {
             style={styles.subjectName}
             numberOfLines={1}
             ellipsizeMode="tail">
-            Introduction to Computing
+            {subjectName}
           </Text>
-          <Text style={styles.subjectCode}>CS101</Text>
+          <Text style={styles.subjectCode}>{subjectCode}</Text>
         </View>
         <TouchableOpacity style={styles.deleteButton} onPress={toggleMenu}>
           <MaterialCommunityIcons
@@ -83,7 +107,8 @@ const AttendanceScreen = () => {
           data={dates}
           keyExtractor={date => date.toString()}
           renderItem={({item: date}) => {
-            const isSelected = selectedDate?.getTime() === date.getTime();
+            const isSelected =
+              selectedDate?.toDateString() === date.toDateString();
             return (
               <View style={{alignItems: 'center'}}>
                 <TouchableOpacity
@@ -113,7 +138,10 @@ const AttendanceScreen = () => {
       {selectedDate === null ? (
         <Leaderboard students={students} />
       ) : (
-        <Records selectedDate={format(selectedDate, 'dd MMM yyyy')} />
+        <Records
+          attendanceRecords={attendanceRecords}
+          selectedDate={format(selectedDate, 'dd MMM yyyy')}
+        />
       )}
       <DownloadButton />
     </View>

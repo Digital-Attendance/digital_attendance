@@ -17,11 +17,13 @@ import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {BASE_URL} from '@env';
+
 const LivenessDetection = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [responseText, setResponseText] = useState(null);
+  const [base64Data, setBase64Data] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -42,31 +44,76 @@ const LivenessDetection = () => {
     })();
   }, []);
 
-  const takephoto = async () => {
-    if (cameraRef.current && hasPermission) {
-      setIsCapturing(true);
+  // const markAttendance = async () => {
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/attendance/mark`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({email}),
+  //     });
+  //   }catch(error){
+  //     console.error(error);
+  //   }
 
-      try {
-        const photo = await cameraRef.current.takePhoto({quality: 10});
-        const timestamp = new Date().getTime();
-        const newPath = `${RNFS.DocumentDirectoryPath}/photo_${timestamp}.jpg`;
-        await RNFS.moveFile(photo.path, newPath);
-        const base64String = await RNFS.readFile(newPath, 'base64');
-        setBase64Data(base64String);
-      } catch (error) {
+  const checkEmbedding = async () => {
+    if (!base64Data) {
+      Snackbar.show({
+        text: 'Please capture a photo first.',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      return;
+    }
+    console.log('Checking embedding...');
+    try {
+      const res = await fetch(
+        'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            email: 'piyush21_ug@ei.nits.ac.in',
+            image: base64Data,
+            registration: false,
+          }),
+        },
+      );
+
+      console.log(res);
+      const resultJSON = await res.json();
+      console.log(resultJSON);
+
+      if (res.status !== 200) {
         Snackbar.show({
-          text: error,
+          text: resultJSON.error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
         });
-      } finally {
-        setIsCapturing(false);
+        return;
       }
+
+      Snackbar.show({
+        text: resultJSON.message,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#5CB85C',
+        textColor: '#fff',
+      });
+      // await markAttendance();
+    } catch (error) {
+      Snackbar.show({
+        text: error,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
     }
   };
 
-  const handleVerification = async () => {
+  const checkLiveness = async () => {
     setIsVerifying(true);
     let base64Data = '';
     if (cameraRef.current && hasPermission) {
@@ -78,6 +125,7 @@ const LivenessDetection = () => {
         await RNFS.moveFile(photo.path, newPath);
         const base64String = await RNFS.readFile(newPath, 'base64');
         base64Data = base64String;
+        setBase64Data(base64String);
       } catch (error) {
         Snackbar.show({
           text: error,
@@ -111,19 +159,24 @@ const LivenessDetection = () => {
       try {
         responseData = await response.json();
       } catch (jsonError) {
-        throw new Error('Invalid JSON response from server');
+        console.log(jsonError);
       }
-
-      console.log('API Response:', responseData);
-
-      let message = 'Invalid response';
+      let message = "";
       if (
         responseData.label !== undefined &&
         responseData.confidence !== undefined
       ) {
-        message = `Liveness: ${
-          responseData.label
-        }, Confidence: ${responseData.confidence.toFixed(2)}`;
+        if (responseData.label === 1 && responseData.confidence > 0.7) {
+          Snackbar.show({
+            text: `Liveness: ${
+              responseData.label
+            }, Confidence: ${responseData.confidence.toFixed(2)}`,
+            duration: Snackbar.LENGTH_LONG,
+            backgroundColor: '#5CB85C',
+            textColor: '#fff',
+          });
+          await checkEmbedding();
+        }
       } else if (responseData.Message) {
         message = responseData.Message;
       }
@@ -131,7 +184,7 @@ const LivenessDetection = () => {
       setResponseText(message);
 
       Snackbar.show({
-        text: message,
+        text: responseText,
         duration: Snackbar.LENGTH_LONG,
         backgroundColor: '#5CB85C',
         textColor: '#fff',
@@ -156,7 +209,7 @@ const LivenessDetection = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Icon name="webcam" size={30} color="#2B8781" />
-        <Text style={styles.title}>Liveness Detection</Text>
+        <Text style={styles.title}>Mark Attendance</Text>
       </View>
       <Text style={styles.subtitle}>
         "Time for a quick identity check—let’s make sure it’s really you!"
@@ -179,7 +232,7 @@ const LivenessDetection = () => {
         <TouchableOpacity
           style={styles.liveButton}
           disabled={isVerifying}
-          onPress={handleVerification}>
+          onPress={checkLiveness}>
           <Text style={styles.buttonText}>Check Liveness</Text>
         </TouchableOpacity>
       </View>
@@ -191,10 +244,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     backgroundColor: '#1E1E1E',
   },
   header: {
+    marginTop: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',

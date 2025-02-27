@@ -1,5 +1,5 @@
-import React, {useState, useRef} from 'react';
-import {Vibration, Text, StyleSheet, Dimensions} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {Vibration, Text, StyleSheet, Dimensions, Platform} from 'react-native';
 import {
   GestureHandlerRootView,
   Gesture,
@@ -11,28 +11,28 @@ import Animated, {
   withTiming,
   runOnJS,
   interpolate,
-  interpolateColor,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+import axios from 'axios';
 
 import BASE_URL from '../../../url';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-import {Snackbar} from 'react-native-paper';
+import Snackbar from 'react-native-snackbar';
 
 const {width} = Dimensions.get('window');
 const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
-const SwipeButton = ({setIsSwipeActive}) => {
+const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
   const translateX = useSharedValue(0);
   const [isStarted, setIsStarted] = useState(false);
-  const watchId = useRef(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
-
+  const watchId = useRef(null);
+  
   const fetchLocation = async () => {
     setErrorMsg('');
     setCurrentLocation(null);
@@ -60,50 +60,65 @@ const SwipeButton = ({setIsSwipeActive}) => {
       }
     } catch (error) {
       setErrorMsg('Permission error: ' + error.message);
-      return;
+      return null;
     }
 
     if (!hasPermission) {
       setErrorMsg('Location permission denied');
-      return;
+      return null;
     }
 
     console.log('Requesting location update...');
+
     if (watchId.current !== null) {
       Geolocation.clearWatch(watchId.current);
       console.log('Clearing previous location watch...');
     }
 
-    watchId.current = Geolocation.watchPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setCurrentLocation({latitude, longitude});
-        console.log('Current Location:', latitude, longitude);
-      },
-      error => {
-        console.log('Location Error:', error.message);
-        setErrorMsg('Location Error: ' + error.message);
-      },
-      {enableHighAccuracy: false, distanceFilter: 1},
-    );
+    return new Promise((resolve, reject) => {
+      watchId.current = Geolocation.watchPosition(
+        position => {
+          const {latitude, longitude} = position.coords;
+          setCurrentLocation({latitude, longitude});
+          console.log('Fetched Location:', latitude, longitude);
+
+          
+          if (watchId.current !== null) {
+            Geolocation.clearWatch(watchId.current);
+            watchId.current = null;
+            console.log('Location fetched, stopping watchPosition.');
+          }
+
+          resolve({latitude, longitude});
+        },
+        error => {
+          console.log('Location Error:', error.message);
+          setErrorMsg('Location Error: ' + error.message);
+          reject(error);
+        },
+        {enableHighAccuracy: false, distanceFilter: 1},
+      );
+    });
   };
 
   const startAttendance = async () => {
-    await fetchLocation();
-
-    Snackbar.show({
-      text: 'Starting attendance...',
-      duration: Snackbar.LENGTH_SHORT,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
-    });
-
     try {
+      const location = await fetchLocation();
+            
+      Snackbar.show({
+        text: 'Starting attendance...',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#2B8781',
+        textColor: '#fff',
+      });
+
       const response = await axios.post(
-        `${BASE_URL}/start-attendance`,
-        {email, location: currentLocation},
+        `${BASE_URL}/faculty/start-attendance`,
+        {email: userEmail, subjectCode, location : location},
         {validateStatus: status => status < 500},
       );
+
+      console.log(response)
 
       if (response.data.success) {
         Snackbar.show({
@@ -114,7 +129,7 @@ const SwipeButton = ({setIsSwipeActive}) => {
         });
       } else {
         Snackbar.show({
-          text: response.data.message,
+          text: response.data.error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -133,8 +148,6 @@ const SwipeButton = ({setIsSwipeActive}) => {
   const stopAttendance = async () => {
     setCurrentLocation(null);
     setErrorMsg('');
-    Geolocation.clearWatch(watchId.current);
-    watchId.current = null;
 
     Snackbar.show({
       text: 'Stopping attendance...',
@@ -145,10 +158,28 @@ const SwipeButton = ({setIsSwipeActive}) => {
 
     try {
       const response = await axios.post(
-        `${BASE_URL}/stop-attendance`,
-        {email},
+        `${BASE_URL}/faculty/stop-attendance`,
+        {email: userEmail,subjectCode},
         {validateStatus: status => status < 500},
       );
+
+      console.log(response)
+
+      if (response.data.success) {
+        Snackbar.show({
+          text: 'Attendance stopped successfully!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
+      } else {
+        Snackbar.show({
+          text: response.data.message,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
     } catch (error) {
       Snackbar.show({
         text: 'An error occurred while stopping attendance!',
@@ -171,14 +202,14 @@ const SwipeButton = ({setIsSwipeActive}) => {
         translateX.value = withTiming(SWIPE_RANGE, {}, () => {
           runOnJS(setIsStarted)(true);
           runOnJS(setIsSwipeActive)(true);
-          // runOnJS(startAttendance)();
+          runOnJS(startAttendance)();
           runOnJS(Vibration.vibrate)(100);
         });
       } else {
         translateX.value = withTiming(0, {}, () => {
           runOnJS(setIsStarted)(false);
           runOnJS(setIsSwipeActive)(false);
-          // runOnJS(stopAttendance)();
+          runOnJS(stopAttendance)();
           runOnJS(Vibration.vibrate)(100);
         });
       }

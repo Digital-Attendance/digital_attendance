@@ -1,9 +1,9 @@
 import React, {useState,useEffect} from 'react';
 import {View, Image, Text, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useUserContext } from './Context';
 export default function SplashScreen({navigation}) {
-
+  const {setUserEmail} = useUserContext();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
 
   useEffect(() => {
@@ -14,6 +14,7 @@ export default function SplashScreen({navigation}) {
     try {
       const token = await AsyncStorage.getItem('access_token');
       const selectedRole = await AsyncStorage.getItem('role');
+      setUserEmail(await AsyncStorage.getItem('email'));
       if (token) {
         navigation.replace(
           selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
@@ -31,7 +32,7 @@ export default function SplashScreen({navigation}) {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Digital Attendance</Text>
-      <Image source={require('../assets/splash.png')} style={styles.logo} />
+      <Image source={require('../assets/splash_black.png')} style={styles.logo} />
     </View>
   );
 }
@@ -41,10 +42,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1E1E1E',
   },
   text: {
     fontSize: 24,
+    color : '#fff',
     fontFamily: 'Monoton-Regular',
   },
   logo: {

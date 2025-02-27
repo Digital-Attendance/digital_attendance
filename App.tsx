@@ -16,7 +16,6 @@ import SplashScreen from "./src/SplashScreen"
 import Start from "./src/Start";
 import Login from "./src/Login";
 import Register from "./src/Register";
-import AttendanceStudent from "./src/AttendanceStudent";
 import Registration_FaceVerification from "./src/Registration_FaceVerification";
 import ForgotPassword from "./src/ForgotPassword";
 import PasswordResetOTPVerification from "./src/PasswordResetOtpVerification";
@@ -52,7 +51,6 @@ const App = () => {
             <Stack.Screen name="FaceVerification" component={Registration_FaceVerification} />
             {/* <Stack.Screen name="Faculty" component={Faculty} />
             <Stack.Screen name="Student" component={Student} /> */}
-            <Stack.Screen name="AttendanceStudent" component={AttendanceStudent} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="OTPVerification" component={PasswordResetOTPVerification} />
             <Stack.Screen name="EmailVerification" component={EmailOTPVerification} />

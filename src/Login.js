@@ -20,11 +20,9 @@ import Snackbar from 'react-native-snackbar';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-// const BASE_URL = process.env.BASE_URL;
-// import {BASE_URL} from '@env';
+import { useUserContext } from './Context';
 import BASE_URL from '../url';
 
 export default function Login({navigation}) {
@@ -33,6 +31,8 @@ export default function Login({navigation}) {
   const [selectedRole, setSelectedRole] = useState('Student');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [logging, setLogging] = useState(false);
+
+  const {setUserEmail} = useUserContext();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -50,14 +50,22 @@ export default function Login({navigation}) {
       duration: Snackbar.LENGTH_LONG,
       backgroundColor: '#2B8781',
       textColor: '#fff',
-    })
+    });
 
     try {
-      const response = await axios.post(`${BASE_URL}/login`, {
-        email,
-        password,
-        role: selectedRole,
-      });
+      const response = await axios.post(
+        `${BASE_URL}/login`,
+        {
+          email,
+          password,
+          role: selectedRole,
+        },
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        },
+      );
 
       if (response.status === 200) {
         await AsyncStorage.setItem('access_token', response.data.access_token);
@@ -65,6 +73,8 @@ export default function Login({navigation}) {
           'refresh_token',
           response.data.refresh_token,
         );
+        setUserEmail(email);
+        await AsyncStorage.setItem('email', email);
         await AsyncStorage.setItem('role', selectedRole);
         Snackbar.show({
           text: 'Login Successful!',
@@ -137,7 +147,7 @@ export default function Login({navigation}) {
           textColor: '#fff',
         });
       }
-    }finally{
+    } finally {
       setLogging(false);
     }
   };
@@ -149,7 +159,10 @@ export default function Login({navigation}) {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.container1}>
-            <Image style={styles.image} source={require('../assets/login.gif')} />
+            <Image
+              style={styles.image}
+              source={require('../assets/login.gif')}
+            />
           </View>
 
           <View style={styles.container2}>
@@ -217,7 +230,10 @@ export default function Login({navigation}) {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity disabled={logging} style={styles.submitButton} onPress={handleLogin}>
+            <TouchableOpacity
+              disabled={logging}
+              style={styles.submitButton}
+              onPress={handleLogin}>
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
           </View>
@@ -303,14 +319,14 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: 'Raleway-Medium',
   },
-  
+
   label: {
     fontSize: 10,
     fontFamily: 'Raleway-Medium',
     paddingVertical: 5,
     color: 'grey',
   },
-  passwordContainer: { 
+  passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',

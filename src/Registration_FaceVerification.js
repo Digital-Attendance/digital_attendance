@@ -164,7 +164,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
     };
 
     try {
-      const response = await fetch(`${BASE_URL}/register-student`, {
+      const response = await fetch(`${BASE_URL}/register`, {
         method: 'POST',
         body: JSON.stringify(requestBody),
         headers: {
@@ -200,7 +200,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Face Verification</Text>
+      <Text style={styles.header}>Face Registration</Text>
       <View style={styles.cameraContainer}>
         {hasPermission && cameraDevice && !photoDataUri ? (
           <Camera

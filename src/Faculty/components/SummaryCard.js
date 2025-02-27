@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo,useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
@@ -13,9 +13,14 @@ import {
 } from 'react-native-svg';
 import Performers from './Performers';
 import performerImages from '../../DummyDatas/performersImages';
-const SummaryCard = () => {
-  const [progress, setProgress] = useState(70);
+const SummaryCard = ({subjectRecord}) => {
+  
+  const [progress, setProgress] = useState(0);
   const navigation = useNavigation();
+  useEffect(() => {
+    setProgress(subjectRecord.averageAttendanceLast5Days);
+  }, [subjectRecord.averageAttendanceLast5Days]);
+  
 
   const CircularProgress = useMemo(
     () => (
@@ -46,12 +51,12 @@ const SummaryCard = () => {
       <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('AttendanceScreen');
+            navigation.navigate('AttendanceScreen',{subjectRecord});
           }}
           style={styles.subjectName_ButtonContainer}>
           <View style={styles.subjectNameContainer}>
-            <Text style={styles.subjectName}>CS101</Text>
-            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.subjectSubName}>Introduction to Computing</Text>
+            <Text style={styles.subjectName}>{subjectRecord.subjectCode}</Text>
+            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.subjectSubName}>{subjectRecord.subjectName}</Text>
           </View>
           <View style={styles.buttonContainer}>
             <View>
@@ -98,14 +103,14 @@ const SummaryCard = () => {
                   Students
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>41</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.numberOfStudents}</Text>
               </View>
               <View style={styles.statsDataSubContainerBox}>
                 <Text style={styles.statsDataSubContainerBoxTitle}>
                   Classes
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>2</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.numberOfClassesTaken}</Text>
               </View>
             </View>
           </View>
@@ -125,7 +130,7 @@ const SummaryCard = () => {
               />
               <Text style={styles.lastClassTitle}>Last Class</Text>
             </View>
-            <Text style={styles.lastClassDateText}>12/02/2025</Text>
+            <Text style={styles.lastClassDateText}>{subjectRecord.lastClassDate}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -141,20 +146,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    // borderWidth: 1,
-    // borderColor: '#f00',
   },
 
-  // backgroundCard1: {
-  //   position: 'absolute',
-  //   top: 12,
-  //   width: '100%',
-  //   height: '100%',
-  //   backgroundColor: 'skyblue',
-  //   opacity: 0.85,
-  //   borderRadius: 30,
-  //   zIndex: 0,
-  // },
 
   mainCard: {
     width: '100%',
@@ -170,13 +163,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // borderWidth: 1,
   },
   subjectNameContainer: {
-    // marginTop: 10,
-    // borderWidth: 1,
-    // marginRight : 50,
-    // borderColor: '#0f0',
+
   },
   subjectName: {
     fontSize: 32,
@@ -198,20 +187,14 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     padding: 10,
-    // justifyContent: 'space-evenly',
-    // marginTop: 15,
-    // borderWidth: 1,
-    // borderColor: '#f00',
   },
 
   progressContainer: {
     marginRight: 40,
-    // borderWidth: 1,
   },
   progressSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    // borderWidth: 1,
   },
   progressText: {
     position: 'absolute',
@@ -238,32 +221,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     top: -10,
-    // padding: 10,
-    // borderWidth: 1,
-    // borderColor: '#f0f',
   },
   statsIconContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
-    // flexDirection: 'row',
-    // borderWidth: 1,
-    // padding: 5,
-    // borderColor: '#f0f',
   },
   statsDataSubContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
-    // flexDirection: 'row',
-    // borderWidth: 1,
-    // padding: 5,
-    // borderColor: '#f0f',
   },
   statsDataSubContainerBox: {
     alignItems: 'center',
-    // justifyContent: 'center',
-    // justifyContent: 'space-around',
-    // padding: 8,
-    // borderWidth: 1,
   },
   statsDataSubContainerBoxTitle: {
     fontSize: 8,
@@ -278,13 +246,6 @@ const styles = StyleSheet.create({
   sectionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // marginTop: 10,
-    // borderWidth: 1,
-    // borderColor: '#f00',
-  },
-  performanceContainer: {
-    // borderWidth: 1,
-    // borderColor: '#fff',
   },
 
   performanceTitle: {
@@ -294,9 +255,6 @@ const styles = StyleSheet.create({
   },
   lastClassContainer: {
     alignItems: 'flex-end',
-    // borderWidth: 1,
-    // borderColor: '#fff',
-    // justifyContent : 'flex-end'
   },
   lastClassIconContainer: {
     flexDirection: 'row',

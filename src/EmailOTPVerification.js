@@ -159,6 +159,7 @@ const EmailOTPVerification = ({navigation, route}) => {
           backgroundColor: '#5CB85C',
           textColor: '#fff',
         });
+        navigation.navigate('SplashScreen');
       } else {
         const errorText = await response.text();
         Snackbar.show({

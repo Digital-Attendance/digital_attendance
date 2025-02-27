@@ -9,14 +9,16 @@ import {
 import CheckBox from '@react-native-community/checkbox';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import attendanceData from '../../DummyDatas/attendanceData';
-import {parse, format} from 'date-fns';
+import {parseISO, format} from 'date-fns';
+import BASE_URL from '../../../url';
+import Snackbar from 'react-native-snackbar';
 
-const Records = ({selectedDate}) => {
-  const formattedDate = format(
-    parse(selectedDate, 'dd MMM yyyy', new Date()),
-    'yyyy-MM-dd',
-  );
-  const students = attendanceData[formattedDate] || [];
+const Records = ({selectedDate, attendanceRecords}) => {
+  const recordForDate = attendanceRecords.find(record => {
+    return format(parseISO(record.date), 'yyyy-MM-dd') === selectedDate;
+  });
+
+  const students = recordForDate ? recordForDate.presentStudents : [];
   const [isEditing, setIsEditing] = useState(false);
   const [updatedAttendance, setUpdatedAttendance] = useState([...students]);
 
@@ -37,6 +39,35 @@ const Records = ({selectedDate}) => {
     });
   };
 
+
+  const saveChanges = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/faculty/update-attendance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: recordForDate ? recordForDate.date : null,
+          updatedAttendance: updatedAttendance,
+        }),
+      });
+      if (response.ok) {
+        Snackbar.show({
+          text: 'Attendance updated successfully',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        setIsEditing(false);
+      } else {
+        Snackbar.show({
+          text: 'An error occurred while updating attendance',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.recordHeader}>
@@ -55,15 +86,16 @@ const Records = ({selectedDate}) => {
           {updatedAttendance.length === 0 ? (
             <Text style={styles.noRecords}>No records available</Text>
           ) : (
-            updatedAttendance.map((student, index) => (
-              
+            updatedAttendance.map((entry, index) => (
               <View key={index} style={styles.studentListCard}>
-                <Text style={styles.scholarId}>{student.scholarID}</Text>
-                <Text style={styles.name}>{student.name}</Text>
+                <Text style={styles.scholarId}>
+                  {entry.student.registration_number}
+                </Text>
+                <Text style={styles.name}>{entry.student.name}</Text>
                 {isEditing ? (
                   <TouchableOpacity onPress={() => toggleAttendance(index)}>
                     <CheckBox
-                      value={student.present}
+                      value={entry.present}
                       disabled={true}
                       tintColors={{true: '#3FFF00', false: '#E25822'}}
                     />
@@ -72,7 +104,7 @@ const Records = ({selectedDate}) => {
                   <View
                     style={[
                       styles.statusIndicator,
-                      {backgroundColor: student.present ? '#3FFF00' : 'red'},
+                      {backgroundColor: entry.present ? '#3FFF00' : 'red'},
                     ]}
                   />
                 )}
@@ -81,6 +113,11 @@ const Records = ({selectedDate}) => {
           )}
         </ScrollView>
       </View>
+      {isEditing && (
+        <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -156,6 +193,18 @@ const styles = StyleSheet.create({
     color: 'gray',
     textAlign: 'center',
     marginTop: 8,
+  },
+  saveButton: {
+    backgroundColor: '#3FFF00',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  saveButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontFamily: 'Raleway-Bold',
   },
 });
 

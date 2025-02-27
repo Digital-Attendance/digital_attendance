@@ -1,2 +1,2 @@
-const BASE_URL = 'http://192.168.211.168:5000';
+const BASE_URL = 'https://fe1a-103-119-241-92.ngrok-free.app';
 export default BASE_URL;
