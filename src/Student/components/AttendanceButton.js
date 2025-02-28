@@ -17,7 +17,7 @@ const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
-const AttendanceButton = ({setIsSwipeActive}) => {
+const AttendanceButton = ({subjectCode}) => {
   const navigation = useNavigation();
   const translateX = useRef(new Animated.Value(0)).current;
   const [isMarking, setIsMarking] = useState(false);
@@ -27,8 +27,7 @@ const AttendanceButton = ({setIsSwipeActive}) => {
     Vibration.vibrate(100);
     setIsMarking(false);
     resetButton();
-    navigation.navigate('VerifyLocation');
-    console.log('Attendance Given');
+    navigation.navigate('LivenessDetection', {subjectCode});
   };
 
   const resetButton = () => {

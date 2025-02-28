@@ -1,45 +1,49 @@
-import React, { useState } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import {Dropdown} from 'react-native-element-dropdown';
 import Snackbar from 'react-native-snackbar';
+import { useUserContext } from '../Context';
+import BASE_URL from '../../url';
+const EnrollSubject = ({navigation, route}) => {
+  const {userEmail} = useUserContext();
 
-const departments = {
-  CSE: {
-    1: ['CS101', 'CS102'],
-    2: ['CS201', 'CS202'],
-    3: ['CS301', 'CS302'],
-    4: ['CS401', 'CS402'],
-    5: ['CS501', 'CS502'],
-    6: ['CS601', 'CS602'],
-    7: ['CS701', 'CS702'],
-    8: ['CS801', 'CS802'],
-  },
-  ECE: {
-    1: ['EC101', 'EC102'],
-    2: ['EC201', 'EC202'],
-    3: ['EC301', 'EC302'],
-    4: ['EC401', 'EC402'],
-    5: ['EC501', 'EC502'],
-    6: ['EC601', 'EC602'],
-    7: ['EC701', 'EC702'],
-    8: ['EC801', 'EC802'],
-  },
-  // Add more departments as needed
-};
-
-const EnrollSubject = ({ navigation }) => {
-  const [semester, setSemester] = useState(null);
+  const [subjectData, setSubjectData] = useState({});
+  const [course, setCourse] = useState(null);
   const [department, setDepartment] = useState(null);
+  const [semester, setSemester] = useState(null);
   const [subject, setSubject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [enroll, setEnroll] = useState(false);
 
-  const handleSubmit = () => {
-    if (!semester || !department || !subject) {
+  
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/subjects`);
+        const data = await response.json();
+        setSubjectData(data);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        Snackbar.show({
+          text: error,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
+      setLoading(false);
+    };
+    fetchSubjects();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!course || !department || !semester || !subject) {
       Snackbar.show({
         text: 'All fields are required!',
         duration: Snackbar.LENGTH_SHORT,
@@ -49,44 +53,89 @@ const EnrollSubject = ({ navigation }) => {
       return;
     }
     setEnroll(true);
-    Snackbar.show({
-      text: 'Subject enrolled successfully!',
-      duration: Snackbar.LENGTH_SHORT,
-      backgroundColor: '#5CB85C',
-      textColor: '#fff',
-    });
+    try {
+      const response = await fetch(`${BASE_URL}/student/enroll`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          studentEmail:userEmail,
+          subjectCode: subject,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Snackbar.show({
+          text: data.message || 'Subject enrolled successfully!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#5CB85C',
+          textColor: '#fff',
+        });
+        navigation.goBack();
+      } else {
+        Snackbar.show({
+          text: data.error || 'Enrollment failed!',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: '#D9534F',
+          textColor: '#fff',
+        });
+      }
+    } catch (error) {
+      Snackbar.show({
+        text: error,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+    }
     setEnroll(false);
-    navigation.goBack();
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2B8781" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enroll in a Subject</Text>
+
       
-      <Text style={styles.label}>Select Semester</Text>
+      <Text style={styles.label}>Select Course</Text>
       <Dropdown
-        data={[...Array(8).keys()].map(i => ({ label: `Semester ${i + 1}`, value: i + 1 }))}
+        data={Object.keys(subjectData).map(item => ({
+          label: item,
+          value: item,
+        }))}
         labelField="label"
         valueField="value"
-        value={semester}
+        value={course}
         onChange={item => {
-          setSemester(item.value);
+          setCourse(item.value);
           setDepartment(null);
+          setSemester(null);
           setSubject(null);
         }}
         style={styles.dropdown}
       />
 
-      {semester && (
+      {/* Department Dropdown */}
+      {course && (
         <>
           <Text style={styles.label}>Select Department</Text>
           <Dropdown
-            data={Object.keys(departments).map(dep => ({ label: dep, value: dep }))}
+            data={Object.keys(subjectData[course]).map(item => ({
+              label: item,
+              value: item,
+            }))}
             labelField="label"
             valueField="value"
             value={department}
             onChange={item => {
               setDepartment(item.value);
+              setSemester(null);
               setSubject(null);
             }}
             style={styles.dropdown}
@@ -94,11 +143,36 @@ const EnrollSubject = ({ navigation }) => {
         </>
       )}
 
-      {department && semester && (
+      {/* Semester Dropdown */}
+      {department && (
         <>
-          <Text style={styles.label}>Select Subject</Text>
+          <Text style={styles.label}>Select Semester</Text>
           <Dropdown
-            data={departments[department]?.[semester]?.map(sub => ({ label: sub, value: sub }))}
+            data={Object.keys(subjectData[course][department]).map(item => ({
+              label: `Semester ${item}`,
+              value: item,
+            }))}
+            labelField="label"
+            valueField="value"
+            value={semester}
+            onChange={item => {
+              setSemester(item.value);
+              setSubject(null);
+            }}
+            style={styles.dropdown}
+          />
+        </>
+      )}
+
+      {/* Subject Code Dropdown */}
+      {semester && (
+        <>
+          <Text style={styles.label}>Select Subject Code</Text>
+          <Dropdown
+            data={subjectData[course][department][semester].map(item => ({
+              label: item,
+              value: item,
+            }))}
             labelField="label"
             valueField="value"
             value={subject}
@@ -108,7 +182,10 @@ const EnrollSubject = ({ navigation }) => {
         </>
       )}
 
-      <TouchableOpacity style={styles.submitButton} disabled={enroll} onPress={handleSubmit}>
+      <TouchableOpacity
+        style={styles.submitButton}
+        disabled={enroll}
+        onPress={handleSubmit}>
         <Text style={styles.buttonText}>Enroll</Text>
       </TouchableOpacity>
     </View>

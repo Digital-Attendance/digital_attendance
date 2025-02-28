@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {View, Dimensions, StyleSheet, Text} from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import axios from 'axios';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import SummaryCard from './SummaryCard';
 import graphValues from '../../DummyDatas/graphDatas';
@@ -76,18 +77,27 @@ const SubjectCard = () => {
               inactiveDotScale={0.6}
             />
             <AttendanceGraph barData={barData} />
+            <SwipeButton
+              setIsSwipeActive={setIsSwipeActive}
+              userEmail={userEmail}
+              subjectCode={subjects[activeIndex]?.subjectCode}
+            />
           </>
         ) : (
           <View style={styles.noSubjectContainer}>
-            <Text style={styles.noSubjectText}>No subjects available</Text>
+            <Text style={styles.noSubjectText}>No subjects available.</Text>
+            <Text style={styles.noSubjectText}>
+              Tap the{' '}
+              <MaterialCommunityIcons
+                name="shape-square-plus"
+                size={30}
+                color="#009f9f"
+              />{' '}
+              to add subjects.
+            </Text>
           </View>
         )}
       </View>
-      <SwipeButton
-        setIsSwipeActive={setIsSwipeActive}
-        userEmail={userEmail}
-        subjectCode={subjects[activeIndex]?.subjectCode}
-      />
     </View>
   );
 };
@@ -109,7 +119,8 @@ const styles = StyleSheet.create({
   },
   noSubjectText: {
     fontSize: 18,
-    color: 'gray',
+    color: '#aaa',
+    fontFamily: 'Raleway-Regular',
   },
 });
 

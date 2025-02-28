@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
+import BASE_URL from '../../url';
 
 const FIXED_LOCATION = {
   latitude: 24.7565,
@@ -22,14 +24,39 @@ const FIXED_LOCATION = {
 
 const THRESHOLD_METERS = 0.01;
 
-const VerifyLocation = () => {
+const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [facultyLocation, setFacultyLocation] = useState(null);
 
   const navigation = useNavigation();
+  const {subjectCode} = route.params;
+
+  const fetchFacultyLocation = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/faculty/location/${subjectCode}`,
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
+      console.log(response);
+      if (response.data.success) {
+        setFacultyLocation(response.data.location);
+      } else if (!response.data.success) {
+        setErrorMsg('Attendance not started yet');
+        setVerifying(false);
+      }
+    } catch (error) {
+      setErrorMsg(error.message);
+      setVerifying(false);
+    }
+  };
 
   const checkGPSStatus = async () => {
     Geolocation.getCurrentPosition(
@@ -50,6 +77,9 @@ const VerifyLocation = () => {
 
   const verifyLocation = async () => {
     await checkGPSStatus();
+    await fetchFacultyLocation();
+    if (!facultyLocation) return;
+    
     setVerifying(true);
     setErrorMsg('');
     setLocationVerified(null);
@@ -103,15 +133,15 @@ const VerifyLocation = () => {
         console.log('Current Location:', latitude, longitude);
 
         const isVerified =
-          Math.abs(FIXED_LOCATION.latitude - latitude) < THRESHOLD_METERS &&
-          Math.abs(FIXED_LOCATION.longitude - longitude) < THRESHOLD_METERS;
+          Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
+          Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
         setLocationVerified(isVerified);
         console.log('Location Verified:', isVerified);
         setVerifying(false);
 
-        if(isVerified) {
+        if (isVerified) {
           setTimeout(() => {
-            navigation.replace('LivenessDetection');
+            navigation.replace('LivenessDetection',{subjectCode});
           }, 2000);
         }
       },
@@ -172,6 +202,10 @@ const VerifyLocation = () => {
           <Paragraph style={styles.locationText}>
             Your Location: {currentLocation.latitude.toFixed(6)},{' '}
             {currentLocation.longitude.toFixed(6)}
+          </Paragraph>
+          <Paragraph style={styles.locationText}>
+            Faculty's Location: {facultyLocation.latitude.toFixed(6)},{' '}
+            {facultyLocation.longitude.toFixed(6)}
           </Paragraph>
         </View>
       )}

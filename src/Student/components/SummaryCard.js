@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
@@ -20,8 +20,18 @@ const getProgressColor = progress => {
   return ['#86e83c', '#2bb539'];
 };
 
-const SummaryCard = () => {
-  const [progress, setProgress] = useState(90);
+const SummaryCard = ({subjectRecord}) => {
+  console.log(subjectRecord);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+      let attendedClasses = subjectRecord.attendedClasses;
+      let totalClasses = subjectRecord.totalClasses;
+      let percentage = 0;
+      if (totalClasses > 0) {
+        percentage = (attendedClasses / totalClasses) * 100;
+      }
+      setProgress(percentage);
+    }, []);
   const progressColors = getProgressColor(progress);
 
   const CircularProgress = useMemo(
@@ -56,12 +66,12 @@ const SummaryCard = () => {
       <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
         <TouchableOpacity style={styles.subjectContainer}>
           <View style={styles.subjectInfo}>
-            <Text style={styles.subjectCode}>CS101</Text>
+            <Text style={styles.subjectCode}>{subjectRecord.subjectCode}</Text>
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
               style={styles.subjectTitle}>
-              Introduction to Computing
+              {subjectRecord.subjectName}
             </Text>
           </View>
           <View style={styles.buttonContainer}>
@@ -108,14 +118,14 @@ const SummaryCard = () => {
                   Present
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>41</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.attendedClasses}</Text>
               </View>
               <View style={styles.statsDataSubContainerBox}>
                 <Text style={styles.statsDataSubContainerBoxTitle}>
                   Classes
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>45</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.totalClasses}</Text>
               </View>
             </View>
           </View>
@@ -135,7 +145,7 @@ const SummaryCard = () => {
               />
               <Text style={styles.lastClassTitle}>Last Class</Text>
             </View>
-            <Text style={styles.lastClassDateText}>12/02/2025</Text>
+            <Text style={styles.lastClassDateText}>{subjectRecord.lastClassDate}</Text>
           </View>
         </View>
       </LinearGradient>

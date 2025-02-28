@@ -10,8 +10,6 @@ const Student_Home = () => {
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <Navbar/>
       <SubjectCard/>
-      {/* <AttendanceGraph/>
-      <AttendanceButton/> */}
     </ScrollView>
   )
 }

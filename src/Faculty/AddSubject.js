@@ -32,6 +32,20 @@ const semesterOptions = {
   PhD: 6,
 };
 
+const departments = [
+  {label: 'Civil Engineering', value: 'Civil Engineering'},
+  {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'},
+  {label: 'Electrical Engineering', value: 'Electrical Engineering'},
+  {label: 'Electronics and Communication Engineering', value: 'Electronics and Communication Engineering'},
+  {label: 'Electronics and Instrumentation Engineering', value: 'Electronics and Instrumentation Engineering'},
+  {label: 'Mechanical Engineering', value: 'Mechanical Engineering'},
+  {label: 'Mathematics', value: 'Mathematics'},
+  {label: 'Physics', value: 'Physics'},
+  {label: 'Chemistry', value: 'Chemistry'},
+  {label: 'Humanities', value: 'Humanities'},
+  {label: 'Management Studies', value: 'Management Studies'},
+];
+
 const AddSubject = ({navigation}) => {
   const {userEmail} = useUserContext();
   console.log(userEmail);
@@ -41,6 +55,7 @@ const AddSubject = ({navigation}) => {
     subjectName: '',
     course: null,
     semester: null,
+    department: null,
   });
 
   const handleChange = (field, value) => {
@@ -48,9 +63,9 @@ const AddSubject = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-    const {subjectCode, subjectName, course, semester} = form;
+    const {subjectCode, subjectName, course, semester, department} = form;
 
-    if (!subjectCode || !subjectName || !course || !semester) {
+    if (!subjectCode || !subjectName || !course || !semester || !department) {
       Snackbar.show({
         text: 'All fields are required!',
         duration: Snackbar.LENGTH_SHORT,
@@ -71,6 +86,7 @@ const AddSubject = ({navigation}) => {
           subjectName,
           course,
           semester,
+          department,
           facultyEmail: userEmail,
         }),
       });
@@ -128,6 +144,17 @@ const AddSubject = ({navigation}) => {
               onChangeText={text => handleChange('subjectName', text)}
             />
 
+            <Text style={styles.label}>Department</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={departments}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Department"
+              value={form.department}
+              onChange={item => handleChange('department', item.value)}
+            />
+
             <Text style={styles.label}>Choose Course</Text>
             <Dropdown
               style={styles.dropdown}
@@ -172,6 +199,8 @@ const AddSubject = ({navigation}) => {
     </KeyboardAvoidingView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
