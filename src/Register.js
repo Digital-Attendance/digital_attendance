@@ -130,7 +130,6 @@ const Register = ({navigation}) => {
         });
         setTimeout(() => {
           navigation.replace('EmailVerification', {form});
-          // navigation.replace('FaceVerification', {form});
         }, 500);
       } else {
         Snackbar.show({
@@ -414,7 +413,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   tooltip: {
     padding: 10,
@@ -423,7 +421,6 @@ const styles = StyleSheet.create({
     width: 140,
     backgroundColor: 'rgba(0, 0, 0, 0.58)',
     borderRadius: 5,
-    // elevation: 3,
   },
   tooltipText: {
     color: '#fff',

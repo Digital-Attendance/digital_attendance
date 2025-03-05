@@ -3,7 +3,7 @@ import React from 'react';
 import {BarChart} from 'react-native-gifted-charts';
 
 const AttendanceGraph = ({barData}) => {
-  console.log(barData);
+  console.log('barData:', barData);
   return (
     <View style={styles.graphContainer}>
       <Text style={styles.graphTitle}>Head-Count</Text>
@@ -29,7 +29,10 @@ const AttendanceGraph = ({barData}) => {
           rulesColor={'#3F3F3F'}
         />
       ) : (
-        <Text style={styles.noData}>No attendance data available</Text>
+        <View
+          style={{alignItems: 'center', height: 260, justifyContent: 'center'}}>
+          <Text style={styles.noData}>No attendance data available</Text>
+        </View>
       )}
     </View>
   );

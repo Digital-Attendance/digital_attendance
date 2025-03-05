@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {View, Dimensions, StyleSheet, Text} from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import axios from 'axios';
+import {format} from 'date-fns';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import SummaryCard from './SummaryCard';
-import graphValues from '../../DummyDatas/graphDatas';
 import AttendanceGraph from './AttendanceGraph';
 import SwipeButton from './SwipeButton';
 
@@ -14,7 +14,7 @@ import BASE_URL from '../../../url';
 
 const {width} = Dimensions.get('window');
 
-const SubjectCard = () => {
+const SubjectCard = ({refresh}) => {
   const {userEmail} = useUserContext();
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,33 +22,42 @@ const SubjectCard = () => {
   const [barData, setBarData] = useState([]);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
 
-  useEffect(() => {
+  const fetchSubjects = () => {
     axios
       .get(`${BASE_URL}/faculty/dashboard/${userEmail}`)
       .then(response => {
         setSubjects(response.data);
-        console.log('response.data:', response.data);
         if (response.data.length > 0) {
           updateGraphData(0, response.data);
         }
       })
       .catch(error => console.log(error));
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchSubjects();
+  }, [refresh]);
 
   const updateGraphData = (index, data = subjects) => {
     if (data.length > 0) {
-      const attendanceRecords = data[index].attendanceRecords || [];
-      const formattedData = attendanceRecords.map(record => ({
-        date: new Date(record.date).toLocaleDateString(),
-        studentsPresent: record.presentStudents.length,
-      }));
+      const attendanceRecords = data[index]?.attendanceRecords || [];
+      const formattedData = attendanceRecords.map(record => {
+        const istDate = new Date(record.date);
+        istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
+
+        return {
+          date: format(istDate, 'd MMM'),
+          studentsPresent: record.Students.filter(student => student.present)
+            .length,
+        };
+      });
       setBarData(formattedData);
     }
   };
 
-  const renderItem = ({item, index}) => (
-    <SummaryCard key={index} index={index} subjectRecord={item} />
-  );
+  const renderItem = useCallback(({item, index}) => {
+    return <SummaryCard key={index} subjectRecord={item} />;
+  }, []);
 
   return (
     <View style={styles.wrapper}>
@@ -76,8 +85,9 @@ const SubjectCard = () => {
               inactiveDotOpacity={0.4}
               inactiveDotScale={0.6}
             />
-            <AttendanceGraph barData={barData} />
+            <AttendanceGraph key={activeIndex} barData={barData} />
             <SwipeButton
+              key={activeIndex}
               setIsSwipeActive={setIsSwipeActive}
               userEmail={userEmail}
               subjectCode={subjects[activeIndex]?.subjectCode}

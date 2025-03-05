@@ -8,13 +8,10 @@ import {
   Keyboard,
 } from 'react-native';
 import axios from 'axios';
-// import {BASE_URL} from '@env';
 import BASE_URL from '../url';
 import Snackbar from 'react-native-snackbar';
 
 const PasswordResetOTPVerification = ({navigation, route}) => {
-  // const BASE_URL = process.env.BASE_URL;
-
   const {email} = route.params;
   const [otp, setOtp] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(30);
@@ -202,7 +199,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    // flex: 1,
     alignItems: 'center',
     paddingTop: 20,
     width: '100%',
@@ -250,11 +246,9 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   buttonContainer: {
-    // flex: 1,
     paddingTop: 20,
     alignItems: 'center',
     width: '100%',
-    // borderWidth: 1,
   },
   verifyButton: {
     backgroundColor: '#2B8781',

@@ -48,8 +48,7 @@ const departments = [
 
 const AddSubject = ({navigation}) => {
   const {userEmail} = useUserContext();
-  console.log(userEmail);
-
+  
   const [form, setForm] = useState({
     subjectCode: '',
     subjectName: '',
@@ -76,7 +75,7 @@ const AddSubject = ({navigation}) => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/add-subject`, {
+      const response = await fetch(`${BASE_URL}/faculty/add-subject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +110,6 @@ const AddSubject = ({navigation}) => {
         });
       }
     } catch (error) {
-      console.error('Error adding subject:', error);
       Snackbar.show({
         text: 'Network error. Please try again!',
         duration: Snackbar.LENGTH_SHORT,

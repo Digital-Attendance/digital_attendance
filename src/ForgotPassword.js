@@ -12,7 +12,6 @@ import Snackbar from 'react-native-snackbar';
 import BASE_URL from '../url';
 
 const ForgotPassword = ({navigation}) => {
-  // const BASE_URL = process.env.BASE_URL;
   const [email, setEmail] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -47,7 +46,6 @@ const ForgotPassword = ({navigation}) => {
       );
 
       if (response.data.success) {
-        //response.data.success
         Snackbar.show({
           text: 'OTP sent to your email!',
           duration: Snackbar.LENGTH_SHORT,
@@ -56,7 +54,6 @@ const ForgotPassword = ({navigation}) => {
         });
         setTimeout(() => {
           navigation.replace('OTPVerification', {email});
-          // navigation.replace('ResetPassword', {email});
         }, 500);
       } else {
         Snackbar.show({
@@ -129,7 +126,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    // fontWeight: '500',
     fontFamily: 'Raleway-Bold',
     marginTop: 50,
     marginBottom: 10,
@@ -141,7 +137,6 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 0.5,
-    // padding: 10,
     paddingHorizontal: 5,
     height: 45,
     fontSize: 12,
@@ -163,7 +158,6 @@ const styles = StyleSheet.create({
   sendOtpButtonText: {
     fontSize: 13,
     fontFamily: 'Raleway-Bold',
-    // fontWeight: '600',
     color: '#fff',
   },
 });

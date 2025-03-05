@@ -1,11 +1,9 @@
-import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
+import React, {useState, useRef, useEffect, useMemo} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Image,
-  Linking,
   ActivityIndicator,
 } from 'react-native';
 import {
@@ -15,19 +13,20 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
-import {useUserContext} from '../Context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
+import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
 
 const LivenessDetection = ({route}) => {
   const {subjectCode} = route.params;
   const {userEmail} = useUserContext();
+  const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [responseText, setResponseText] = useState(null);
-  // const [base64Data, setBase64Data] = useState(null);
+  const [livenessStatus, setLivenessStatus] = useState(null);
+  const [faceVerificationStatus, setFaceVerificationStatus] = useState(null);
+  const [attendanceStatus, setAttendanceStatus] = useState(null);
 
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
@@ -43,50 +42,38 @@ const LivenessDetection = ({route}) => {
   useEffect(() => {
     (async () => {
       const permission = await Camera.requestCameraPermission();
-      if (permission === 'denied') await Linking.openSettings();
       setHasPermission(permission === 'granted');
     })();
   }, []);
 
   const markAttendance = async () => {
+    setAttendanceStatus('loading');
     try {
-      const response = await fetch(
-        `${BASE_URL}/student/mark-attendance`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({studentEmail: userEmail, subjectCode}),
-        },
-        {
-          validateStatus: function (status) {
-            return status < 500;
-          },
-        },
-      );
+      const response = await fetch(`${BASE_URL}/student/mark-attendance`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentEmail: userEmail, subjectCode}),
+      });
       const data = await response.json();
+      setAttendanceStatus(response.status === 200 ? 'success' : 'failed');
+      Snackbar.show({
+        text: response.status === 200 ? data.message : data.error,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: response.status === 200 ? '#5CB85C' : '#D9534F',
+        textColor: '#fff',
+      });
       if (response.status === 200) {
-        Snackbar.show({
-          text: data.message,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
-        });
-      } else {
-        Snackbar.show({
-          text: data.error,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
-        });
+        setTimeout(() => {
+          navigation.navigate('Student_Home');
+        }, 500);
       }
     } catch (error) {
-      console.log(error);
+      setAttendanceStatus('failed');
     }
   };
 
   const verifyFace = async base64Data => {
+    setFaceVerificationStatus('loading');
     try {
       const response = await fetch(
         'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
@@ -101,35 +88,20 @@ const LivenessDetection = ({route}) => {
         },
       );
       const resultJSON = await response.json();
-      console.log(resultJSON);
+      setFaceVerificationStatus(response.status === 200 ? 'success' : 'failed');
       if (response.status === 200) {
-        Snackbar.show({
-          text: resultJSON.message,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
-        });
         await markAttendance();
-      } else {
-        Snackbar.show({
-          text: resultJSON.error,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
-        });
       }
     } catch (error) {
-      Snackbar.show({
-        text: error.message,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
-      });
+      setFaceVerificationStatus('failed');
     }
   };
 
   const checkLiveness = async () => {
     if (!cameraRef.current || !hasPermission) return;
+    setLivenessStatus('loading');
+    setFaceVerificationStatus(null);
+    setAttendanceStatus(null);
     setIsProcessing(true);
     try {
       const photo = await cameraRef.current.takePhoto({quality: 10});
@@ -143,32 +115,16 @@ const LivenessDetection = ({route}) => {
         },
       );
       const responseData = await response.json();
-      console.log(responseData);
+      setLivenessStatus(
+        responseData.label === 1 && responseData.confidence > 0.7
+          ? 'success'
+          : 'failed',
+      );
       if (responseData.label === 1 && responseData.confidence > 0.7) {
-        Snackbar.show({
-          text: `Liveness Confirmed (Confidence: ${responseData.confidence.toFixed(
-            2,
-          )})`,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
-        });
         await verifyFace(base64Data);
-      } else {
-        Snackbar.show({
-          text: 'Liveness Check Failed',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
-        });
       }
     } catch (error) {
-      Snackbar.show({
-        text: error.Message,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
-      });
+      setLivenessStatus('failed');
     } finally {
       setIsProcessing(false);
     }
@@ -200,10 +156,52 @@ const LivenessDetection = ({route}) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.liveButton}
-          disabled={isVerifying}
+          disabled={isProcessing}
           onPress={checkLiveness}>
-          <Text style={styles.buttonText}>Check Liveness</Text>
+          <Text style={styles.buttonText}>Mark</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.statusContainer}>
+        {livenessStatus === 'loading' && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Checking Liveness...</Text>
+            <ActivityIndicator size="small" color="#fff" />
+          </View>
+        )}
+        {livenessStatus === 'success' && (
+          <Text style={styles.successText}>Liveness Confirmed ✅</Text>
+        )}
+        {livenessStatus === 'failed' && (
+          <Text style={styles.failedText}>Liveness Check Failed ❌</Text>
+        )}
+
+        {faceVerificationStatus === 'loading' && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>
+              Checking Face Verification...
+            </Text>
+            <ActivityIndicator size="small" color="#fff" />
+          </View>
+        )}
+        {faceVerificationStatus === 'success' && (
+          <Text style={styles.successText}>Face Verified ✅</Text>
+        )}
+        {faceVerificationStatus === 'failed' && (
+          <Text style={styles.failedText}>Face Verification Failed ❌</Text>
+        )}
+
+        {attendanceStatus === 'loading' && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Marking Attendance...</Text>
+            <ActivityIndicator size="small" color="#fff" />
+          </View>
+        )}
+        {attendanceStatus === 'success' && (
+          <Text style={styles.successText}>Attendance Marked ✅</Text>
+        )}
+        {attendanceStatus === 'failed' && (
+          <Text style={styles.failedText}>Attendance Failed ❌</Text>
+        )}
       </View>
     </View>
   );
@@ -213,7 +211,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    // justifyContent: 'center',
     backgroundColor: '#1E1E1E',
   },
   header: {
@@ -270,6 +267,20 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   buttonText: {color: '#FFF', fontSize: 16, fontWeight: 'bold'},
+  statusContainer: {marginTop: 20},
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginVertical: 5,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 14,
+    fontStyle: 'italic',
+  },
+  successText: {color: '#5CB85C', fontSize: 16, marginTop: 5},
+  failedText: {color: '#D9534F', fontSize: 16, marginTop: 5},
 });
 
 export default LivenessDetection;

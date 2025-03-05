@@ -2,6 +2,7 @@ import React, {useState,useEffect} from 'react';
 import {View, Image, Text, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUserContext } from './Context';
+import Snackbar from 'react-native-snackbar';
 export default function SplashScreen({navigation}) {
   const {setUserEmail} = useUserContext();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
@@ -14,8 +15,9 @@ export default function SplashScreen({navigation}) {
     try {
       const token = await AsyncStorage.getItem('access_token');
       const selectedRole = await AsyncStorage.getItem('role');
-      setUserEmail(await AsyncStorage.getItem('email'));
+      const userEmail = await AsyncStorage.getItem('email');
       if (token) {
+        setUserEmail(userEmail);
         navigation.replace(
           selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
         );
@@ -23,7 +25,10 @@ export default function SplashScreen({navigation}) {
         navigation.replace('Start');
       }
     } catch (error) {
-      console.log('Error checking session:', error);
+      Snackbar.show({
+        text: error,
+        duration: Snackbar.LENGTH_SHORT,
+      });
     } finally {
       setIsSessionChecked(true);
     }

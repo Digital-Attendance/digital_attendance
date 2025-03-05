@@ -86,7 +86,7 @@ export default function Login({navigation}) {
         setTimeout(() => {
           setEmail('');
           setPassword('');
-          navigation.navigate(
+          navigation.replace(
             selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
           );
         }, 500);
@@ -257,10 +257,8 @@ const styles = StyleSheet.create({
     height: windowHeight / 3,
     alignItems: 'center',
     justifyContent: 'center',
-    // overflow: 'hidden',
   },
   image: {
-    // width: windowWidth - 60,
     height: windowHeight / 2,
     resizeMode: 'contain',
     borderRadius: 10,
@@ -299,8 +297,6 @@ const styles = StyleSheet.create({
   roleButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    // height: 30,
-    // width: 80,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -331,7 +327,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: 45,
-    // padding: 10,
     borderWidth: 0.5,
     borderColor: '#ccc',
     borderRadius: 10,

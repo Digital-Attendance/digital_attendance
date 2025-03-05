@@ -8,48 +8,66 @@ import {
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import attendanceData from '../../DummyDatas/attendanceData';
-import {parseISO, format} from 'date-fns';
+import {format} from 'date-fns';
 import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
 
-const Records = ({selectedDate, attendanceRecords}) => {
+const convertUTCtoIST = utcDate => {
+  const istDate = new Date(utcDate);
+  istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
+  return format(istDate, 'yyyy-MM-dd');
+};
+
+const Records = ({selectedDate, attendanceRecords, subjectCode}) => {
   const recordForDate = attendanceRecords.find(record => {
-    return format(parseISO(record.date), 'yyyy-MM-dd') === selectedDate;
+    return convertUTCtoIST(record.date) === selectedDate;
   });
 
-  const students = recordForDate ? recordForDate.presentStudents : [];
+  const students = recordForDate ? recordForDate.Students : [];
   const [isEditing, setIsEditing] = useState(false);
   const [updatedAttendance, setUpdatedAttendance] = useState([...students]);
 
   useEffect(() => {
-    console.log('Formatted Date:', formattedDate);
     setUpdatedAttendance([...students]);
-  }, [formattedDate]);
+  }, [selectedDate]);
 
   const toggleEditing = () => {
     setIsEditing(!isEditing);
   };
 
   const toggleAttendance = index => {
-    setUpdatedAttendance(prevState => {
-      return prevState.map((student, i) =>
+    setUpdatedAttendance(prevState =>
+      prevState.map((student, i) =>
         i === index ? {...student, present: !student.present} : student,
-      );
-    });
+      ),
+    );
   };
-
 
   const saveChanges = async () => {
     try {
+      if (!recordForDate || !recordForDate.date) {
+        Snackbar.show({
+          text: 'No attendance record found for this date',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return;
+      }
+
       const response = await fetch(`${BASE_URL}/faculty/update-attendance`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          date: recordForDate ? recordForDate.date : null,
-          updatedAttendance: updatedAttendance,
+          subjectCode,
+          date: recordForDate.date,
+          updatedAttendance: updatedAttendance.map(({_id, present}) => ({
+            _id,
+            present,
+          })),
         }),
       });
+
+      const data = await response.json();
+
       if (response.ok) {
         Snackbar.show({
           text: 'Attendance updated successfully',
@@ -58,13 +76,16 @@ const Records = ({selectedDate, attendanceRecords}) => {
         setIsEditing(false);
       } else {
         Snackbar.show({
-          text: 'An error occurred while updating attendance',
+          text: data.error || 'An error occurred while updating attendance',
           duration: Snackbar.LENGTH_SHORT,
         });
       }
     } catch (error) {
       console.error('Error updating attendance:', error);
-      
+      Snackbar.show({
+        text: 'Network error. Please try again.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
     }
   };
 
@@ -72,11 +93,18 @@ const Records = ({selectedDate, attendanceRecords}) => {
     <View style={styles.container}>
       <View style={styles.recordHeader}>
         <Text style={styles.title}>Records</Text>
-        <TouchableOpacity style={styles.addButton} onPress={toggleEditing}>
+        {isEditing && (
+          <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
+            <MaterialCommunityIcons name="check" size={20} color="green" />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={[styles.addButton, isEditing && {backgroundColor: 'red'}]}
+          onPress={toggleEditing}>
           <MaterialCommunityIcons
             name={isEditing ? 'close' : 'pencil'}
             size={20}
-            color="#004d4d"
+            color="#000"
           />
         </TouchableOpacity>
       </View>
@@ -88,10 +116,8 @@ const Records = ({selectedDate, attendanceRecords}) => {
           ) : (
             updatedAttendance.map((entry, index) => (
               <View key={index} style={styles.studentListCard}>
-                <Text style={styles.scholarId}>
-                  {entry.student.registration_number}
-                </Text>
-                <Text style={styles.name}>{entry.student.name}</Text>
+                <Text style={styles.scholarId}>{entry.scholarID}</Text>
+                <Text style={styles.name}>{entry.name}</Text>
                 {isEditing ? (
                   <TouchableOpacity onPress={() => toggleAttendance(index)}>
                     <CheckBox
@@ -113,11 +139,6 @@ const Records = ({selectedDate, attendanceRecords}) => {
           )}
         </ScrollView>
       </View>
-      {isEditing && (
-        <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -132,10 +153,11 @@ const styles = StyleSheet.create({
   recordHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
   title: {
-    width: '90%',
+    width: '80%',
     color: '#fff',
     fontSize: 28,
     fontFamily: 'Teko-Bold',
@@ -148,6 +170,15 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     height: 30,
     width: 30,
+  },
+  saveButton: {
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 30,
+    height: 30,
+    width: 30,
+    marginRight: 10,
   },
   scrollContainer: {
     height: 450,
@@ -184,7 +215,7 @@ const styles = StyleSheet.create({
     width: '40%',
   },
   statusIndicator: {
-    width: 2,
+    width: 10,
     height: 10,
     borderRadius: 5,
   },
@@ -193,18 +224,6 @@ const styles = StyleSheet.create({
     color: 'gray',
     textAlign: 'center',
     marginTop: 8,
-  },
-  saveButton: {
-    backgroundColor: '#3FFF00',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  saveButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontFamily: 'Raleway-Bold',
   },
 });
 

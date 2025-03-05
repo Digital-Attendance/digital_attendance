@@ -8,7 +8,7 @@ import {
   Linking,
   Alert,
 } from 'react-native';
-import {Paragraph, ActivityIndicator} from 'react-native-paper';
+import {Paragraph, ActivityIndicator, Snackbar} from 'react-native-paper';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from '@react-native-community/geolocation';
@@ -16,11 +16,6 @@ import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import BASE_URL from '../../url';
-
-const FIXED_LOCATION = {
-  latitude: 24.7565,
-  longitude: 92.7804,
-};
 
 const THRESHOLD_METERS = 0.01;
 
@@ -38,14 +33,14 @@ const VerifyLocation = ({route}) => {
   const fetchFacultyLocation = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/faculty/location/${subjectCode}`,
+        `${BASE_URL}/student/faculty-location/${subjectCode}`,
         {
           validateStatus: function (status) {
             return status < 500;
           },
         },
       );
-      console.log(response);
+
       if (response.data.success) {
         setFacultyLocation(response.data.location);
       } else if (!response.data.success) {
@@ -59,27 +54,32 @@ const VerifyLocation = ({route}) => {
   };
 
   const checkGPSStatus = async () => {
-    Geolocation.getCurrentPosition(
-      () => {
-        console.log('GPS is ON');
-      },
-      error => {
-        if (error.code === 2) {
-          Alert.alert(
-            'GPS Disabled',
-            'Please enable GPS to verify your location.',
-          );
-        }
-      },
-      {enableHighAccuracy: true, timeout: 5000},
-    );
+    return new Promise(resolve => {
+      Geolocation.getCurrentPosition(
+        () => {
+          resolve(true);
+        },
+        error => {
+          resolve(false);
+        },
+        {enableHighAccuracy: false, timeout: 5000},
+      );
+    });
   };
 
   const verifyLocation = async () => {
-    await checkGPSStatus();
+    const gpsStatus = await checkGPSStatus();
+    console.log('GPS Status:', gpsStatus);
+    if (!gpsStatus) {
+      setErrorMsg("Please turn on your device's GPS");
+      setVerifying(false);
+      return;
+    }
     await fetchFacultyLocation();
-    if (!facultyLocation) return;
-    
+    if (!facultyLocation) {
+      return;
+    }
+
     setVerifying(true);
     setErrorMsg('');
     setLocationVerified(null);
@@ -119,29 +119,24 @@ const VerifyLocation = ({route}) => {
       return;
     }
 
-    console.log('Requesting location update...');
-
     if (watchId.current !== null) {
       Geolocation.clearWatch(watchId.current);
-      console.log('Clearing previous location watch...');
     }
 
     watchId.current = Geolocation.watchPosition(
       position => {
         const {latitude, longitude} = position.coords;
         setCurrentLocation({latitude, longitude});
-        console.log('Current Location:', latitude, longitude);
 
         const isVerified =
           Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
           Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
         setLocationVerified(isVerified);
-        console.log('Location Verified:', isVerified);
         setVerifying(false);
 
         if (isVerified) {
           setTimeout(() => {
-            navigation.replace('LivenessDetection',{subjectCode});
+            navigation.replace('LivenessDetection', {subjectCode});
           }, 2000);
         }
       },
@@ -160,7 +155,6 @@ const VerifyLocation = ({route}) => {
     return () => {
       if (watchId.current !== null) {
         Geolocation.clearWatch(watchId.current);
-        console.log('Clearing location watch on unmount...');
       }
     };
   }, []);
@@ -204,7 +198,7 @@ const VerifyLocation = ({route}) => {
             {currentLocation.longitude.toFixed(6)}
           </Paragraph>
           <Paragraph style={styles.locationText}>
-            Faculty's Location: {facultyLocation.latitude.toFixed(6)},{' '}
+            Faculty's Location: {facultyLocation.latitude.toFixed(4)},{' '}
             {facultyLocation.longitude.toFixed(6)}
           </Paragraph>
         </View>

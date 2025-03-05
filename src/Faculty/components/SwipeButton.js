@@ -32,9 +32,27 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
   const watchId = useRef(null);
-  
+
+  const checkGPSStatus = async () => {
+    return new Promise((resolve) => {
+      Geolocation.getCurrentPosition(
+        () => {
+          resolve(true);
+        },
+        error => {
+          Snackbar.show({
+            text: "Please turn on your device's GPS",
+            duration: Snackbar.LENGTH_SHORT,
+            textColor: '#fff',
+          })
+          resolve(false);
+        },
+        {enableHighAccuracy: false},
+      );
+    });
+  };
+
   const fetchLocation = async () => {
-    setErrorMsg('');
     setCurrentLocation(null);
     let hasPermission = false;
 
@@ -59,20 +77,25 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
         }
       }
     } catch (error) {
-      setErrorMsg('Permission error: ' + error.message);
+      Snackbar.show({
+        text: error,
+        duration: Snackbar.LENGTH_SHORT,
+        textColor: '#f00',
+      })
       return null;
     }
 
     if (!hasPermission) {
-      setErrorMsg('Location permission denied');
+      Snackbar.show({
+        text: 'Location permission denied',
+        duration: Snackbar.LENGTH_SHORT,
+        textColor: '#fff',
+      })
       return null;
     }
 
-    console.log('Requesting location update...');
-
     if (watchId.current !== null) {
       Geolocation.clearWatch(watchId.current);
-      console.log('Clearing previous location watch...');
     }
 
     return new Promise((resolve, reject) => {
@@ -80,20 +103,20 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
         position => {
           const {latitude, longitude} = position.coords;
           setCurrentLocation({latitude, longitude});
-          console.log('Fetched Location:', latitude, longitude);
 
-          
           if (watchId.current !== null) {
             Geolocation.clearWatch(watchId.current);
             watchId.current = null;
-            console.log('Location fetched, stopping watchPosition.');
           }
 
           resolve({latitude, longitude});
         },
         error => {
-          console.log('Location Error:', error.message);
-          setErrorMsg('Location Error: ' + error.message);
+          Snackbar.show({
+            text: error,
+            duration: Snackbar.LENGTH_SHORT,
+            textColor: '#fff',
+          })
           reject(error);
         },
         {enableHighAccuracy: false, distanceFilter: 1},
@@ -103,8 +126,21 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
 
   const startAttendance = async () => {
     try {
+      const gpsStatus = await checkGPSStatus();
+      if (!gpsStatus) {
+        translateX.value = withTiming(0);
+        runOnJS(setIsStarted)(false);
+        runOnJS(setIsSwipeActive)(false);
+        return;
+      }
       const location = await fetchLocation();
-            
+      if (!location) {
+        translateX.value = withTiming(0);
+        runOnJS(setIsStarted)(false);
+        runOnJS(setIsSwipeActive)(false);
+        return;
+      }
+
       Snackbar.show({
         text: 'Starting attendance...',
         duration: Snackbar.LENGTH_SHORT,
@@ -114,11 +150,9 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
 
       const response = await axios.post(
         `${BASE_URL}/faculty/start-attendance`,
-        {email: userEmail, subjectCode, location : location},
+        {email: userEmail, subjectCode, location: location},
         {validateStatus: status => status < 500},
       );
-
-      console.log(response)
 
       if (response.data.success) {
         Snackbar.show({
@@ -134,6 +168,9 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
           backgroundColor: '#D9534F',
           textColor: '#fff',
         });
+        translateX.value = withTiming(0);
+        runOnJS(setIsStarted)(false);
+        runOnJS(setIsSwipeActive)(false);
       }
     } catch (error) {
       Snackbar.show({
@@ -159,11 +196,9 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
     try {
       const response = await axios.post(
         `${BASE_URL}/faculty/stop-attendance`,
-        {email: userEmail,subjectCode},
+        {email: userEmail, subjectCode},
         {validateStatus: status => status < 500},
       );
-
-      console.log(response)
 
       if (response.data.success) {
         Snackbar.show({

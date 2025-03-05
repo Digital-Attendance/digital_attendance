@@ -18,7 +18,7 @@ const Navbar = () => {
       <TouchableOpacity
         onLongPress={async () => {
           await AsyncStorage.removeItem('access_token');
-          navigation.navigate('SplashScreen');
+          navigation.popTo('SplashScreen');
         }}
         style={styles.navbarTextHeader}>
         <Text style={styles.navbarText}>{dayName}</Text>

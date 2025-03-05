@@ -1,19 +1,45 @@
 import React, {useState} from 'react';
 import {View, Text, TextInput, TouchableOpacity} from 'react-native';
 import {StyleSheet} from 'react-native';
+import BASE_URL from '../../../url';
+import Snackbar from 'react-native-snackbar';
+import { useNavigation } from '@react-navigation/native';
 
 const DeleteSubject = ({toggleMenu, subjectCode}) => {
   const [typedCode, setTypedCode] = useState('');
   const [error, setError] = useState('');
-
-  const handleDelete = () => {
-    if (typedCode === subjectCode) {
-      console.log('Subject deleted');
-      toggleMenu();
-    } else {
-      setError('Subject code does not match.');
+  const navigation = useNavigation();
+  const handleDelete = async () => {
+    if (typedCode !== subjectCode) {
+      setError("Subject code does not match.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${BASE_URL}/faculty/delete-subject/${subjectCode}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        Snackbar.show({
+          text: data.message,
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        toggleMenu();
+        navigation.navigate('Faculty_Home');
+        
+      } else {
+        setError(data.message || "Failed to delete subject");
+      }
+    } catch (error) {
+      setError("Error deleting subject. Please try again.");
+      
     }
   };
+  
 
   return (
     <View style={styles.container}>

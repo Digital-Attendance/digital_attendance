@@ -10,12 +10,12 @@ import {
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const StudentList = ({name, attended, progress}) => {
+const StudentList = ({name, scholarID, attended, progress}) => {
   return (
     <View style={styles.studentListCard}>
       <View style={styles.studentDetails}>
         <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
-        <Text style={styles.scholarID}>Scholar ID : 2115085</Text>
+        <Text style={styles.scholarID}>Scholar ID : {scholarID}</Text>
       </View>
       <View style={styles.classAttendedContainer}>
         <Text style={styles.classAttendedText}>{attended}</Text>
@@ -36,18 +36,43 @@ const StudentList = ({name, attended, progress}) => {
   );
 };
 
-const Leaderboard = ({students}) => {
+const Leaderboard = ({ subjectRecord }) => {
+  const studentAttendanceMap = new Map();
+
+  subjectRecord.attendanceRecords.forEach((record) => {
+    record.Students.forEach((student) => {
+      const { scholarID, name, present } = student;
+
+      if (!studentAttendanceMap.has(scholarID)) {
+        studentAttendanceMap.set(scholarID, { name, scholarID, totalPresent: 0, totalClasses: 0 });
+      }
+
+      const studentData = studentAttendanceMap.get(scholarID);
+      studentData.totalPresent += present ? 1 : 0;
+      studentData.totalClasses += 1;
+      studentAttendanceMap.set(scholarID, studentData);
+    });
+  });
+
+  const studentList = Array.from(studentAttendanceMap.values()).map((student) => ({
+    ...student,
+    attendancePercentage: subjectRecord.numberOfClassesTaken > 0
+      ? (student.totalPresent / subjectRecord.numberOfClassesTaken) * 100
+      : 0,
+  })).sort((a, b) => b.attendancePercentage - a.attendancePercentage);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.scrollContainer}>
         <ScrollView contentContainerStyle={styles.studentList}>
-          {students.map((student, index) => (
+          {studentList.map((student, index) => (
             <StudentList
               key={index}
               name={student.name}
-              attended={student.attended}
-              progress={student.progress}
+              scholarID={student.scholarID}
+              attended={student.totalPresent}
+              progress={student.attendancePercentage}
             />
           ))}
         </ScrollView>
@@ -55,6 +80,7 @@ const Leaderboard = ({students}) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -75,8 +101,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     borderRadius: 14,
     borderWidth: 0.2,
-    // borderTopWidth: 2,
-    // borderTopColor: 'skyblue',
     borderBottomWidth: 2,
     borderBottomColor: 'skyblue',
     overflow: 'hidden',
@@ -124,7 +148,6 @@ const styles = StyleSheet.create({
   classAttendedContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    // borderRightWidth: 1,
   },
   progressSection: {
     alignItems: 'center',

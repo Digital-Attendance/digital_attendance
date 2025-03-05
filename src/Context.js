@@ -20,24 +20,6 @@ export const AsyncStorageProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [userEmail, setUserEmail] = useState('');
 
-  // useEffect(() => {
-  //   checkLoginStatus();
-  // }, []);
-
-  // const checkLoginStatus = async () => {
-  //   const token = await AsyncStorage.getItem('access_token');
-  //   if (token) {
-  //     try {
-  //       const response = await axios.get(`${BASE_URL}/session_status`, {
-  //         headers: {Authorization: `Bearer ${token}`},
-  //       });
-  //       setUser(response.data);
-  //     } catch (error) {
-  //       await AsyncStorage.removeItem('access_token');
-  //     }
-  //   }
-  // };
-
   const logout = async () => {
     await axios.post(`${BASE_URL}/logout`);
     await AsyncStorage.removeItem('access_token');
@@ -52,7 +34,7 @@ export const AsyncStorageProvider = ({children}) => {
       setUserEmail,
       logout,
     }),
-    [user, logout],
+    [user,userEmail, logout],
   );
 
   return (

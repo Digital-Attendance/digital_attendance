@@ -6,15 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import axios from 'axios';
 import {BASE_URL} from '@env';
 import Snackbar from 'react-native-snackbar';
-import {set} from 'date-fns';
-const ResetPassword = ({navigation, route}) => {
-  // const BASE_URL = process.env.BASE_URL;
 
+const ResetPassword = ({navigation, route}) => {
   const {email} = route.params;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -143,7 +140,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    // fontWeight: '600',
     fontFamily: 'Raleway-Bold',
     textAlign: 'center',
     marginVertical: 20,
@@ -165,11 +161,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
-    // backgroundColor: '#ffffff',
-    // borderRadius: 14,
-    // paddingHorizontal: 14,
-    // flexDirection: 'row',
-    // alignItems: 'center',
   },
   input: {
     borderWidth: 0.5,
@@ -178,7 +169,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     borderRadius: 10,
     borderColor: '#ccc',
-    // marginBottom: 5,
     color: '#384959',
   },
   resetButton: {
@@ -194,7 +184,6 @@ const styles = StyleSheet.create({
   resetButtonText: {
     fontSize: 13,
     fontFamily: 'Raleway-Bold',
-    // fontWeight: '600',
     color: '#fff',
   },
 });

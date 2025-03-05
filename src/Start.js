@@ -1,25 +1,55 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image, Animated, Easing } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 
-const Start = ({navigation}) => {
+const Start = ({ navigation }) => {
+  const shineAnim = useRef(new Animated.Value(-400)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shineAnim, {
+        toValue: 300,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Digital Attendance</Text>
+      <MaskedView
+        style={styles.maskedContainer}
+        maskElement={<Text style={styles.title}>Digital Attendance</Text>}
+      >
+        <Text style={[styles.title, { color: '#666' }]}>Digital Attendance</Text>
+        <Animated.View
+          style={[
+            styles.animatedShine,
+            { transform: [{ translateX: shineAnim }] },
+          ]}
+        >
+          <LinearGradient
+            colors={['transparent', 'rgba(255,255,255,0.8)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.shineGradient}
+          />
+        </Animated.View>
+      </MaskedView>
+
       <Image
         source={require('../assets/startBackgroundImg_black.png')}
         style={styles.logo}
         resizeMode="contain"
       />
+      
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.registerButton]}
-          onPress={() => navigation.navigate('Register')}>
+        <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={() => navigation.navigate('Register')}>
           <Text style={[styles.buttonText, styles.registerText]}>Register</Text>
         </TouchableOpacity>
       </View>
@@ -36,13 +66,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1E1E1E',
   },
+  maskedContainer: {
+    position: 'relative',
+  },
   title: {
-    padding: 10,
-    paddingBottom: 40,
     fontSize: 25,
     textAlign: 'center',
     fontFamily: 'Monoton-Regular',
-    color: '#fff',
+    color: '#fff', // Base color
+  },
+  animatedShine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 300, // Ensures full shine effect
+    height: 40,
+  },
+  shineGradient: {
+    width: '100%',
+    height: '100%',
   },
   logo: {
     width: '100%',
@@ -62,7 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     width: '80%',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,

@@ -9,9 +9,10 @@ import {
   Stop,
   Defs,
 } from 'react-native-svg';
+import {format} from 'date-fns';
 
 import Performers from '../../Faculty/components/Performers';
-import performerImages from '../../DummyDatas/performersImages';
+
 
 const getProgressColor = progress => {
   if (progress <= 50) return ['#ff0000', '#ff4d4d'];
@@ -21,17 +22,16 @@ const getProgressColor = progress => {
 };
 
 const SummaryCard = ({subjectRecord}) => {
-  console.log(subjectRecord);
   const [progress, setProgress] = useState(0);
   useEffect(() => {
-      let attendedClasses = subjectRecord.attendedClasses;
-      let totalClasses = subjectRecord.totalClasses;
-      let percentage = 0;
-      if (totalClasses > 0) {
-        percentage = (attendedClasses / totalClasses) * 100;
-      }
-      setProgress(percentage);
-    }, []);
+    let attendedClasses = subjectRecord.attendedClasses;
+    let totalClasses = subjectRecord.totalClasses;
+    let percentage = 0;
+    if (totalClasses > 0) {
+      percentage = (attendedClasses / totalClasses) * 100;
+    }
+    setProgress(percentage);
+  }, [subjectRecord]);
   const progressColors = getProgressColor(progress);
 
   const CircularProgress = useMemo(
@@ -118,14 +118,18 @@ const SummaryCard = ({subjectRecord}) => {
                   Present
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.attendedClasses}</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>
+                  {subjectRecord.attendedClasses}
+                </Text>
               </View>
               <View style={styles.statsDataSubContainerBox}>
                 <Text style={styles.statsDataSubContainerBoxTitle}>
                   Classes
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.totalClasses}</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>
+                  {subjectRecord.totalClasses}
+                </Text>
               </View>
             </View>
           </View>
@@ -133,7 +137,7 @@ const SummaryCard = ({subjectRecord}) => {
         <View style={styles.sectionContainer}>
           <View style={styles.performanceContainer}>
             <Text style={styles.performanceTitle}>Leaderboard</Text>
-            <Performers performers={performerImages} />
+            <Performers subjectRecord={subjectRecord} />
           </View>
           <View style={styles.lastClassContainer}>
             <View style={styles.lastClassIconContainer}>
@@ -145,7 +149,12 @@ const SummaryCard = ({subjectRecord}) => {
               />
               <Text style={styles.lastClassTitle}>Last Class</Text>
             </View>
-            <Text style={styles.lastClassDateText}>{subjectRecord.lastClassDate}</Text>
+
+            <Text style={styles.lastClassDateText}>
+              {subjectRecord.lastClassDate === 'No classes yet'
+                ? 'No classes yet'
+                : format(new Date(subjectRecord.lastClassDate), 'd MMM yyyy')}
+            </Text>
           </View>
         </View>
       </LinearGradient>

@@ -25,7 +25,7 @@ const EnrollSubject = ({navigation, route}) => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/subjects`);
+        const response = await fetch(`${BASE_URL}/student/subjects`);
         const data = await response.json();
         setSubjectData(data);
       } catch (error) {

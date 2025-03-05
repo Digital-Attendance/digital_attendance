@@ -42,6 +42,17 @@ const App = () => {
             initialRouteName="SplashScreen"
             screenOptions={{ 
               headerShown: false,
+              // animation : 'default',
+              // animation : 'slide_from_right',
+              // animation : 'slide_from_left',
+              // animation : 'slide_from_bottom',
+              animation : 'fade',
+              // animation : 'fade_from_bottom',
+              // animation : 'fade_from_right',
+              // animation : 'scale_from_center',
+              // animation : 'none',
+              
+              
              }}
           >
             <Stack.Screen name="SplashScreen" component={SplashScreen} />
@@ -49,8 +60,6 @@ const App = () => {
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="FaceVerification" component={Registration_FaceVerification} />
-            {/* <Stack.Screen name="Faculty" component={Faculty} />
-            <Stack.Screen name="Student" component={Student} /> */}
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="OTPVerification" component={PasswordResetOTPVerification} />
             <Stack.Screen name="EmailVerification" component={EmailOTPVerification} />
@@ -75,7 +84,7 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fbfbfe",
+    backgroundColor: "#1E1E1E",
   },
 });
 

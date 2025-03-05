@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View, Dimensions, StyleSheet, Text} from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import axios from 'axios';
@@ -12,26 +12,29 @@ import BASE_URL from '../../../url';
 
 const {width} = Dimensions.get('window');
 
-const SubjectCard = () => {
+const SubjectCard = ({refresh}) => {
   const {userEmail} = useUserContext();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isSwipeActive, setIsSwipeActive] = useState(false);
-
   const [subjects, setSubjects] = useState([]);
 
-  useEffect(() => {
+  console.log('Active Index: ', activeIndex);
+
+  const fetchSubjects = () => {
     axios
       .get(`${BASE_URL}/student/dashboard/${userEmail}`)
       .then(response => {
         setSubjects(response.data);
-        console.log('response.data:', response.data);
       })
       .catch(error => console.log(error));
-  }, []);
+  };
 
-  const renderItem = ({item, index}) => (
-    <SummaryCard key={index} index={index} subjectRecord={item} />
-  );
+  useEffect(() => {
+    fetchSubjects();
+  }, [refresh]);
+
+  const renderItem = useCallback(({item, index}) => {
+    return <SummaryCard key={index} subjectRecord={item} />;
+  }, []);
 
   return (
     <View style={styles.wrapper}>
@@ -43,7 +46,7 @@ const SubjectCard = () => {
             sliderWidth={width}
             itemWidth={width}
             layout="default"
-            scrollEnabled={!isSwipeActive}
+            scrollEnabled={true}
             onSnapToItem={index => {
               setActiveIndex(index);
             }}
@@ -64,10 +67,11 @@ const SubjectCard = () => {
             inactiveDotOpacity={0.4}
             inactiveDotScale={0.6}
           />
-          <AttendanceGraph />
-          <AttendanceButton
-            subjectCode={subjects[activeIndex].subjectCode}
+          <AttendanceGraph key={activeIndex}
+            cumulativeAttendance={subjects[activeIndex]?.cumulativeAttendance}
           />
+
+          <AttendanceButton key={activeIndex} subjectCode={subjects[activeIndex]?.subjectCode} />
         </>
       ) : (
         <View style={styles.noSubjectContainer}>

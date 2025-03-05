@@ -1,9 +1,9 @@
-import React, {useState, useMemo,useEffect} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
-
+import { format } from 'date-fns';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -12,22 +12,20 @@ import {
   Defs,
 } from 'react-native-svg';
 import Performers from './Performers';
-import performerImages from '../../DummyDatas/performersImages';
+
 const SummaryCard = ({subjectRecord}) => {
-  
   const [progress, setProgress] = useState(0);
   const navigation = useNavigation();
   useEffect(() => {
     setProgress(subjectRecord.averageAttendanceLast5Days);
-  }, [subjectRecord.averageAttendanceLast5Days]);
-  
+  }, [subjectRecord]);
 
   const CircularProgress = useMemo(
     () => (
       <AnimatedCircularProgress
         size={80}
         width={9}
-        fill={progress}
+        fill={Number(progress)}
         rotation={-90}
         arcSweepAngle={180}
         backgroundColor="#005758"
@@ -47,16 +45,20 @@ const SummaryCard = ({subjectRecord}) => {
 
   return (
     <View style={styles.wrapper}>
-      {/* <View style={styles.backgroundCard1} /> */}
       <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('AttendanceScreen',{subjectRecord});
+            navigation.navigate('AttendanceScreen', {subjectRecord});
           }}
           style={styles.subjectName_ButtonContainer}>
           <View style={styles.subjectNameContainer}>
             <Text style={styles.subjectName}>{subjectRecord.subjectCode}</Text>
-            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.subjectSubName}>{subjectRecord.subjectName}</Text>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={styles.subjectSubName}>
+              {subjectRecord.subjectName}
+            </Text>
           </View>
           <View style={styles.buttonContainer}>
             <View>
@@ -103,14 +105,18 @@ const SummaryCard = ({subjectRecord}) => {
                   Students
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.numberOfStudents}</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>
+                  {subjectRecord.numberOfStudents}
+                </Text>
               </View>
               <View style={styles.statsDataSubContainerBox}>
                 <Text style={styles.statsDataSubContainerBoxTitle}>
                   Classes
                 </Text>
 
-                <Text style={styles.statsDataSubContainerBoxText}>{subjectRecord.numberOfClassesTaken}</Text>
+                <Text style={styles.statsDataSubContainerBoxText}>
+                  {subjectRecord.numberOfClassesTaken}
+                </Text>
               </View>
             </View>
           </View>
@@ -118,7 +124,7 @@ const SummaryCard = ({subjectRecord}) => {
         <View style={styles.sectionContainer}>
           <View style={styles.performanceContainer}>
             <Text style={styles.performanceTitle}>Leaderboard</Text>
-            <Performers performers={performerImages} />
+            <Performers subjectRecord={subjectRecord} />
           </View>
           <View style={styles.lastClassContainer}>
             <View style={styles.lastClassIconContainer}>
@@ -130,7 +136,12 @@ const SummaryCard = ({subjectRecord}) => {
               />
               <Text style={styles.lastClassTitle}>Last Class</Text>
             </View>
-            <Text style={styles.lastClassDateText}>{subjectRecord.lastClassDate}</Text>
+
+            <Text style={styles.lastClassDateText}>
+              {subjectRecord.lastClassDate === 'No classes yet'
+                ? 'No classes yet'
+                : format(new Date(subjectRecord.lastClassDate), 'd MMM yyyy')}
+            </Text>
           </View>
         </View>
       </LinearGradient>
@@ -148,7 +159,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 
-
   mainCard: {
     width: '100%',
     backgroundColor: '#005758',
@@ -156,17 +166,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 10,
     borderWidth: 0.1,
-    borderBottomWidth : 2,
-    borderColor : 'skyblue',
+    borderBottomWidth: 2,
+    borderColor: 'skyblue',
   },
   subjectName_ButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  subjectNameContainer: {
-
-  },
+  subjectNameContainer: {},
   subjectName: {
     fontSize: 32,
     letterSpacing: 1,
@@ -181,7 +189,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     left: 10,
   },
-  
+
   statsContainer: {
     flexDirection: 'row',
     width: '100%',
