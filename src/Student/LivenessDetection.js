@@ -13,6 +13,7 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import {useUserContext} from '../Context';
@@ -56,11 +57,13 @@ const LivenessDetection = ({route}) => {
       });
       const data = await response.json();
       setAttendanceStatus(response.status === 200 ? 'success' : 'failed');
-      Snackbar.show({
-        text: response.status === 200 ? data.message : data.error,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: response.status === 200 ? '#5CB85C' : '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'info',
+        text1: response.status === 200 ? data.message : data.error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
       if (response.status === 200) {
         setTimeout(() => {

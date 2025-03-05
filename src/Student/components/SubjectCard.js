@@ -17,8 +17,6 @@ const SubjectCard = ({refresh}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
 
-  console.log('Active Index: ', activeIndex);
-
   const fetchSubjects = () => {
     axios
       .get(`${BASE_URL}/student/dashboard/${userEmail}`)
@@ -67,7 +65,7 @@ const SubjectCard = ({refresh}) => {
             inactiveDotOpacity={0.4}
             inactiveDotScale={0.6}
           />
-          <AttendanceGraph key={activeIndex}
+          <AttendanceGraph
             cumulativeAttendance={subjects[activeIndex]?.cumulativeAttendance}
           />
 

@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 import Snackbar from 'react-native-snackbar';
-import { useUserContext } from '../Context';
+import Toast from 'react-native-toast-message';
+import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
 const EnrollSubject = ({navigation, route}) => {
   const {userEmail} = useUserContext();
@@ -21,7 +22,6 @@ const EnrollSubject = ({navigation, route}) => {
   const [loading, setLoading] = useState(true);
   const [enroll, setEnroll] = useState(false);
 
-  
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -29,12 +29,13 @@ const EnrollSubject = ({navigation, route}) => {
         const data = await response.json();
         setSubjectData(data);
       } catch (error) {
-        console.error('Error fetching subjects:', error);
-        Snackbar.show({
-          text: error,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: error,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
       setLoading(false);
@@ -44,11 +45,13 @@ const EnrollSubject = ({navigation, route}) => {
 
   const handleSubmit = async () => {
     if (!course || !department || !semester || !subject) {
-      Snackbar.show({
-        text: 'All fields are required!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'success',
+        text1: 'All fields are required!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
       return;
     }
@@ -58,33 +61,39 @@ const EnrollSubject = ({navigation, route}) => {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          studentEmail:userEmail,
+          studentEmail: userEmail,
           subjectCode: subject,
         }),
       });
       const data = await response.json();
       if (response.ok) {
-        Snackbar.show({
-          text: data.message || 'Subject enrolled successfully!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: response.data.message,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
         navigation.goBack();
       } else {
-        Snackbar.show({
-          text: data.error || 'Enrollment failed!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: 'Enrollment failed!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: error,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
     }
     setEnroll(false);
@@ -102,7 +111,6 @@ const EnrollSubject = ({navigation, route}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Enroll in a Subject</Text>
 
-      
       <Text style={styles.label}>Select Course</Text>
       <Dropdown
         data={Object.keys(subjectData).map(item => ({

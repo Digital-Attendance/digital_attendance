@@ -22,11 +22,8 @@ const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 const DownloadButton = ({subjectCode}) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleEmailAttendance = async () => {
-    console.log("Sending email");
-    
+  
+  const handleEmailAttendance = async () => {    
     try {
       const response = await axios.get(
         `${BASE_URL}/faculty/email-attendance/${subjectCode}`,{
@@ -116,7 +113,7 @@ const DownloadButton = ({subjectCode}) => {
             <Icon name="chevron-forward" size={24} color="#fff" />
           </Animated.View>
         </Animated.View>
-        <Text style={styles.text}>{isDownloading ? "Email" : "Email Attendance"}</Text>
+        <Text style={styles.text}>{isDownloading ? "Emailing" : "Email Attendance"}</Text>
       </LinearGradient>
     </View>
   );

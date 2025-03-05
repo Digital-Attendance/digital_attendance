@@ -3,6 +3,7 @@ import {View, Image, Text, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUserContext } from './Context';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 export default function SplashScreen({navigation}) {
   const {setUserEmail} = useUserContext();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
@@ -25,9 +26,13 @@ export default function SplashScreen({navigation}) {
         navigation.replace('Start');
       }
     } catch (error) {
-      Snackbar.show({
-        text: error,
-        duration: Snackbar.LENGTH_SHORT,
+      Toast.show({
+        type: 'error',
+        text1: error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     } finally {
       setIsSessionChecked(true);

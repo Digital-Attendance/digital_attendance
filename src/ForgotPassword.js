@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 import BASE_URL from '../url';
 
 const ForgotPassword = ({navigation}) => {
@@ -17,21 +18,25 @@ const ForgotPassword = ({navigation}) => {
 
   const handlePasswordResetRequest = async () => {
     if (!email) {
-      Snackbar.show({
-        text: 'Email cannot be empty!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'Email Cannot Be Empty',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
       return;
     }
     
     setIsVerifying(true);
-    Snackbar.show({
-      text: 'Sending OTP...',
-      duration: Snackbar.LENGTH_SHORT,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
+    Toast.show({
+      type: 'error',
+      text1: 'Sending OTP...',
+      position: 'top',
+      visibilityTime: 1000,
+      autoHide: true,
+      topOffset: 10,      
     });
 
     try {
@@ -46,29 +51,35 @@ const ForgotPassword = ({navigation}) => {
       );
 
       if (response.data.success) {
-        Snackbar.show({
-          text: 'OTP sent to your email!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'OTP Sent Successfully',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
         setTimeout(() => {
           navigation.replace('OTPVerification', {email});
         }, 500);
       } else {
-        Snackbar.show({
-          text: response.data.message,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: response.data.message,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: 'An error occurred while sending the OTP!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'An error occurred while sending OTP!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     }
     setIsVerifying(false);

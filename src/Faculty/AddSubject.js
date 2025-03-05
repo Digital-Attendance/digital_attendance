@@ -12,6 +12,7 @@ import {
   Keyboard,
 } from 'react-native';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 import {useUserContext} from '../Context';
 import {Dropdown} from 'react-native-element-dropdown';
 import BASE_URL from '../../url';
@@ -65,11 +66,13 @@ const AddSubject = ({navigation}) => {
     const {subjectCode, subjectName, course, semester, department} = form;
 
     if (!subjectCode || !subjectName || !course || !semester || !department) {
-      Snackbar.show({
-        text: 'All fields are required!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'All fields are required!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
       return;
     }
@@ -93,28 +96,34 @@ const AddSubject = ({navigation}) => {
       const data = await response.json();
 
       if (response.ok) {
-        Snackbar.show({
-          text: 'Subject added successfully!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'Subject added successfully!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
 
         navigation.goBack();
       } else {
-        Snackbar.show({
-          text: data.error || 'Failed to add subject',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: data.error || 'An error occurred!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: 'Network error. Please try again!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'Network error!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     }
   };

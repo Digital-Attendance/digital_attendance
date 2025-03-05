@@ -11,10 +11,8 @@ import axios from 'axios';
 
 import BASE_URL from '../url';
 
-
 const AsyncStorageContext = createContext();
 export const AsyncStorageProvider = ({children}) => {
-  
   console.log('BASE_URL:', BASE_URL);
 
   const [user, setUser] = useState(null);
@@ -34,7 +32,7 @@ export const AsyncStorageProvider = ({children}) => {
       setUserEmail,
       logout,
     }),
-    [user,userEmail, logout],
+    [user, userEmail, setUserEmail, logout],
   );
 
   return (
@@ -47,9 +45,7 @@ export const AsyncStorageProvider = ({children}) => {
 export const useUserContext = () => {
   const context = useContext(AsyncStorageContext);
   if (!context) {
-    console.log(
-      'useUserContext must be used within an AsyncStorageProvider',
-    );
+    console.log('useUserContext must be used within an AsyncStorageProvider');
   }
   return context;
 };

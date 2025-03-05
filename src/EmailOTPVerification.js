@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
+import Toast from 'react-native-toast-message';
 import Snackbar from 'react-native-snackbar';
 import BASE_URL from '../url';
 const EmailOTPVerification = ({navigation, route}) => {
@@ -60,11 +61,13 @@ const EmailOTPVerification = ({navigation, route}) => {
     const otpCode = otp.join('');
 
     if (otpCode.length < 4) {
-      Snackbar.show({
-        text: 'Please enter a valid OTP code!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'Please enter a valid OTP',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
       return;
     }
@@ -78,11 +81,13 @@ const EmailOTPVerification = ({navigation, route}) => {
         );
 
         if (response.data.success) {
-          Snackbar.show({
-            text: 'OTP verified successfully!',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#5CB85C',
-            textColor: '#fff',
+          Toast.show({
+            type: 'success',
+            text1: 'OTP Verified',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,      
           });
           if (selectedRole === 'Student') {
             setTimeout(() => {
@@ -93,27 +98,33 @@ const EmailOTPVerification = ({navigation, route}) => {
           } else if (selectedRole === 'Faculty') {
             await registerFaculty();
           } else {
-            Snackbar.show({
-              text: 'Invalid Role',
-              duration: Snackbar.LENGTH_SHORT,
-              backgroundColor: '#D9534F',
-              textColor: '#fff',
+            Toast.show({
+              type: 'error',
+              text1: 'Invalid Role',
+              position: 'top',
+              visibilityTime: 1000,
+              autoHide: true,
+              topOffset: 10,      
             });
           }
         } else {
-          Snackbar.show({
-            text: response.data.message,
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#D9534F',
-            textColor: '#fff',
+          Toast.show({
+            type: 'error',
+            text1: response.data.message,
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,      
           });
         }
       } catch (error) {
-        Snackbar.show({
-          text: 'An error occurred while verifying the OTP!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: 'An error occurred while verifying the OTP',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     }, 500);
@@ -122,11 +133,13 @@ const EmailOTPVerification = ({navigation, route}) => {
   const registerFaculty = async () => {
     setIsRegistering(true);
 
-    Snackbar.show({
-      text: 'Registering Faculty...',
-      duration: Snackbar.LENGTH_INDEFINITE,
-      backgroundColor: '#17A2B8',
-      textColor: '#fff',
+    Toast.show({
+      type: 'info',
+      text1: 'Registering...',
+      position: 'top',
+      visibilityTime: 1000,
+      autoHide: true,
+      topOffset: 10,      
     });
 
     const requestBody = {
@@ -147,28 +160,34 @@ const EmailOTPVerification = ({navigation, route}) => {
       });
 
       if (response.ok) {
-        Snackbar.show({
-          text: 'Registration successful!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'Registration Successful',
+          position: 'top',
+          visibilityTime: 500,
+          autoHide: true,
+          topOffset: 10,      
         });
         navigation.navigate('SplashScreen');
       } else {
         const errorText = await response.text();
-        Snackbar.show({
-          text: errorText || 'Registration failed!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: errorText || 'Registration failed!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: error,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     } finally {
       setIsRegistering(false);

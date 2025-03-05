@@ -17,7 +17,7 @@ const Faculty_Home = () => {
       showsVerticalScrollIndicator={false}
       >
       <Navbar />
-      <SubjectCard refresh={refresh} />
+      <SubjectCard refresh={refresh} /> 
     </ScrollView>
   );
 };

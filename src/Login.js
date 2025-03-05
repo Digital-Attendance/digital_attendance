@@ -17,12 +17,13 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const windowHeight = Dimensions.get('window').height;
 
-import { useUserContext } from './Context';
+import {useUserContext} from './Context';
 import BASE_URL from '../url';
 
 export default function Login({navigation}) {
@@ -36,20 +37,36 @@ export default function Login({navigation}) {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Snackbar.show({
-        text: 'Username and password cannot be empty!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'info',
+        text1: 'Username and password cannot be empty!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
+      // Snackbar.show({
+      //   text: 'Username and password cannot be empty!',
+      //   duration: Snackbar.LENGTH_SHORT,
+      //   backgroundColor: '#D9534F',
+      //   textColor: '#fff',
+      // });
       return;
     }
     setLogging(true);
-    Snackbar.show({
-      text: 'Logging in...',
-      duration: Snackbar.LENGTH_LONG,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
+    // Snackbar.show({
+    //   text: 'Logging in...',
+    //   duration: Snackbar.LENGTH_LONG,
+    //   backgroundColor: '#2B8781',
+    //   textColor: '#fff',
+    // });
+    Toast.show({
+      type: 'info',
+      text1: 'Logging in...',
+      position: 'top',
+      visibilityTime: 1000,
+      autoHide: true,
+      topOffset: 10,
     });
 
     try {
@@ -76,11 +93,19 @@ export default function Login({navigation}) {
         setUserEmail(email);
         await AsyncStorage.setItem('email', email);
         await AsyncStorage.setItem('role', selectedRole);
-        Snackbar.show({
-          text: 'Login Successful!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        // Snackbar.show({
+        //   text: 'Login Successful!',
+        //   duration: Snackbar.LENGTH_SHORT,
+        //   backgroundColor: '#5CB85C',
+        //   textColor: '#fff',
+        // });
+        Toast.show({
+          type: 'success',
+          text1: 'Login Successful!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
 
         setTimeout(() => {
@@ -91,60 +116,71 @@ export default function Login({navigation}) {
           );
         }, 500);
       } else {
-        Snackbar.show({
-          text: 'Invalid Credentials',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        // Snackbar.show({
+        //   text: 'Invalid Credentials',
+        //   duration: Snackbar.LENGTH_SHORT,
+        //   backgroundColor: '#D9534F',
+        //   textColor: '#fff',
+        // });
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Credentials',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
         setPassword('');
       }
     } catch (error) {
       if (error.response) {
-        if (error.response.status === 400) {
-          Snackbar.show({
-            text: 'Invalid Username or Password',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#D9534F',
-            textColor: '#fff',
-          });
-        } else if (error.response.status === 401) {
-          Snackbar.show({
-            text: 'Unauthorized! Please check your credentials.',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#D9534F',
-            textColor: '#fff',
+        if (error.response.status === 401) {
+          Toast.show({
+            type: 'error',
+            text1: 'Invalid Username or password !',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
           });
         } else if (error.response.status === 500) {
-          Snackbar.show({
-            text: 'Server error! Please try again later.',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#D9534F',
-            textColor: '#fff',
+          Toast.show({
+            type: 'error',
+            text1: 'Server Error !',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
           });
         } else {
-          Snackbar.show({
-            text: `Error: ${
+          Toast.show({
+            type: 'info',
+            text1: `Error: ${
               error.response.data.message || 'Something went wrong'
             }`,
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: '#D9534F',
-            textColor: '#fff',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
           });
         }
       } else if (error.request) {
-        Snackbar.show({
-          text: 'No response from server. Check your internet.',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'info',
+          text1: 'No response from server. Check your internet.',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       } else {
-        Snackbar.show({
-          text: 'An unexpected error occurred!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'info',
+          text1: 'An unexpected error occured!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } finally {

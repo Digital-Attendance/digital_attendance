@@ -36,18 +36,24 @@ const AttendanceScreen = ({route}) => {
       if (response.ok) {
         setAttendanceRecords(data.attendanceRecords);
       } else {
-        Snackbar.show({
-          text: 'Error fetching attendance',
-          duration: Snackbar.LENGTH_SHORT,
-          textColor: '#fff',
-        })
+        Toast.show({
+          type: 'error',
+          text1: "Error fetching attendance",
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
+        });
       }
     } catch (error) {
-      Snackbar.show({
-        text: 'Error fetching attendance',
-        duration: Snackbar.LENGTH_SHORT,
-        textColor: '#fff',
-      })
+      Toast.show({
+        type: 'error',
+        text1: "Error fetching attendance",
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
+      });
     } finally {
       setLoading(false);
     }

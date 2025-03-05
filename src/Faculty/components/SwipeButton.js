@@ -40,11 +40,14 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
           resolve(true);
         },
         error => {
-          Snackbar.show({
-            text: "Please turn on your device's GPS",
-            duration: Snackbar.LENGTH_SHORT,
-            textColor: '#fff',
-          })
+          Toast.show({
+            type: 'error',
+            text1: 'Please enable GPS to start attendance',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,      
+          });
           resolve(false);
         },
         {enableHighAccuracy: false},
@@ -77,20 +80,26 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
         }
       }
     } catch (error) {
-      Snackbar.show({
-        text: error,
-        duration: Snackbar.LENGTH_SHORT,
-        textColor: '#f00',
-      })
+      Toast.show({
+        type: 'error',
+        text1: error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
+      });
       return null;
     }
 
     if (!hasPermission) {
-      Snackbar.show({
-        text: 'Location permission denied',
-        duration: Snackbar.LENGTH_SHORT,
-        textColor: '#fff',
-      })
+      Toast.show({
+        type: 'error',
+        text1: 'Location permission denied',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
+      });
       return null;
     }
 
@@ -112,11 +121,14 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
           resolve({latitude, longitude});
         },
         error => {
-          Snackbar.show({
-            text: error,
-            duration: Snackbar.LENGTH_SHORT,
-            textColor: '#fff',
-          })
+          Toast.show({
+            type: 'error',
+            text1: error,
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,      
+          });
           reject(error);
         },
         {enableHighAccuracy: false, distanceFilter: 1},
@@ -141,11 +153,13 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
         return;
       }
 
-      Snackbar.show({
-        text: 'Starting attendance...',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#2B8781',
-        textColor: '#fff',
+      Toast.show({
+        type: 'info',
+        text1: 'Starting attendance...',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
 
       const response = await axios.post(
@@ -155,29 +169,35 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
       );
 
       if (response.data.success) {
-        Snackbar.show({
-          text: 'Attendance started successfully!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'Attendance started successfully!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       } else {
-        Snackbar.show({
-          text: response.data.error,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: 'An error occurred while starting attendance!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
         translateX.value = withTiming(0);
         runOnJS(setIsStarted)(false);
         runOnJS(setIsSwipeActive)(false);
       }
     } catch (error) {
-      Snackbar.show({
-        text: 'An error occurred while starting attendance!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'An error occurred while starting attendance!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     }
   };
@@ -186,11 +206,13 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
     setCurrentLocation(null);
     setErrorMsg('');
 
-    Snackbar.show({
-      text: 'Stopping attendance...',
-      duration: Snackbar.LENGTH_SHORT,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
+    Toast.show({
+      type: 'info',
+      text1: 'Stopping attendance...',
+      position: 'top',
+      visibilityTime: 1000,
+      autoHide: true,
+      topOffset: 10,      
     });
 
     try {
@@ -201,26 +223,32 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
       );
 
       if (response.data.success) {
-        Snackbar.show({
-          text: 'Attendance stopped successfully!',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'Attendance stopped successfully!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       } else {
-        Snackbar.show({
-          text: response.data.message,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: response.data.error || 'An error occurred while stopping attendance!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: 'An error occurred while stopping attendance!',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'An error occurred while stopping attendance!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     }
   };

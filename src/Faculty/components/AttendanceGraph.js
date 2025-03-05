@@ -3,7 +3,7 @@ import React from 'react';
 import {BarChart} from 'react-native-gifted-charts';
 
 const AttendanceGraph = ({barData}) => {
-  console.log('barData:', barData);
+  console.log('Faculty BarData:', barData);
   return (
     <View style={styles.graphContainer}>
       <Text style={styles.graphTitle}>Head-Count</Text>

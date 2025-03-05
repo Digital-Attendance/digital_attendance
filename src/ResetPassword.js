@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import {BASE_URL} from '@env';
 import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 
 const ResetPassword = ({navigation, route}) => {
   const {email} = route.params;
@@ -20,32 +21,38 @@ const ResetPassword = ({navigation, route}) => {
   const handlePasswordReset = async () => {
     setIsVerifying(true);
     if (!newPassword || !confirmPassword) {
-      Snackbar.show({
-        text: 'Please enter all fields',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'Please enter all fields !',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
       setIsVerifying(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Snackbar.show({
-        text: 'Passwords do not match',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: 'Passwords do not match !',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
       setIsVerifying(false);
       return;
     }
 
-    Snackbar.show({
-      text: 'Resetting password...',
-      duration: Snackbar.LENGTH_LONG,
-      backgroundColor: '#2B8781',
-      textColor: '#fff',
+    Toast.show({
+      type: 'info',
+      text1: 'Resetting password...',
+      position: 'top',
+      visibilityTime: 1000,
+      autoHide: true,
+      topOffset: 10,
     });
 
     try {
@@ -60,31 +67,36 @@ const ResetPassword = ({navigation, route}) => {
       );
 
       if (response.data.success) {
-        Snackbar.show({
-          text: 'Password reset successful. Redirecting to login...',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#5CB85C',
-          textColor: '#fff',
+        Toast.show({
+          type: 'success',
+          text1: 'Password reset successful. Redirecting to login...',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
 
         setInterval(() => {
           navigation.navigate('Login');
         }, 500);
       } else {
-        Snackbar.show({
-          text: response.data.message,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: '#D9534F',
-          textColor: '#fff',
+        Toast.show({
+          type: 'error',
+          text1: response.data.message,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,      
         });
       }
     } catch (error) {
-      Snackbar.show({
-        text: error,
-        
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: '#D9534F',
-        textColor: '#fff',
+      Toast.show({
+        type: 'error',
+        text1: error,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,      
       });
     } finally {
       setIsVerifying(false);
