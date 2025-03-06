@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
-import { format } from 'date-fns';
+import {format} from 'date-fns';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -13,12 +13,20 @@ import {
 } from 'react-native-svg';
 import Performers from './Performers';
 
+const getProgressColor = progress => {
+  if (progress <= 50) return ['#ff0000', '#ff4d4d'];
+  if (progress <= 75) return ['#f9ed39', '#f9f9ae'];
+  if (progress <= 85) return ['#0575E6', '#00F260'];
+  return ['#86e83c', '#2bb539'];
+};
+
 const SummaryCard = ({subjectRecord}) => {
   const [progress, setProgress] = useState(0);
   const navigation = useNavigation();
   useEffect(() => {
-    setProgress(subjectRecord.averageAttendanceLast5Days);
+    setProgress(subjectRecord.averageAttendance);
   }, [subjectRecord]);
+  const progressColors = getProgressColor(progress);
 
   const CircularProgress = useMemo(
     () => (
@@ -33,8 +41,12 @@ const SummaryCard = ({subjectRecord}) => {
         renderCap={({center}) => (
           <Defs>
             <SVGLinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor="#00F260" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#0575E6" stopOpacity="1" />
+              <Stop offset="0%" stopColor={progressColors[0]} stopOpacity="1" />
+              <Stop
+                offset="100%"
+                stopColor={progressColors[1]}
+                stopOpacity="1"
+              />
             </SVGLinearGradient>
           </Defs>
         )}
@@ -80,7 +92,7 @@ const SummaryCard = ({subjectRecord}) => {
               {CircularProgress}
               <Text style={styles.progressText}>{progress}%</Text>
               <Text style={styles.progressTitle}>AVG Attendance</Text>
-              <Text style={styles.progressSubTitle}>Last 5 Days</Text>
+              {/* <Text style={styles.progressSubTitle}>Last 5 Days</Text> */}
             </View>
           </View>
           <View style={styles.statsDataContainer}>

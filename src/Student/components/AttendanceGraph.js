@@ -24,16 +24,13 @@ const AttendanceGraph = ({cumulativeAttendance}) => {
             startOpacity={0.2}
             endOpacity={0.1}
             hideDataPoints
-            // showDataPoints
-            // dataPointsColor="#147df5"
-            // dataPointsRadius={3}
             showVerticalLines
             verticalLinesThickness={10}
             verticalLinesColor="#147df5"
             verticalLinesUptoDataPoint
             hideRules
             xAxisLabelTextStyle={{fontSize: 8, color: 'gray'}}
-            yAxisLabelTexts={['0', '25', '50', '75', '100']}
+            maxValue={100}
             yAxisTextStyle={{fontSize: 10, color: 'gray'}}
             verticalLinesStrokeLinecap="butt"
             

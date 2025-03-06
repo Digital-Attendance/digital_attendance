@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
   profilePicContainer: {
     position: 'absolute',
-    top: 8,
+    top: 6,
     width: 30,
     height: 30,
     borderRadius: 20,

@@ -44,7 +44,7 @@ const SubjectCard = ({refresh}) => {
       const attendanceRecords = data[index]?.attendanceRecords || [];
       const formattedData = attendanceRecords.map(record => {
         const istDate = new Date(record.date);
-        istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
+        // istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
 
         return {
           date: format(istDate, 'd MMM'),

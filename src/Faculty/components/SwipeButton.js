@@ -20,7 +20,7 @@ import BASE_URL from '../../../url';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Snackbar from 'react-native-snackbar';
-
+import Toast from 'react-native-toast-message';
 const {width} = Dimensions.get('window');
 const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
@@ -180,7 +180,7 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
       } else {
         Toast.show({
           type: 'error',
-          text1: 'An error occurred while starting attendance!',
+          text1: response.data.error || 'An error occurred while starting attendance!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,

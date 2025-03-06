@@ -1,23 +1,31 @@
 import React, {useState, useCallback} from 'react';
-import {StyleSheet, ScrollView} from 'react-native';
+import {StyleSheet, ScrollView, RefreshControl} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import Navbar from './components/Navbar';
 import SubjectCard from './components/SubjectCard';
 
 const Faculty_Home = () => {
   const [refresh, setRefresh] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   useFocusEffect(
     useCallback(() => {
       setRefresh(prev => !prev);
     }, []),
   );
+  const onRefresh = () => {
+    setRefreshing(true);
+    setRefresh(prev => !prev);
+    setTimeout(() => setRefreshing(false), 1000);
+  };
   return (
     <ScrollView
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
-      >
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <Navbar />
-      <SubjectCard refresh={refresh} /> 
+      <SubjectCard refresh={refresh} />
     </ScrollView>
   );
 };

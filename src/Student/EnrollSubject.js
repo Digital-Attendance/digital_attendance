@@ -11,6 +11,7 @@ import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
 import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
+import axios from 'axios';
 const EnrollSubject = ({navigation, route}) => {
   const {userEmail} = useUserContext();
 
@@ -25,13 +26,12 @@ const EnrollSubject = ({navigation, route}) => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/student/subjects`);
-        const data = await response.json();
-        setSubjectData(data);
+        const response = await axios.get(`${BASE_URL}/student/subjects`);
+        setSubjectData(response.data);
       } catch (error) {
         Toast.show({
           type: 'error',
-          text1: error,
+          text1: error.response?.data?.message || 'Failed to fetch subjects!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
@@ -40,13 +40,14 @@ const EnrollSubject = ({navigation, route}) => {
       }
       setLoading(false);
     };
+
     fetchSubjects();
   }, []);
 
   const handleSubmit = async () => {
     if (!course || !department || !semester || !subject) {
       Toast.show({
-        type: 'success',
+        type: 'error',
         text1: 'All fields are required!',
         position: 'top',
         visibilityTime: 1000,
@@ -55,47 +56,48 @@ const EnrollSubject = ({navigation, route}) => {
       });
       return;
     }
+
     setEnroll(true);
+
     try {
-      const response = await fetch(`${BASE_URL}/student/enroll`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          studentEmail: userEmail,
-          subjectCode: subject,
-        }),
+      const response = await axios.post(`${BASE_URL}/student/enroll`, {
+        studentEmail: userEmail,
+        subjectCode: subject,
       });
-      const data = await response.json();
-      if (response.ok) {
+
+      if (response.status === 200) {
         Toast.show({
           type: 'success',
-          text1: response.data.message,
+          text1: response.data.message || 'Enrollment successful!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
           topOffset: 10,
         });
         navigation.goBack();
+      }
+    } catch (error) {
+      if (error.response) {
+        Toast.show({
+          type: 'error',
+          text1: error.response.data.error || 'Enrollment failed!',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Enrollment failed!',
+          text1: 'Network error! Please try again.',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
           topOffset: 10,
         });
       }
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: error,
-        position: 'top',
-        visibilityTime: 1000,
-        autoHide: true,
-        topOffset: 10,
-      });
     }
+
     setEnroll(false);
   };
 

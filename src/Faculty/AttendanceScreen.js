@@ -26,6 +26,14 @@ const AttendanceScreen = ({route}) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const handleAttendanceUpdate = (updatedRecord) => {
+    setAttendanceRecords(prevRecords =>
+      prevRecords.map(record =>
+        record.date === updatedRecord.date ? updatedRecord : record
+      )
+    );
+  };
+
   const fetchAttendanceRecords = useCallback(async () => {
     try {
       setLoading(true);
@@ -67,7 +75,7 @@ const AttendanceScreen = ({route}) => {
     return attendanceRecords
       .map(record => {
         const istDate = new Date(record.date);
-        istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
+        // istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
         return istDate;
       })
       .sort((a, b) => new Date(b) - new Date(a));
@@ -174,9 +182,10 @@ const AttendanceScreen = ({route}) => {
             <Leaderboard subjectRecord={subjectRecord} />
           ) : (
             <Records
-              subjectCode={subjectRecord.subjectCode}
-              attendanceRecords={attendanceRecords}
-              selectedDate={format(selectedDate, 'yyyy-MM-dd')}
+            subjectCode={subjectRecord.subjectCode}
+            attendanceRecords={attendanceRecords}
+            selectedDate={format(selectedDate, 'yyyy-MM-dd')}
+            onAttendanceUpdated={handleAttendanceUpdate}
             />
           )}
           <DownloadButton subjectCode={subjectRecord.subjectCode} />

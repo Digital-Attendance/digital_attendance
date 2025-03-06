@@ -12,13 +12,14 @@ import {format} from 'date-fns';
 import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
 
+
 const convertUTCtoIST = utcDate => {
   const istDate = new Date(utcDate);
-  istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
+  // istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
   return format(istDate, 'yyyy-MM-dd');
 };
 
-const Records = ({selectedDate, attendanceRecords, subjectCode}) => {
+const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpdated}) => {
   const recordForDate = attendanceRecords.find(record => {
     return convertUTCtoIST(record.date) === selectedDate;
   });
@@ -32,6 +33,9 @@ const Records = ({selectedDate, attendanceRecords, subjectCode}) => {
   }, [selectedDate]);
 
   const toggleEditing = () => {
+    if (isEditing) {
+      setUpdatedAttendance([...students]);
+    }
     setIsEditing(!isEditing);
   };
 
@@ -74,6 +78,9 @@ const Records = ({selectedDate, attendanceRecords, subjectCode}) => {
           duration: Snackbar.LENGTH_SHORT,
         });
         setIsEditing(false);
+        if (onAttendanceUpdated) {
+          onAttendanceUpdated({ ...recordForDate, Students: updatedAttendance });
+        }
       } else {
         Snackbar.show({
           text: data.error || 'An error occurred while updating attendance',

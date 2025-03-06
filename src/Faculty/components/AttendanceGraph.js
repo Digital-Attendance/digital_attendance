@@ -25,12 +25,13 @@ const AttendanceGraph = ({barData}) => {
           showGradient
           gradientColor="#147df5"
           showValuesAsTopLabel
+          hideRules
           topLabelTextStyle={{fontSize: 8, color: 'gray'}}
-          rulesColor={'#3F3F3F'}
+          // rulesColor={'#3F3F3F'}
         />
       ) : (
         <View
-          style={{alignItems: 'center', height: 260, justifyContent: 'center'}}>
+          style={{alignItems: 'center', height: 240, justifyContent: 'center'}}>
           <Text style={styles.noData}>No attendance data available</Text>
         </View>
       )}

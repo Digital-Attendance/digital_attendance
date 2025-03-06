@@ -17,18 +17,32 @@ import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import BASE_URL from '../../url';
 
-const THRESHOLD_METERS = 0.01;
+// const THRESHOLD_METERS = 500;
 
 const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
+  const {subjectCode} = route.params;
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [facultyLocation, setFacultyLocation] = useState(null);
+  // const [facultyLoc, setFacultyLocation] = useState(null);
 
   const navigation = useNavigation();
-  const {subjectCode} = route.params;
+
+  function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
 
   const fetchFacultyLocation = async () => {
     try {
@@ -42,10 +56,12 @@ const VerifyLocation = ({route}) => {
       );
 
       if (response.data.success) {
-        setFacultyLocation(response.data.location);
+        // setFacultyLocation(response.data.location);
+        return response.data.location;
       } else if (!response.data.success) {
         setErrorMsg('Attendance not started yet');
         setVerifying(false);
+        return null;
       }
     } catch (error) {
       setErrorMsg(error.message);
@@ -69,14 +85,15 @@ const VerifyLocation = ({route}) => {
 
   const verifyLocation = async () => {
     const gpsStatus = await checkGPSStatus();
-    console.log('GPS Status:', gpsStatus);
     if (!gpsStatus) {
       setErrorMsg("Please turn on your device's GPS");
       setVerifying(false);
       return;
     }
-    await fetchFacultyLocation();
+    const facultyLocation = await fetchFacultyLocation();
     if (!facultyLocation) {
+      setErrorMsg('Faculty location not found, Retry !');
+      setVerifying(false);
       return;
     }
 
@@ -121,16 +138,27 @@ const VerifyLocation = ({route}) => {
 
     if (watchId.current !== null) {
       Geolocation.clearWatch(watchId.current);
+      
     }
-
+    
     watchId.current = Geolocation.watchPosition(
       position => {
         const {latitude, longitude} = position.coords;
         setCurrentLocation({latitude, longitude});
 
-        const isVerified =
-          Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
-          Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
+        const distance = getDistanceFromLatLonInMeters(
+          facultyLocation.latitude,
+          facultyLocation.longitude,
+          latitude,
+          longitude,
+        );
+
+        const isVerified = distance < 16;
+
+        // const isVerified =
+        //   Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
+        //   Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
+        console.log('Distance:', distance, 'meters. Location Verified:', isVerified);
         setLocationVerified(isVerified);
         setVerifying(false);
 
@@ -141,7 +169,6 @@ const VerifyLocation = ({route}) => {
         }
       },
       error => {
-        console.log('Location Error:', error.message);
         setErrorMsg('Location Error: ' + error.message);
         setVerifying(false);
       },
@@ -191,7 +218,7 @@ const VerifyLocation = ({route}) => {
           </Paragraph>
         </View>
       )}
-      {currentLocation && (
+      {/* {currentLocation && (
         <View style={styles.locationContainer}>
           <Paragraph style={styles.locationText}>
             Your Location: {currentLocation.latitude.toFixed(6)},{' '}
@@ -202,7 +229,7 @@ const VerifyLocation = ({route}) => {
             {facultyLocation.longitude.toFixed(6)}
           </Paragraph>
         </View>
-      )}
+      )} */}
       {!verifying && (
         <TouchableOpacity style={styles.recheck} onPress={verifyLocation}>
           <Text style={styles.recheckText}>Re-check Location</Text>
