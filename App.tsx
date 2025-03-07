@@ -1,10 +1,10 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, StatusBar} from 'react-native';
-
 import {PaperProvider} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {AsyncStorageProvider} from './src/Context';
+import Toast,{BaseToast,ErrorToast,ToastConfigParams} from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
 
@@ -25,10 +25,62 @@ import Student_Home from './src/Student/Student_Home';
 import VerifyLocation from './src/Student/VerifyLocation';
 import LivenessDetection from './src/Student/LivenessDetection';
 import EnrollSubject from './src/Student/EnrollSubject';
-
-import Toast from 'react-native-toast-message';
 import SubjectInfo from './src/Student/SubjectInfo';
+import ArchivedSubjects from './src/Faculty/ArchivedSubjects';
 
+const toastConfig = {
+  success: (props : ToastConfigParams<any>) => (
+    <BaseToast
+      {...props}
+      style={{ borderLeftColor: 'transparent', backgroundColor: '#E8F5E9' }}
+      contentContainerStyle={{ padding:0 }}
+      text1Style={{
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: 'black',
+        textAlign: 'center',
+      }}
+      text2Style={{
+        fontSize: 14,
+        color: 'black',
+      }}
+    />
+  ),
+  error: (props: ToastConfigParams<any>) => (
+    <ErrorToast
+      {...props}
+      style={{ borderLeftColor: 'transparent', backgroundColor: '#FFEBEE', }}
+      contentContainerStyle={{ padding: 0 }}
+      text1Style={{
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: 'black',
+        textAlign: 'center',
+      }}
+      text2Style={{
+        fontSize: 14,
+        color: 'black',
+      }}
+    />
+  ),
+  info: (props: ToastConfigParams<any>) => (
+    <BaseToast
+      {...props}
+      style={{ borderLeftColor: 'transparent', backgroundColor: '#1E1E1E', }}
+      contentContainerStyle={{ padding: 0 }}
+      text1Style={{
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#fff',
+        textAlign: 'center',
+      }}
+      text2Style={{
+        fontSize: 14,
+        color: 'black',
+      }}
+    />
+  ),
+};
 
 const App = () => {
   return (
@@ -68,6 +120,7 @@ const App = () => {
                 name="AttendanceScreen"
                 component={AttendanceScreen}
               />
+              <Stack.Screen name="ArchivedSubjects" component={ArchivedSubjects} />
               {/* Student Screens */}
               <Stack.Screen name="Student_Home" component={Student_Home} />
               <Stack.Screen name="SubjectInfo" component={SubjectInfo} />
@@ -80,7 +133,7 @@ const App = () => {
             </Stack.Navigator>
           </NavigationContainer>
         </AsyncStorageProvider>
-      <Toast />
+      <Toast config={toastConfig} />
       </SafeAreaView>
     </PaperProvider>
   );

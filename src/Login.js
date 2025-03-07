@@ -38,7 +38,7 @@ export default function Login({navigation}) {
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Toast.show({
-        type: 'info',
+        type: 'error',
         text1: 'Username and password cannot be empty!',
         position: 'top',
         visibilityTime: 1000,
@@ -82,6 +82,11 @@ export default function Login({navigation}) {
             'ngrok-skip-browser-warning': 'true',
           },
         },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        }
       );
 
       if (response.status === 200) {

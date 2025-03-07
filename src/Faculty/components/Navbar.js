@@ -1,10 +1,12 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {StyleSheet, View, Image, TouchableOpacity, Text} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SideMenu from './SideMenu';
 
 const Navbar = () => {
+  const [isSideMenuVisible, setSideMenuVisibility] = useState(false);
   const navigation = useNavigation();
   const today = new Date();
   const dayName = today.toLocaleDateString('en-US', {weekday: 'long'});
@@ -13,13 +15,21 @@ const Navbar = () => {
     day: 'numeric',
     year: 'numeric',
   });
+
+  const toggleSideMenu = () => {
+    setSideMenuVisibility(prev => !prev);
+  }
+
+
+  /*onLongPress={async () => {
+          await AsyncStorage.removeItem('access_token');
+          navigation.popTo('SplashScreen');
+        }} */
+
   return (
     <View style={styles.navContainer}>
       <TouchableOpacity
-        onLongPress={async () => {
-          await AsyncStorage.removeItem('access_token');
-          navigation.popTo('SplashScreen');
-        }}
+        onPress={toggleSideMenu}
         style={styles.navbarTextHeader}>
         <Text style={styles.navbarText}>{dayName}</Text>
         <Text style={styles.navbarSubText}>{formattedDate}</Text>
@@ -35,6 +45,7 @@ const Navbar = () => {
           color="#009f9f"
         />
       </TouchableOpacity>
+      {isSideMenuVisible && <SideMenu toggleSideMenu={toggleSideMenu} />}
     </View>
   );
 };
@@ -50,8 +61,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   navbarTextHeader: {
-    // borderWidth: 1,
-    // borderColor: '#005758',
+    
   },
   navbarText: {
     color: '#f0f0f0',

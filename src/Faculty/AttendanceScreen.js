@@ -8,17 +8,21 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
+import axios from 'axios';
 import {format, parseISO} from 'date-fns';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useUserContext} from '../Context';
 import Leaderboard from './components/Leaderboard';
 import Records from './components/Records';
 import DeleteSubject from './components/DeleteSubject';
 import AddFaculty from './components/AddFaculty';
 import DownloadButton from './components/DownloadButton';
 import BASE_URL from '../../url';
-import Toast from 'react-native-toast-message';
 
 const AttendanceScreen = ({route}) => {
   const {subjectRecord} = route.params;
@@ -28,6 +32,8 @@ const AttendanceScreen = ({route}) => {
   const [facultyModalVisible, setFacultyModalVisible] = useState(false);
   const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {userEmail} = useUserContext();
+  const navigation = useNavigation();
 
   const [updatedSubjectRecord, setUpdatedSubjectRecord] =
     useState(subjectRecord);
@@ -47,6 +53,73 @@ const AttendanceScreen = ({route}) => {
         record.date === updatedRecord.date ? updatedRecord : record,
       ),
     );
+  };
+  const handleAttendanceDeletion = deletedDate => {
+    setAttendanceRecords(prevRecords =>
+      prevRecords.filter(record => record.date !== deletedDate),
+    );
+    setSelectedDate(null);
+  };
+
+  const handleArchiveSubject = async () => {
+    try {
+      Alert.alert(
+        'Archive Subject',
+        'Are you sure you want to archive this subject?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Archive',
+            onPress: async () => {
+              const response = await axios.post(
+                `${BASE_URL}/faculty/archive-subject`,
+                {
+                  subjectCode: subjectRecord.subjectCode,
+                  email: userEmail,
+                },
+                {
+                  validateStatus: function (status) {
+                    return status < 500;
+                  },
+                },
+              );
+              if (response.ok) {
+                Toast.show({
+                  type: 'success',
+                  text1: 'Subject archived successfully',
+                  position: 'top',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
+                });
+                navigation.goBack();
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error archiving subject',
+                  position: 'top',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
+                });
+              }
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error archiving subject',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
+      });
+    }
   };
 
   const fetchAttendanceRecords = useCallback(async () => {
@@ -118,9 +191,6 @@ const AttendanceScreen = ({route}) => {
         end={{x: 1, y: 0}}
         colors={['#007a7a', '#005758']}
         style={styles.header}>
-        <TouchableOpacity onPress={toggleSideMenu}>
-          <MaterialCommunityIcons name="menu" size={28} color="#fff" />
-        </TouchableOpacity>
         <View style={styles.subjectContainer}>
           <Text
             style={styles.subjectName}
@@ -130,6 +200,9 @@ const AttendanceScreen = ({route}) => {
           </Text>
           <Text style={styles.subjectCode}>{subjectRecord.subjectCode}</Text>
         </View>
+        <TouchableOpacity onPress={toggleSideMenu}>
+          <MaterialCommunityIcons name="widgets" size={28} color="#fff" />
+        </TouchableOpacity>
         <Modal transparent visible={facultyModalVisible} animationType="fade">
           <Pressable style={styles.overlay} onPress={toggleFacultyModal}>
             <AddFaculty
@@ -148,24 +221,40 @@ const AttendanceScreen = ({route}) => {
         </Modal>
       </LinearGradient>
       {sideMenuVisible && (
-        <View style={styles.sideMenu}>
-          <Pressable style={styles.menuItem} onPress={toggleMenu}>
-            <MaterialCommunityIcons name="delete" size={20} color="#fff" />
-            <Text style={styles.menuText}>Delete Subject</Text>
+        <Modal transparent visible={sideMenuVisible} animationType="fade">
+          <Pressable style={styles.sideMenuOverlay} onPress={toggleSideMenu}>
+            <View style={styles.sideMenu}>
+              <Pressable style={styles.menuItem} onPress={toggleMenu}>
+                <MaterialCommunityIcons name="delete" size={20} color="#fff" />
+                <Text style={styles.menuText}>Delete Subject</Text>
+              </Pressable>
+              <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
+                <MaterialCommunityIcons
+                  name="account-plus-outline"
+                  size={20}
+                  color="#fff"
+                />
+                <Text style={styles.menuText}>Add Faculty</Text>
+              </Pressable>
+              <Pressable style={styles.menuItem}>
+                <MaterialCommunityIcons
+                  name="account-arrow-left-outline"
+                  size={20}
+                  color="#fff"
+                />
+                <Text style={styles.menuText}>View Requests</Text>
+              </Pressable>
+              <Pressable style={styles.menuItem} onPress={handleArchiveSubject}>
+                <MaterialCommunityIcons
+                  name="archive-lock"
+                  size={20}
+                  color="#fff"
+                />
+                <Text style={styles.menuText}>Archive Subject</Text>
+              </Pressable>
+            </View>
           </Pressable>
-          <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
-            <MaterialCommunityIcons
-              name="account-plus-outline"
-              size={20}
-              color="#fff"
-            />
-            <Text style={styles.menuText}>Add Faculty</Text>
-          </Pressable>
-          <Pressable style={styles.menuItem}>
-            <MaterialCommunityIcons name="eye" size={20} color="#fff" />
-            <Text style={styles.menuText}>View Admission</Text>
-          </Pressable>
-        </View>
+        </Modal>
       )}
 
       {loading ? (
@@ -231,6 +320,7 @@ const AttendanceScreen = ({route}) => {
               attendanceRecords={attendanceRecords}
               selectedDate={format(selectedDate, 'yyyy-MM-dd')}
               onAttendanceUpdated={handleAttendanceUpdate}
+              onAttendanceDeleted={handleAttendanceDeletion}
             />
           )}
           <DownloadButton subjectCode={subjectRecord.subjectCode} />
@@ -248,7 +338,7 @@ const styles = StyleSheet.create({
   },
   sideMenu: {
     position: 'absolute',
-    left: 0,
+    right: 0,
     top: 60,
     backgroundColor: '#333',
     width: 200,
@@ -261,7 +351,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuText: {
-    color: '#fff', 
+    color: '#fff',
     fontSize: 16,
     marginLeft: 10,
   },
@@ -292,6 +382,12 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.73)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sideMenuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.36)',
     justifyContent: 'center',
     alignItems: 'center',
   },

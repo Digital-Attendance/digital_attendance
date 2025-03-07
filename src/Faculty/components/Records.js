@@ -11,15 +11,20 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {format} from 'date-fns';
 import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
-
+import axios from 'axios';
 
 const convertUTCtoIST = utcDate => {
   const istDate = new Date(utcDate);
-  // istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
   return format(istDate, 'yyyy-MM-dd');
 };
 
-const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpdated}) => {
+const Records = ({
+  selectedDate,
+  attendanceRecords,
+  subjectCode,
+  onAttendanceUpdated,
+  onAttendanceDeleted,
+}) => {
   const recordForDate = attendanceRecords.find(record => {
     return convertUTCtoIST(record.date) === selectedDate;
   });
@@ -27,7 +32,7 @@ const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpda
   const students = recordForDate ? recordForDate.Students : [];
   const [isEditing, setIsEditing] = useState(false);
   const [updatedAttendance, setUpdatedAttendance] = useState([...students]);
-
+  
   useEffect(() => {
     setUpdatedAttendance([...students]);
   }, [selectedDate]);
@@ -45,6 +50,48 @@ const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpda
         i === index ? {...student, present: !student.present} : student,
       ),
     );
+  };
+
+  const handleDeleteAttendanceRecord = async () => {
+    try {
+      if (!recordForDate || !recordForDate.date) {
+        Snackbar.show({
+          text: 'No attendance record found for this date',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return;
+      }
+      const response = await axios.delete(
+        `${BASE_URL}/faculty/delete-attendance`,
+        {
+          data: {
+            subjectCode,
+            date: recordForDate.date,
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        Snackbar.show({
+          text: 'Attendance record deleted successfully',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        if (onAttendanceDeleted) {
+          onAttendanceDeleted(recordForDate.date);
+        }
+      } else {
+        Snackbar.show({
+          text: 'An error occurred while deleting attendance record',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting attendance record:', error);
+      Snackbar.show({
+        text: 'Network error. Please try again.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
   };
 
   const saveChanges = async () => {
@@ -79,7 +126,7 @@ const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpda
         });
         setIsEditing(false);
         if (onAttendanceUpdated) {
-          onAttendanceUpdated({ ...recordForDate, Students: updatedAttendance });
+          onAttendanceUpdated({...recordForDate, Students: updatedAttendance});
         }
       } else {
         Snackbar.show({
@@ -99,21 +146,28 @@ const Records = ({selectedDate, attendanceRecords, subjectCode, onAttendanceUpda
   return (
     <View style={styles.container}>
       <View style={styles.recordHeader}>
-        <Text style={styles.title}>Records</Text>
-        {isEditing && (
-          <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-            <MaterialCommunityIcons name="check" size={20} color="green" />
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
-          style={[styles.addButton, isEditing && {backgroundColor: 'red'}]}
-          onPress={toggleEditing}>
-          <MaterialCommunityIcons
-            name={isEditing ? 'close' : 'pencil'}
-            size={20}
-            color="#000"
-          />
+          style={styles.dropAttendance}
+          onPress={handleDeleteAttendanceRecord}>
+          <MaterialCommunityIcons name="delete" size={20} color="#fff" />
         </TouchableOpacity>
+        <Text style={styles.title}>Records</Text>
+        <View style={styles.buttonContainer}>
+          {isEditing && (
+            <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
+              <MaterialCommunityIcons name="check" size={20} color="green" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[styles.addButton, isEditing && {backgroundColor: 'red'}]}
+            onPress={toggleEditing}>
+            <MaterialCommunityIcons
+              name={isEditing ? 'close' : 'pencil'}
+              size={20}
+              color="#000"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.scrollContainer}>
@@ -164,11 +218,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    width: '80%',
+    // width: '80%',
     color: '#fff',
     fontSize: 28,
     fontFamily: 'Teko-Bold',
     textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
   },
   addButton: {
     backgroundColor: '#fff',
