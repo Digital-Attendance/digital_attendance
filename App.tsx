@@ -27,6 +27,7 @@ import LivenessDetection from './src/Student/LivenessDetection';
 import EnrollSubject from './src/Student/EnrollSubject';
 
 import Toast from 'react-native-toast-message';
+import SubjectInfo from './src/Student/SubjectInfo';
 
 
 const App = () => {
@@ -40,15 +41,7 @@ const App = () => {
               initialRouteName="SplashScreen"
               screenOptions={{
                 headerShown: false,
-                // animation : 'default',
-                // animation : 'slide_from_right',
-                // animation : 'slide_from_left',
-                // animation : 'slide_from_bottom',
                 animation: 'fade',
-                // animation : 'fade_from_bottom',
-                // animation : 'fade_from_right',
-                // animation : 'scale_from_center',
-                // animation : 'none',
               }}>
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="Start" component={Start} />
@@ -77,6 +70,7 @@ const App = () => {
               />
               {/* Student Screens */}
               <Stack.Screen name="Student_Home" component={Student_Home} />
+              <Stack.Screen name="SubjectInfo" component={SubjectInfo} />
               <Stack.Screen name="EnrollSubject" component={EnrollSubject} />
               <Stack.Screen name="VerifyLocation" component={VerifyLocation} />
               <Stack.Screen

@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback,useEffect} from 'react';
+import React, {useState, useMemo, useCallback, useEffect} from 'react';
 import {
   View,
   Text,
@@ -15,22 +15,37 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Leaderboard from './components/Leaderboard';
 import Records from './components/Records';
 import DeleteSubject from './components/DeleteSubject';
+import AddFaculty from './components/AddFaculty';
 import DownloadButton from './components/DownloadButton';
 import BASE_URL from '../../url';
-import Snackbar from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 
 const AttendanceScreen = ({route}) => {
   const {subjectRecord} = route.params;
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [facultyModalVisible, setFacultyModalVisible] = useState(false);
+  const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleAttendanceUpdate = (updatedRecord) => {
+  const [updatedSubjectRecord, setUpdatedSubjectRecord] =
+    useState(subjectRecord);
+
+  const handleStudentRemoval = scholarID => {
+    setUpdatedSubjectRecord(prev => ({
+      ...prev,
+      students: prev.students.filter(
+        student => student.scholarID !== scholarID,
+      ),
+    }));
+  };
+
+  const handleAttendanceUpdate = updatedRecord => {
     setAttendanceRecords(prevRecords =>
       prevRecords.map(record =>
-        record.date === updatedRecord.date ? updatedRecord : record
-      )
+        record.date === updatedRecord.date ? updatedRecord : record,
+      ),
     );
   };
 
@@ -46,21 +61,21 @@ const AttendanceScreen = ({route}) => {
       } else {
         Toast.show({
           type: 'error',
-          text1: "Error fetching attendance",
+          text1: 'Error fetching attendance',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: "Error fetching attendance",
+        text1: 'Error fetching attendance',
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
     } finally {
       setLoading(false);
@@ -75,7 +90,6 @@ const AttendanceScreen = ({route}) => {
     return attendanceRecords
       .map(record => {
         const istDate = new Date(record.date);
-        // istDate.setHours(istDate.getHours() + 5, istDate.getMinutes() + 30);
         return istDate;
       })
       .sort((a, b) => new Date(b) - new Date(a));
@@ -84,6 +98,12 @@ const AttendanceScreen = ({route}) => {
   const toggleMenu = useCallback(() => {
     setMenuVisible(prev => !prev);
   }, []);
+  const toggleSideMenu = useCallback(() => {
+    setSideMenuVisible(prev => !prev);
+  }, []);
+  const toggleFacultyModal = () => {
+    setFacultyModalVisible(prev => !prev);
+  };
 
   const handleDateSelect = useCallback(date => {
     setSelectedDate(prev =>
@@ -93,12 +113,14 @@ const AttendanceScreen = ({route}) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <LinearGradient
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}
         colors={['#007a7a', '#005758']}
         style={styles.header}>
+        <TouchableOpacity onPress={toggleSideMenu}>
+          <MaterialCommunityIcons name="menu" size={28} color="#fff" />
+        </TouchableOpacity>
         <View style={styles.subjectContainer}>
           <Text
             style={styles.subjectName}
@@ -108,13 +130,14 @@ const AttendanceScreen = ({route}) => {
           </Text>
           <Text style={styles.subjectCode}>{subjectRecord.subjectCode}</Text>
         </View>
-        <TouchableOpacity style={styles.deleteButton} onPress={toggleMenu}>
-          <MaterialCommunityIcons
-            name="trash-can-outline"
-            size={24}
-            color="#fff"
-          />
-        </TouchableOpacity>
+        <Modal transparent visible={facultyModalVisible} animationType="fade">
+          <Pressable style={styles.overlay} onPress={toggleFacultyModal}>
+            <AddFaculty
+              toggleFacultyModal={toggleFacultyModal}
+              subjectCode={subjectRecord.subjectCode}
+            />
+          </Pressable>
+        </Modal>
         <Modal transparent visible={menuVisible} animationType="fade">
           <Pressable style={styles.overlay} onPress={toggleMenu}>
             <DeleteSubject
@@ -124,6 +147,26 @@ const AttendanceScreen = ({route}) => {
           </Pressable>
         </Modal>
       </LinearGradient>
+      {sideMenuVisible && (
+        <View style={styles.sideMenu}>
+          <Pressable style={styles.menuItem} onPress={toggleMenu}>
+            <MaterialCommunityIcons name="delete" size={20} color="#fff" />
+            <Text style={styles.menuText}>Delete Subject</Text>
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
+            <MaterialCommunityIcons
+              name="account-plus-outline"
+              size={20}
+              color="#fff"
+            />
+            <Text style={styles.menuText}>Add Faculty</Text>
+          </Pressable>
+          <Pressable style={styles.menuItem}>
+            <MaterialCommunityIcons name="eye" size={20} color="#fff" />
+            <Text style={styles.menuText}>View Admission</Text>
+          </Pressable>
+        </View>
+      )}
 
       {loading ? (
         <ActivityIndicator
@@ -133,7 +176,6 @@ const AttendanceScreen = ({route}) => {
         />
       ) : (
         <>
-          {/* Date Container */}
           <View style={styles.dateContainer}>
             <TouchableOpacity onPress={() => setSelectedDate(null)}>
               <LinearGradient
@@ -179,13 +221,16 @@ const AttendanceScreen = ({route}) => {
           </View>
 
           {selectedDate === null ? (
-            <Leaderboard subjectRecord={subjectRecord} />
+            <Leaderboard
+              subjectRecord={updatedSubjectRecord}
+              onStudentRemoved={handleStudentRemoval}
+            />
           ) : (
             <Records
-            subjectCode={subjectRecord.subjectCode}
-            attendanceRecords={attendanceRecords}
-            selectedDate={format(selectedDate, 'yyyy-MM-dd')}
-            onAttendanceUpdated={handleAttendanceUpdate}
+              subjectCode={subjectRecord.subjectCode}
+              attendanceRecords={attendanceRecords}
+              selectedDate={format(selectedDate, 'yyyy-MM-dd')}
+              onAttendanceUpdated={handleAttendanceUpdate}
             />
           )}
           <DownloadButton subjectCode={subjectRecord.subjectCode} />
@@ -200,6 +245,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1E1E1E',
     alignItems: 'center',
+  },
+  sideMenu: {
+    position: 'absolute',
+    left: 0,
+    top: 60,
+    backgroundColor: '#333',
+    width: 200,
+    padding: 10,
+    zIndex: 1,
+  },
+  menuItem: {
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuText: {
+    color: '#fff', 
+    fontSize: 16,
+    marginLeft: 10,
   },
   header: {
     flexDirection: 'row',

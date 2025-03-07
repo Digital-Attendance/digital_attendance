@@ -3,18 +3,23 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Alert,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import BASE_URL from '../../../url';
+import Toast from 'react-native-toast-message';
 
-const StudentList = ({name, scholarID, attended, progress}) => {
+const StudentList = ({name, scholarID, attended, progress, onRemove}) => {
   return (
     <View style={styles.studentListCard}>
       <View style={styles.studentDetails}>
-        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
+        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+          {name}
+        </Text>
         <Text style={styles.scholarID}>Scholar ID : {scholarID}</Text>
       </View>
       <View style={styles.classAttendedContainer}>
@@ -32,19 +37,30 @@ const StudentList = ({name, scholarID, attended, progress}) => {
         />
         <Text style={styles.progressText}>{progress}%</Text>
       </View>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => onRemove(scholarID)}>
+        <MaterialCommunityIcons name="delete" size={20} color="#900" />
+      </TouchableOpacity>
     </View>
   );
 };
 
-const Leaderboard = ({ subjectRecord }) => {
+const Leaderboard = ({subjectRecord, onStudentRemoved}) => {
+
   const studentAttendanceMap = new Map();
 
-  subjectRecord.attendanceRecords.forEach((record) => {
-    record.Students.forEach((student) => {
-      const { scholarID, name, present } = student;
+  subjectRecord.attendanceRecords.forEach(record => {
+    record.Students.forEach(student => {
+      const {scholarID, name, present} = student;
 
       if (!studentAttendanceMap.has(scholarID)) {
-        studentAttendanceMap.set(scholarID, { name, scholarID, totalPresent: 0, totalClasses: 0 });
+        studentAttendanceMap.set(scholarID, {
+          name,
+          scholarID,
+          totalPresent: 0,
+          totalClasses: 0,
+        });
       }
 
       const studentData = studentAttendanceMap.get(scholarID);
@@ -54,33 +70,107 @@ const Leaderboard = ({ subjectRecord }) => {
     });
   });
 
-  const studentList = Array.from(studentAttendanceMap.values()).map((student) => ({
-    ...student,
-    attendancePercentage: subjectRecord.numberOfClassesTaken > 0
-      ? (student.totalPresent / subjectRecord.numberOfClassesTaken) * 100
-      : 0,
-  })).sort((a, b) => b.attendancePercentage - a.attendancePercentage);
+  subjectRecord.students.forEach(student => {
+    if (!studentAttendanceMap.has(student.scholarID)) {
+      studentAttendanceMap.set(student.scholarID, {
+        name: student.name,
+        scholarID: student.scholarID,
+        totalPresent: 0,
+        totalClasses: 0,
+      });
+    }
+  });
+
+  const studentList = Array.from(studentAttendanceMap.values())
+    .map(student => ({
+      ...student,
+      attendancePercentage:
+        subjectRecord.numberOfClassesTaken > 0
+          ? (student.totalPresent / subjectRecord.numberOfClassesTaken) * 100
+          : 0,
+    }))
+    .sort((a, b) => b.attendancePercentage - a.attendancePercentage);
+
+  const handleRemoveStudent = async scholarID => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to remove this student from the subject?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          onPress: async () => {
+            try {
+              const response = await fetch(
+                `${BASE_URL}/faculty/remove-student`,
+                {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    subjectCode: subjectRecord.subjectCode,
+                    scholarID,
+                  }),
+                },
+              );
+
+              const result = await response.json();
+              if (response.ok) {
+                Toast.show({
+                  type: 'success',
+                  text1: 'Student removed successfully!',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
+                });
+                onStudentRemoved(scholarID);
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Failed to remove student!',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
+                });
+              }
+            } catch (error) {
+              Toast.show({
+                type: 'error',
+                text1: 'Something went wrong!',
+                visibilityTime: 1000,
+                autoHide: true,
+                topOffset: 10,
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.scrollContainer}>
         <ScrollView contentContainerStyle={styles.studentList}>
-          {studentList.map((student, index) => (
-            <StudentList
-              key={index}
-              name={student.name}
-              scholarID={student.scholarID}
-              attended={student.totalPresent}
-              progress={student.attendancePercentage}
-            />
-          ))}
+          {studentList.length > 0 ? (
+            studentList.map((student, index) => (
+              <StudentList
+                key={index}
+                name={student.name}
+                scholarID={student.scholarID}
+                attended={student.totalPresent}
+                progress={student.attendancePercentage}
+                onRemove={handleRemoveStudent}
+              />
+            ))
+          ) : (
+            <Text style={styles.noDataText}>No students enrolled yet.</Text>
+          )}
         </ScrollView>
       </View>
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -158,6 +248,16 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontFamily: 'Raleway-Medium',
     color: '#fff',
+  },
+  deleteButton: {
+    padding: 5,
+    borderWidth: 1,
+  },
+  noDataText: {
+    color: '#ccc',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

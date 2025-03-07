@@ -1,12 +1,12 @@
-import { StyleSheet, View, Text } from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import React from 'react';
 
-const Performers = ({ subjectRecord }) => {
+const Performers = ({subjectRecord}) => {
   if (!subjectRecord || !subjectRecord.attendanceRecords) return null;
 
   const studentsAttendance = {};
-  subjectRecord.attendanceRecords.forEach((record) => {
-    record.Students.forEach((student) => {
+  subjectRecord.attendanceRecords.forEach(record => {
+    record.Students.forEach(student => {
       if (!studentsAttendance[student.scholarID]) {
         studentsAttendance[student.scholarID] = {
           name: student.name,
@@ -22,21 +22,30 @@ const Performers = ({ subjectRecord }) => {
     });
   });
 
-  const studentsWithAttendance = Object.values(studentsAttendance).map((student) => ({
-    ...student,
-    attendancePercentage: (student.presentCount / student.totalClasses) * 100,
-  }));
+  const studentsWithAttendance = Object.values(studentsAttendance).map(
+    student => ({
+      ...student,
+      attendancePercentage: (student.presentCount / student.totalClasses) * 100,
+    }),
+  );
 
-  studentsWithAttendance.sort((a, b) => b.attendancePercentage - a.attendancePercentage);
+  studentsWithAttendance.sort(
+    (a, b) => b.attendancePercentage - a.attendancePercentage,
+  );
 
   const topPerformers = studentsWithAttendance.slice(0, 3);
-
+  const colorShades = ['#0057b3', '#3385ff', '#99c2ff'];
   return (
     <View style={styles.performersContainer}>
       {topPerformers.map((performer, index) => (
-        <View key={performer.scholarID} style={[styles.profilePicContainer, { left: index * 25 }]}>
-          <View style={styles.profilePic}>
-            <Text style={styles.profileText}>{performer.scholarID.slice(-3)}</Text>
+        <View
+          key={performer.scholarID}
+          style={[styles.profilePicContainer, {left: index * 25}]}>
+          <View
+            style={[styles.profilePic, {backgroundColor: colorShades[index]}]}>
+            <Text style={styles.profileText}>
+              {performer.scholarID.slice(-3)}
+            </Text>
           </View>
         </View>
       ))}
@@ -66,7 +75,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#147df5',
+    // backgroundColor: '#147df5',
   },
   profileText: {
     fontSize: 10,

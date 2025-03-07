@@ -22,7 +22,6 @@ const SubjectCard = ({refresh}) => {
   const [barData, setBarData] = useState([]);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
 
-  
   const fetchSubjects = () => {
     axios
       .get(`${BASE_URL}/faculty/dashboard/${userEmail}`)
@@ -32,7 +31,15 @@ const SubjectCard = ({refresh}) => {
           updateGraphData(0, response.data);
         }
       })
-      .catch(error => console.log(error));
+      .catch(error =>
+        Toast.show({
+          type: 'error',
+          text1: error,
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        }),
+      );
   };
 
   useEffect(() => {

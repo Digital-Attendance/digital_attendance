@@ -4,6 +4,7 @@ import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
 import {
   LinearGradient as SVGLinearGradient,
   Stop,
@@ -23,6 +24,8 @@ const getProgressColor = progress => {
 
 const SummaryCard = ({subjectRecord}) => {
   const [progress, setProgress] = useState(0);
+  const navigation = useNavigation();
+
   useEffect(() => {
     let attendedClasses = subjectRecord.attendedClasses;
     let totalClasses = subjectRecord.totalClasses;
@@ -64,7 +67,7 @@ const SummaryCard = ({subjectRecord}) => {
   return (
     <View style={styles.wrapper}>
       <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.mainCard}>
-        <TouchableOpacity style={styles.subjectContainer}>
+        <TouchableOpacity style={styles.subjectContainer} onPress={() => {navigation.navigate('SubjectInfo', {subjectRecord})}}>
           <View style={styles.subjectInfo}>
             <Text style={styles.subjectCode}>{subjectRecord.subjectCode}</Text>
             <Text
