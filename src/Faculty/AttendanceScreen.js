@@ -12,10 +12,12 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
-import {format, parseISO} from 'date-fns';
+import {format} from 'date-fns';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {useUserContext} from '../Context';
 import Leaderboard from './components/Leaderboard';
 import Records from './components/Records';
@@ -26,6 +28,7 @@ import BASE_URL from '../../url';
 
 const AttendanceScreen = ({route}) => {
   const {subjectRecord} = route.params;
+  
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -34,18 +37,6 @@ const AttendanceScreen = ({route}) => {
   const [loading, setLoading] = useState(false);
   const {userEmail} = useUserContext();
   const navigation = useNavigation();
-
-  const [updatedSubjectRecord, setUpdatedSubjectRecord] =
-    useState(subjectRecord);
-
-  const handleStudentRemoval = scholarID => {
-    setUpdatedSubjectRecord(prev => ({
-      ...prev,
-      students: prev.students.filter(
-        student => student.scholarID !== scholarID,
-      ),
-    }));
-  };
 
   const handleAttendanceUpdate = updatedRecord => {
     setAttendanceRecords(prevRecords =>
@@ -77,7 +68,7 @@ const AttendanceScreen = ({route}) => {
               const response = await axios.post(
                 `${BASE_URL}/faculty/archive-subject`,
                 {
-                  subjectCode: subjectRecord.subjectCode,
+                  subjectID: subjectRecord.subjectID,
                   email: userEmail,
                 },
                 {
@@ -86,7 +77,8 @@ const AttendanceScreen = ({route}) => {
                   },
                 },
               );
-              if (response.ok) {
+              const data = await response.data;
+              if (response.status === 200) {
                 Toast.show({
                   type: 'success',
                   text1: 'Subject archived successfully',
@@ -125,12 +117,23 @@ const AttendanceScreen = ({route}) => {
   const fetchAttendanceRecords = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${BASE_URL}/faculty/attendanceRecord/${subjectRecord.subjectCode}`,
+      const response = await axios.get(
+        `${BASE_URL}/faculty/attendanceRecord/${subjectRecord.subjectID}`,
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
       );
-      const data = await response.json();
-      if (response.ok) {
+      const data = await response.data;
+      console.log(response);
+      if (response.status === 200) {
         setAttendanceRecords(data.attendanceRecords);
+
+        await AsyncStorage.setItem(
+          'cachedAttendanceRecords',
+          JSON.stringify(data.attendanceRecords),
+        );
       } else {
         Toast.show({
           type: 'error',
@@ -153,7 +156,7 @@ const AttendanceScreen = ({route}) => {
     } finally {
       setLoading(false);
     }
-  }, [subjectRecord.subjectCode]);
+  }, [subjectRecord.subjectID]);
 
   useEffect(() => {
     fetchAttendanceRecords();
@@ -207,7 +210,7 @@ const AttendanceScreen = ({route}) => {
           <Pressable style={styles.overlay} onPress={toggleFacultyModal}>
             <AddFaculty
               toggleFacultyModal={toggleFacultyModal}
-              subjectCode={subjectRecord.subjectCode}
+              subjectID={subjectRecord.subjectID}
             />
           </Pressable>
         </Modal>
@@ -215,7 +218,7 @@ const AttendanceScreen = ({route}) => {
           <Pressable style={styles.overlay} onPress={toggleMenu}>
             <DeleteSubject
               toggleMenu={toggleMenu}
-              subjectCode={subjectRecord.subjectCode}
+              subjectID={subjectRecord.subjectID}
             />
           </Pressable>
         </Modal>
@@ -224,10 +227,6 @@ const AttendanceScreen = ({route}) => {
         <Modal transparent visible={sideMenuVisible} animationType="fade">
           <Pressable style={styles.sideMenuOverlay} onPress={toggleSideMenu}>
             <View style={styles.sideMenu}>
-              <Pressable style={styles.menuItem} onPress={toggleMenu}>
-                <MaterialCommunityIcons name="delete" size={20} color="#fff" />
-                <Text style={styles.menuText}>Delete Subject</Text>
-              </Pressable>
               <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
                 <MaterialCommunityIcons
                   name="account-plus-outline"
@@ -236,13 +235,9 @@ const AttendanceScreen = ({route}) => {
                 />
                 <Text style={styles.menuText}>Add Faculty</Text>
               </Pressable>
-              <Pressable style={styles.menuItem}>
-                <MaterialCommunityIcons
-                  name="account-arrow-left-outline"
-                  size={20}
-                  color="#fff"
-                />
-                <Text style={styles.menuText}>View Requests</Text>
+              <Pressable style={styles.menuItem} onPress={toggleMenu}>
+                <MaterialCommunityIcons name="delete" size={20} color="#fff" />
+                <Text style={styles.menuText}>Delete Subject</Text>
               </Pressable>
               <Pressable style={styles.menuItem} onPress={handleArchiveSubject}>
                 <MaterialCommunityIcons
@@ -311,19 +306,18 @@ const AttendanceScreen = ({route}) => {
 
           {selectedDate === null ? (
             <Leaderboard
-              subjectRecord={updatedSubjectRecord}
-              onStudentRemoved={handleStudentRemoval}
+              subjectRecord={subjectRecord}              
             />
           ) : (
             <Records
-              subjectCode={subjectRecord.subjectCode}
+              subjectID={subjectRecord.subjectID}
               attendanceRecords={attendanceRecords}
               selectedDate={format(selectedDate, 'yyyy-MM-dd')}
               onAttendanceUpdated={handleAttendanceUpdate}
               onAttendanceDeleted={handleAttendanceDeletion}
             />
           )}
-          <DownloadButton subjectCode={subjectRecord.subjectCode} />
+          <DownloadButton subjectID={subjectRecord.subjectID} />
         </>
       )}
     </View>

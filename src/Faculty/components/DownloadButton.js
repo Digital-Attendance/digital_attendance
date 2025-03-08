@@ -19,14 +19,14 @@ const BUTTON_WIDTH = width - 40;
 const BUTTON_HEIGHT = 50;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
-const DownloadButton = ({subjectCode}) => {
+const DownloadButton = ({subjectID}) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const [isDownloading, setIsDownloading] = useState(false);
   
   const handleEmailAttendance = async () => {    
     try {
       const response = await axios.get(
-        `${BASE_URL}/faculty/email-attendance/${subjectCode}`,{
+        `${BASE_URL}/faculty/email-attendance/${subjectID}`,{
           validateStatus: function (status) {
             return status < 500;
           },

@@ -3,7 +3,7 @@ import {View, Dimensions, StyleSheet, Text} from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import axios from 'axios';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUserContext} from '../../Context';
 import SummaryCard from './SummaryCard';
 import AttendanceGraph from './AttendanceGraph';
@@ -17,11 +17,17 @@ const SubjectCard = ({refresh}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
 
-  const fetchSubjects = () => {
+  const fetchSubjects =async () => {
+    const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
+    if (cachedSubjects) {
+      const parsedSubjects = JSON.parse(cachedSubjects);
+      setSubjects(parsedSubjects);
+    }
     axios
       .get(`${BASE_URL}/student/dashboard/${userEmail}`)
       .then(response => {
         setSubjects(response.data);
+        AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
       })
       .catch(error => console.log(error));
   };
@@ -69,7 +75,7 @@ const SubjectCard = ({refresh}) => {
             cumulativeAttendance={subjects[activeIndex]?.cumulativeAttendance}
           />
 
-          <AttendanceButton key={activeIndex} subjectCode={subjects[activeIndex]?.subjectCode} />
+          <AttendanceButton key={activeIndex} subjectCode={subjects[activeIndex]?.subjectID} />
         </>
       ) : (
         <View style={styles.noSubjectContainer}>

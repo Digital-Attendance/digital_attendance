@@ -5,18 +5,18 @@ import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
 import { useNavigation } from '@react-navigation/native';
 
-const DeleteSubject = ({toggleMenu, subjectCode}) => {
+const DeleteSubject = ({toggleMenu, subjectID}) => {
   const [typedCode, setTypedCode] = useState('');
   const [error, setError] = useState('');
   const navigation = useNavigation();
   const handleDelete = async () => {
-    if (typedCode !== subjectCode) {
+    if (typedCode !== subjectID) {
       setError("Subject code does not match.");
       return;
     }
   
     try {
-      const response = await fetch(`${BASE_URL}/faculty/delete-subject/${subjectCode}`, {
+      const response = await fetch(`${BASE_URL}/faculty/delete-subject/${subjectID}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -32,7 +32,7 @@ const DeleteSubject = ({toggleMenu, subjectCode}) => {
         navigation.navigate('Faculty_Home');
         
       } else {
-        setError(data.message || "Failed to delete subject");
+        setError(data.error || "Failed to delete subject");
       }
     } catch (error) {
       setError("Error deleting subject. Please try again.");
@@ -45,7 +45,7 @@ const DeleteSubject = ({toggleMenu, subjectCode}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Delete Subject</Text>
       <Text style={styles.warning}>
-        This action is irreversible. Please type "{subjectCode}" to confirm
+        This action is irreversible. Please type "{subjectID}" to confirm
         deletion.
       </Text>
       <TextInput

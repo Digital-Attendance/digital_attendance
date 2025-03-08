@@ -20,7 +20,7 @@ import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
 
 const LivenessDetection = ({route}) => {
-  const {subjectCode} = route.params;
+  const {subjectID} = route.params;
   const {userEmail} = useUserContext();
   const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(false);
@@ -53,7 +53,7 @@ const LivenessDetection = ({route}) => {
       const response = await fetch(`${BASE_URL}/student/mark-attendance`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({studentEmail: userEmail, subjectCode}),
+        body: JSON.stringify({studentEmail: userEmail, subjectID}),
       });
       const data = await response.json();
       setAttendanceStatus(response.status === 200 ? 'success' : 'failed');

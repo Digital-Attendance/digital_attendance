@@ -27,7 +27,9 @@ const AttendanceGraph = ({barData}) => {
           showValuesAsTopLabel
           hideRules
           topLabelTextStyle={{fontSize: 8, color: 'gray'}}
-          
+          // rulesLength={500}
+          // rulesColor="#333" 
+                
         />
       ) : (
         <View
@@ -47,6 +49,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingLeft: 0,
     borderRadius: 10,
+    // backgroundColor: '#1c1c1c',
     // height: 220,
   },
   graphTitle: {

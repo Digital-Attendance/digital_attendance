@@ -4,7 +4,9 @@ import Carousel, {Pagination} from 'react-native-snap-carousel';
 import axios from 'axios';
 import {format} from 'date-fns';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import Toast from 'react-native-toast-message';
 import SummaryCard from './SummaryCard';
 import AttendanceGraph from './AttendanceGraph';
 import SwipeButton from './SwipeButton';
@@ -21,8 +23,17 @@ const SubjectCard = ({refresh}) => {
   const [subjects, setSubjects] = useState([]);
   const [barData, setBarData] = useState([]);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
+  
 
-  const fetchSubjects = () => {
+  const fetchSubjects = async () => {
+    const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
+    if (cachedSubjects) {
+      const parsedSubjects = JSON.parse(cachedSubjects);
+      setSubjects(parsedSubjects);
+      if (parsedSubjects.length > 0) {
+        updateGraphData(0, parsedSubjects);
+      }
+    }
     axios
       .get(`${BASE_URL}/faculty/dashboard/${userEmail}`)
       .then(response => {
@@ -30,6 +41,7 @@ const SubjectCard = ({refresh}) => {
         if (response.data.length > 0) {
           updateGraphData(0, response.data);
         }
+        AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
       })
       .catch(error =>
         Toast.show({
@@ -51,11 +63,12 @@ const SubjectCard = ({refresh}) => {
       const attendanceRecords = data[index]?.attendanceRecords || [];
       const formattedData = attendanceRecords.map(record => {
         const istDate = new Date(record.date);
-        
+
         return {
           date: format(istDate, 'd MMM'),
-          studentsPresent: Number(record.Students.filter(student => student.present)
-            .length),
+          studentsPresent: Number(
+            record.Students.filter(student => student.present).length,
+          ),
         };
       });
       setBarData(formattedData);
@@ -97,7 +110,7 @@ const SubjectCard = ({refresh}) => {
               key={activeIndex}
               setIsSwipeActive={setIsSwipeActive}
               userEmail={userEmail}
-              subjectCode={subjects[activeIndex]?.subjectCode}
+              subjectCode={subjects[activeIndex]?.subjectID}
             />
           </>
         ) : (

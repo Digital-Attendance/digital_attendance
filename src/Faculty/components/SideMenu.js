@@ -4,20 +4,67 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  Image,
+  Alert,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Animated, {SlideInLeft, SlideOutLeft} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'react-native-image-picker';
+import { useUserContext } from '../../Context';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
+  const {userEmail} = useUserContext();
+  const [profileImage, setProfileImage] = useState(
+    'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
+  );
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const getProfileImage = async () => {
+      const image = await AsyncStorage.getItem('profileImage');
+      if (image) {
+        setProfileImage(image);
+      }
+    };
+    getProfileImage();
+  }, []);
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('access_token');
-    navigation.popTo('SplashScreen');
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        onPress: () => {},
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        onPress: async () => {
+          await AsyncStorage.clear();
+          navigation.popTo('SplashScreen');
+        },
+      },
+    ]);
   };
 
+  const selectProfileImage = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+
+    ImagePicker.launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('Image picker error: ', response.error);
+      } else if (response.assets && response.assets.length > 0) {
+        setProfileImage(response.assets[0].uri);
+        AsyncStorage.setItem('profileImage', response.assets[0].uri);
+      }
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -29,12 +76,48 @@ const SideMenu = ({toggleSideMenu}) => {
         <View style={styles.header}>
           <Text style={styles.title}>Digital Attendance</Text>
         </View>
-        <View style={styles.menuItems}>
-          <TouchableOpacity style={styles.menuItem} onPress={()=>{navigation.navigate("ArchivedSubjects")}} >
-            <MaterialCommunityIcons name="archive" size={20} color="grey" />
-            <Text style={styles.menuItemText}>View Archive Subjects</Text>
+        <View style={styles.avatarContainer}>
+          <TouchableOpacity onPress={selectProfileImage}>
+            <Image source={{uri: profileImage}} style={styles.avatar} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+        </View>
+        <Text style={styles.userName}>John Doe</Text>
+        <View style={styles.menuItems}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              navigation.navigate('ArchivedSubjects');
+            }}>
+            <MaterialCommunityIcons name="archive" size={20} color="grey" />
+            <Text style={styles.menuItemText}>Archive Subjects</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('EnrollRequests')}}>
+            <MaterialCommunityIcons
+              name="account-search"
+              size={20}
+              color="grey"
+            />
+            <Text style={styles.menuItemText}>Enrollment Requests</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('CollabRequests')}}>
+            <MaterialCommunityIcons
+              name="account-multiple-plus"
+              size={20}
+              color="grey"
+            />
+            <Text style={styles.menuItemText}>Collab Requests</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <MaterialCommunityIcons name="account-box" size={20} color="grey" />
+            <Text style={styles.menuItemText}>Contact Us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <MaterialCommunityIcons name="account-box" size={20} color="grey" />
+            <Text style={styles.menuItemText}>About Us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.menuItem, styles.logout]}
+            onPress={handleLogout}>
             <MaterialCommunityIcons name="account" size={20} color="grey" />
             <Text style={styles.menuItemText}>Logout</Text>
           </TouchableOpacity>
@@ -66,6 +149,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     zIndex: 1,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: 'JosefinSans-Bold',
+    color: '#2196F3FF',
+    textAlign: 'center',
+  },
   menuContainer: {
     position: 'absolute',
     top: 0,
@@ -81,20 +176,51 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 5,
     zIndex: 2,
+    // alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  avatarContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
-    fontFamily: 'JosefinSans-Bold',
-    color: '#2196F3FF',
+  avatar: {
+    width: 125,
+    height: 125,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: '#fff',
+    // shadowOffset: {width: 40, height: 40},
+    // shadowRadius: 0,
+    elevation: 50,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
+  userName: {
+    fontSize: 18,
+    color: 'white',
+    fontFamily: 'Raleway-Bold',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  statsText: {
+    fontSize: 14,
+    color: 'white',
+    marginHorizontal: 5,
+    fontFamily: 'Raleway-Regular',
+  },
+
   menuItems: {
-    // flex: 1,
+    marginTop: 20,
   },
   menuItem: {
     flexDirection: 'row',

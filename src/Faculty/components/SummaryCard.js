@@ -69,7 +69,7 @@ const SummaryCard = ({subjectRecord}) => {
               numberOfLines={1}
               ellipsizeMode="tail"
               style={styles.subjectSubName}>
-              {subjectRecord.subjectName}
+              {subjectRecord.subjectName}  ({subjectRecord.department} - {subjectRecord.section})
             </Text>
           </View>
           <View style={styles.buttonContainer}>

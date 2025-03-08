@@ -8,8 +8,10 @@ import {
 import React, {useState} from 'react';
 import Toast from 'react-native-toast-message';
 import BASE_URL from '../../../url';
+import { useUserContext } from '../../Context';
 
-const AddFaculty = ({toggleFacultyModal, subjectCode}) => {
+const AddFaculty = ({toggleFacultyModal, subjectID}) => {
+  const {userEmail} = useUserContext();
   const [facultyEmail, setFacultyEmail] = useState('');
   const handleAddFaculty = async () => {
     if (!facultyEmail.trim()) {
@@ -25,8 +27,9 @@ const AddFaculty = ({toggleFacultyModal, subjectCode}) => {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          subjectCode: subjectCode,
+          subjectID: subjectID,
           email: facultyEmail,
+          requestedByEmail : userEmail
         }),
       });
 
@@ -42,7 +45,7 @@ const AddFaculty = ({toggleFacultyModal, subjectCode}) => {
       } else {
         Toast.show({
           type: 'error',
-          text1: result.message || 'Error adding faculty',
+          text1: result.error || 'Error adding faculty',
         });
       }
     } catch (error) {

@@ -16,7 +16,7 @@ const EnrollSubject = ({navigation, route}) => {
   const {userEmail} = useUserContext();
 
   const [subjectData, setSubjectData] = useState({});
-  const [course, setCourse] = useState(null);
+  const [programme, setProgramme] = useState(null);
   const [department, setDepartment] = useState(null);
   const [semester, setSemester] = useState(null);
   const [subject, setSubject] = useState(null);
@@ -45,7 +45,7 @@ const EnrollSubject = ({navigation, route}) => {
   }, []);
 
   const handleSubmit = async () => {
-    if (!course || !department || !semester || !subject) {
+    if (!programme || !department || !semester || !subject) {
       Toast.show({
         type: 'error',
         text1: 'All fields are required!',
@@ -62,7 +62,7 @@ const EnrollSubject = ({navigation, route}) => {
     try {
       const response = await axios.post(`${BASE_URL}/student/enroll`, {
         studentEmail: userEmail,
-        subjectCode: subject,
+        subjectID: subject,
       });
 
       if (response.status === 200) {
@@ -113,7 +113,7 @@ const EnrollSubject = ({navigation, route}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Enroll in a Subject</Text>
 
-      <Text style={styles.label}>Select Course</Text>
+      <Text style={styles.label}>Select Programme</Text>
       <Dropdown
         data={Object.keys(subjectData).map(item => ({
           label: item,
@@ -121,9 +121,9 @@ const EnrollSubject = ({navigation, route}) => {
         }))}
         labelField="label"
         valueField="value"
-        value={course}
+        value={programme}
         onChange={item => {
-          setCourse(item.value);
+          setProgramme(item.value);
           setDepartment(null);
           setSemester(null);
           setSubject(null);
@@ -131,12 +131,11 @@ const EnrollSubject = ({navigation, route}) => {
         style={styles.dropdown}
       />
 
-      {/* Department Dropdown */}
-      {course && (
+      {programme && (
         <>
           <Text style={styles.label}>Select Department</Text>
           <Dropdown
-            data={Object.keys(subjectData[course]).map(item => ({
+            data={Object.keys(subjectData[programme]).map(item => ({
               label: item,
               value: item,
             }))}
@@ -158,7 +157,7 @@ const EnrollSubject = ({navigation, route}) => {
         <>
           <Text style={styles.label}>Select Semester</Text>
           <Dropdown
-            data={Object.keys(subjectData[course][department]).map(item => ({
+            data={Object.keys(subjectData[programme][department]).map(item => ({
               label: `Semester ${item}`,
               value: item,
             }))}
@@ -174,12 +173,12 @@ const EnrollSubject = ({navigation, route}) => {
         </>
       )}
 
-      {/* Subject Code Dropdown */}
+      {/* Subject ID Dropdown */}
       {semester && (
         <>
           <Text style={styles.label}>Select Subject Code</Text>
           <Dropdown
-            data={subjectData[course][department][semester].map(item => ({
+            data={subjectData[programme][department][semester].map(item => ({
               label: item,
               value: item,
             }))}

@@ -21,7 +21,7 @@ const convertUTCtoIST = utcDate => {
 const Records = ({
   selectedDate,
   attendanceRecords,
-  subjectCode,
+  subjectID,
   onAttendanceUpdated,
   onAttendanceDeleted,
 }) => {
@@ -65,7 +65,7 @@ const Records = ({
         `${BASE_URL}/faculty/delete-attendance`,
         {
           data: {
-            subjectCode,
+            subjectID,
             date: recordForDate.date,
           },
         },
@@ -108,7 +108,7 @@ const Records = ({
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          subjectCode,
+          subjectID,
           date: recordForDate.date,
           updatedAttendance: updatedAttendance.map(({_id, present}) => ({
             _id,

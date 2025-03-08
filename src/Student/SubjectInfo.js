@@ -23,7 +23,7 @@ const SubjectInfo = ({navigation, route}) => {
               const response = await axios.post(
                 `${BASE_URL}/student/unenroll`,
                 {
-                  subjectCode: subjectRecord.subjectCode,
+                  subjectCode: subjectRecord.subjectID,
                   email: userEmail,
                 },
                 {
@@ -69,19 +69,6 @@ const SubjectInfo = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>{subjectRecord.subjectName}</Text>
-          <Text style={styles.subtitle}>{subjectRecord.subjectCode}</Text>
-        </View>
-        <TouchableOpacity onPress={handleUnEnroll}>
-          <MaterialCommunityIcons
-            name="account-arrow-right"
-            size={20}
-            color="#fff"
-          />
-        </TouchableOpacity>
-      </View> */}
       <LinearGradient
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}

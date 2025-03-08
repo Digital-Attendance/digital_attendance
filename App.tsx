@@ -27,6 +27,8 @@ import LivenessDetection from './src/Student/LivenessDetection';
 import EnrollSubject from './src/Student/EnrollSubject';
 import SubjectInfo from './src/Student/SubjectInfo';
 import ArchivedSubjects from './src/Faculty/ArchivedSubjects';
+import EnrollRequests from './src/Faculty/EnrollRequests';
+import CollabRequests from './src/Faculty/CollabRequests';
 
 const toastConfig = {
   success: (props : ToastConfigParams<any>) => (
@@ -116,6 +118,8 @@ const App = () => {
               {/* Faculty Screens */}
               <Stack.Screen name="Faculty_Home" component={Faculty_Home} />
               <Stack.Screen name="AddSubject" component={AddSubject} />
+              <Stack.Screen name="EnrollRequests" component={EnrollRequests} />
+              <Stack.Screen name="CollabRequests" component={CollabRequests} />
               <Stack.Screen
                 name="AttendanceScreen"
                 component={AttendanceScreen}

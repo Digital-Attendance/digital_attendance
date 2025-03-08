@@ -21,7 +21,7 @@ import BASE_URL from '../../url';
 
 const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
-  const {subjectCode} = route.params;
+  const {subjectID} = route.params;
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -47,7 +47,7 @@ const VerifyLocation = ({route}) => {
   const fetchFacultyLocation = async () => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/student/faculty-location/${subjectCode}`,
+        `${BASE_URL}/student/faculty-location/${subjectID}`,
         {
           validateStatus: function (status) {
             return status < 500;
@@ -164,7 +164,7 @@ const VerifyLocation = ({route}) => {
 
         if (isVerified) {
           setTimeout(() => {
-            navigation.replace('LivenessDetection', {subjectCode});
+            navigation.replace('LivenessDetection', {subjectID});
           }, 2000);
         }
       },

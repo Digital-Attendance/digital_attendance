@@ -26,7 +26,7 @@ const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
-const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
+const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
   const translateX = useSharedValue(0);
   const [isStarted, setIsStarted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -164,7 +164,7 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
 
       const response = await axios.post(
         `${BASE_URL}/faculty/start-attendance`,
-        {email: userEmail, subjectCode, location: location},
+        {email: userEmail, subjectID, location: location},
         {validateStatus: status => status < 500},
       );
 
@@ -218,7 +218,7 @@ const SwipeButton = ({setIsSwipeActive, subjectCode, userEmail}) => {
     try {
       const response = await axios.post(
         `${BASE_URL}/faculty/stop-attendance`,
-        {email: userEmail, subjectCode},
+        {email: userEmail, subjectID},
         {validateStatus: status => status < 500},
       );
 

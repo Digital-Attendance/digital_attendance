@@ -11,13 +11,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import Snackbar from 'react-native-snackbar';
+
 import Toast from 'react-native-toast-message';
 import {useUserContext} from '../Context';
 import {Dropdown} from 'react-native-element-dropdown';
 import BASE_URL from '../../url';
 
-const courses = [
+const programmes = [
   {label: 'BTech', value: 'BTech'},
   {label: 'MTech', value: 'MTech'},
   {label: 'MBA', value: 'MBA'},
@@ -34,17 +34,17 @@ const semesterOptions = {
 };
 
 const departments = [
-  {label: 'Civil Engineering', value: 'Civil Engineering'},
-  {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'},
-  {label: 'Electrical Engineering', value: 'Electrical Engineering'},
-  {label: 'Electronics and Communication Engineering', value: 'Electronics and Communication Engineering'},
-  {label: 'Electronics and Instrumentation Engineering', value: 'Electronics and Instrumentation Engineering'},
-  {label: 'Mechanical Engineering', value: 'Mechanical Engineering'},
-  {label: 'Mathematics', value: 'Mathematics'},
-  {label: 'Physics', value: 'Physics'},
-  {label: 'Chemistry', value: 'Chemistry'},
-  {label: 'Humanities', value: 'Humanities'},
-  {label: 'Management Studies', value: 'Management Studies'},
+  {label: 'Civil Engineering', value: 'CE'},
+  {label: 'Computer Science and Engineering', value: 'CSE'},
+  {label: 'Electrical Engineering', value: 'EE'},
+  {label: 'Electronics and Communication Engineering', value: 'ECE'},
+  {label: 'Electronics and Instrumentation Engineering', value: 'EIE'},
+  {label: 'Mechanical Engineering', value: 'ME'},
+  {label: 'Mathematics', value: 'MA'},
+  {label: 'Physics', value: 'PHY'},
+  {label: 'Chemistry', value: 'CH'},
+  {label: 'Humanities', value: 'HS'},
+  {label: 'Management Studies', value: 'MS'},
 ];
 
 const AddSubject = ({navigation}) => {
@@ -53,9 +53,10 @@ const AddSubject = ({navigation}) => {
   const [form, setForm] = useState({
     subjectCode: '',
     subjectName: '',
-    course: null,
+    programme: null,
     semester: null,
     department: null,
+    section: '',
   });
 
   const handleChange = (field, value) => {
@@ -63,9 +64,9 @@ const AddSubject = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-    const {subjectCode, subjectName, course, semester, department} = form;
+    const {subjectCode, subjectName, programme, semester, department, section} = form;
 
-    if (!subjectCode || !subjectName || !course || !semester || !department) {
+    if (!subjectCode || !subjectName || !programme || !semester || !department || !section) {
       Toast.show({
         type: 'error',
         text1: 'All fields are required!',
@@ -84,11 +85,13 @@ const AddSubject = ({navigation}) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          subjectID: `${subjectCode}_${department}_${section}`,
           subjectCode,
           subjectName,
-          course,
+          programme,
           semester,
           department,
+          section,
           facultyEmail: userEmail,
         }),
       });
@@ -111,7 +114,7 @@ const AddSubject = ({navigation}) => {
           type: 'error',
           text1: data.error || 'An error occurred!',
           position: 'top',
-          visibilityTime: 1000,
+          visibilityTime: 3000,
           autoHide: true,
           topOffset: 10,      
         });
@@ -151,6 +154,16 @@ const AddSubject = ({navigation}) => {
               onChangeText={text => handleChange('subjectName', text)}
             />
 
+            <Text style={styles.label}>Choose Programme</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={programmes}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Programme"
+              value={form.programme}
+              onChange={item => handleChange('programme', item.value)}
+            />
             <Text style={styles.label}>Department</Text>
             <Dropdown
               style={styles.dropdown}
@@ -162,24 +175,20 @@ const AddSubject = ({navigation}) => {
               onChange={item => handleChange('department', item.value)}
             />
 
-            <Text style={styles.label}>Choose Course</Text>
-            <Dropdown
-              style={styles.dropdown}
-              data={courses}
-              labelField="label"
-              valueField="value"
-              placeholder="Select Course"
-              value={form.course}
-              onChange={item => handleChange('course', item.value)}
+            <Text style={styles.label}>Section</Text>
+            <TextInput
+              style={styles.input}
+              value={form.section}
+              onChangeText={text => handleChange('section', text)}
             />
 
             <Text style={styles.label}>Semester</Text>
             <Dropdown
               style={styles.dropdown}
               data={
-                form.course
+                form.programme
                   ? Array.from(
-                      {length: semesterOptions[form.course]},
+                      {length: semesterOptions[form.programme]},
                       (_, i) => ({
                         label: `${i + 1} Semester`,
                         value: `${i + 1}`,
@@ -192,7 +201,7 @@ const AddSubject = ({navigation}) => {
               placeholder="Select Semester"
               value={form.semester}
               onChange={item => handleChange('semester', item.value)}
-              disable={!form.course}
+              disable={!form.programme}
             />
 
             <TouchableOpacity

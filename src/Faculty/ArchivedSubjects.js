@@ -13,7 +13,7 @@ const ArchivedSubjects = () => {
       try {
         const response = await fetch(`${BASE_URL}/faculty/get-archived-subjects/${userEmail}`);
         const data = await response.json();
-        console.log(data);
+        
         if (response.ok) {
           setArchivedSubjects(data.archivedSubjects);
         } else {
@@ -66,14 +66,14 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 22,
     fontFamily: "Raleway-Bold",
-    color: "#fff",
+    color: "#2196F3FF",
     textAlign: "center",
     marginBottom: 15,
   },
   noDataText: {
     textAlign: "center",
     fontSize: 16,
-    color: "#fff",
+    color: "#ccc",
     marginTop: 20,
   },
   subjectCard: {

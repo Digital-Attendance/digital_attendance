@@ -9,11 +9,9 @@ import {
 } from 'react-native';
 
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import BASE_URL from '../../../url';
-import Toast from 'react-native-toast-message';
 
-const StudentList = ({name, scholarID, attended, progress, onRemove}) => {
+
+const StudentList = ({name, scholarID, attended, progress}) => {
   return (
     <View style={styles.studentListCard}>
       <View style={styles.studentDetails}>
@@ -37,16 +35,11 @@ const StudentList = ({name, scholarID, attended, progress, onRemove}) => {
         />
         <Text style={styles.progressText}>{progress}%</Text>
       </View>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => onRemove(scholarID)}>
-        <MaterialCommunityIcons name="delete" size={20} color="#900" />
-      </TouchableOpacity>
     </View>
   );
 };
 
-const Leaderboard = ({subjectRecord, onStudentRemoved}) => {
+const Leaderboard = ({subjectRecord}) => {
 
   const studentAttendanceMap = new Map();
 
@@ -91,61 +84,7 @@ const Leaderboard = ({subjectRecord, onStudentRemoved}) => {
     }))
     .sort((a, b) => b.attendancePercentage - a.attendancePercentage);
 
-  const handleRemoveStudent = async scholarID => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to remove this student from the subject?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Remove',
-          onPress: async () => {
-            try {
-              const response = await fetch(
-                `${BASE_URL}/faculty/remove-student`,
-                {
-                  method: 'POST',
-                  headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify({
-                    subjectCode: subjectRecord.subjectCode,
-                    scholarID,
-                  }),
-                },
-              );
-
-              const result = await response.json();
-              if (response.ok) {
-                Toast.show({
-                  type: 'success',
-                  text1: 'Student removed successfully!',
-                  visibilityTime: 1000,
-                  autoHide: true,
-                  topOffset: 10,
-                });
-                onStudentRemoved(scholarID);
-              } else {
-                Toast.show({
-                  type: 'error',
-                  text1: 'Failed to remove student!',
-                  visibilityTime: 1000,
-                  autoHide: true,
-                  topOffset: 10,
-                });
-              }
-            } catch (error) {
-              Toast.show({
-                type: 'error',
-                text1: 'Something went wrong!',
-                visibilityTime: 1000,
-                autoHide: true,
-                topOffset: 10,
-              });
-            }
-          },
-        },
-      ],
-    );
-  };
+  
 
   return (
     <View style={styles.container}>
@@ -160,7 +99,6 @@ const Leaderboard = ({subjectRecord, onStudentRemoved}) => {
                 scholarID={student.scholarID}
                 attended={student.totalPresent}
                 progress={student.attendancePercentage}
-                onRemove={handleRemoveStudent}
               />
             ))
           ) : (

@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {LineChart} from 'react-native-gifted-charts';
 
 const AttendanceGraph = ({cumulativeAttendance}) => {
-  console.log('Student BarData:', cumulativeAttendance);
+  
   return (
     <View style={styles.graphContainer}>
       <Text style={styles.graphTitle}>Attendance %</Text>
