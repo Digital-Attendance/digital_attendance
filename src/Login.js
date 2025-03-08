@@ -33,7 +33,7 @@ export default function Login({navigation}) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [logging, setLogging] = useState(false);
 
-  const {setUserEmail} = useUserContext();
+  const {setUserEmail,setUserName} = useUserContext();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -96,6 +96,8 @@ export default function Login({navigation}) {
           response.data.refresh_token,
         );
         setUserEmail(email);
+        setUserName(response.data.name);
+        await AsyncStorage.setItem('name', response.data.name);
         await AsyncStorage.setItem('email', email);
         await AsyncStorage.setItem('role', selectedRole);
         // Snackbar.show({

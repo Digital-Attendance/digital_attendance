@@ -56,7 +56,7 @@ const AddSubject = ({navigation}) => {
     programme: null,
     semester: null,
     department: null,
-    section: '',
+    section: 'NA',
   });
 
   const handleChange = (field, value) => {

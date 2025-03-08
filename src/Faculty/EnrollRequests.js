@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndi
 import axios from "axios";
 import { useUserContext } from "../Context";
 import BASE_URL from "../../url";
+import Toast from "react-native-toast-message";
 
 const EnrollRequests = () => {
   const [loading, setLoading] = useState(true);
@@ -22,11 +23,17 @@ const EnrollRequests = () => {
       if (response.status === 200) {
         setRequests(response.data.enrollmentRequests);
       } else {
-        Alert.alert("Error", "Failed to fetch enrollment requests");
+        Toast.show({
+          type: "error",
+          text1: "Failed to fetch requests",
+        });
       }
     } catch (error) {
       console.error("Error fetching requests:", error);
-      Alert.alert("Error", "Something went wrong");
+      Toast.show({
+        type: "error",
+        text1: "Failed to fetch requests",
+      });
     } finally {
       setLoading(false);
     }
@@ -42,14 +49,23 @@ const EnrollRequests = () => {
       });
 
       if (response.status === 200) {
-        Alert.alert("Success", `Enrollment ${action}d`);
-        fetchEnrollmentRequests(); // Refresh the data
+        Toast.show({
+          type: "success",
+          text1: `Successfully ${action}ed enrollment`,
+        });
+        fetchEnrollmentRequests();
       } else {
-        Alert.alert("Error", `Failed to ${action} enrollment`);
+        Toast.show({
+          type: "error",
+          text1: `Failed to ${action} enrollment`,
+        });
       }
     } catch (error) {
       console.error(`Error during ${action}:`, error);
-      Alert.alert("Error", "Something went wrong");
+      Toast.show({
+        type: "error",
+        text1: `Failed to ${action} enrollment`,
+      });
     }
   };
 

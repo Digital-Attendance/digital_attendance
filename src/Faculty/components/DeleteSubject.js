@@ -29,7 +29,7 @@ const DeleteSubject = ({toggleMenu, subjectID}) => {
           duration: Snackbar.LENGTH_SHORT,
         });
         toggleMenu();
-        navigation.navigate('Faculty_Home');
+        navigation.replace('Faculty_Home');
         
       } else {
         setError(data.error || "Failed to delete subject");

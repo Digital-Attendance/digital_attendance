@@ -17,6 +17,7 @@ export const AsyncStorageProvider = ({children}) => {
 
   const [user, setUser] = useState(null);
   const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
 
   const logout = async () => {
     await axios.post(`${BASE_URL}/logout`);
@@ -29,10 +30,12 @@ export const AsyncStorageProvider = ({children}) => {
     () => ({
       user,
       userEmail,
+      userName,
       setUserEmail,
+      setUserName,
       logout,
     }),
-    [user, userEmail, setUserEmail, logout],
+    [user, userEmail, userName, setUserName, setUserEmail, logout],
   );
 
   return (

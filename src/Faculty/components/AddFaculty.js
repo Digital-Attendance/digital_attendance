@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import BASE_URL from '../../../url';
 import { useUserContext } from '../../Context';
 
-const AddFaculty = ({toggleFacultyModal, subjectID}) => {
+const AddFaculty = ({toggleSideMenu,toggleFacultyModal, subjectID}) => {
   const {userEmail} = useUserContext();
   const [facultyEmail, setFacultyEmail] = useState('');
   const handleAddFaculty = async () => {
@@ -42,6 +42,7 @@ const AddFaculty = ({toggleFacultyModal, subjectID}) => {
         });
         setFacultyEmail('');
         toggleFacultyModal();
+        toggleSideMenu();
       } else {
         Toast.show({
           type: 'error',

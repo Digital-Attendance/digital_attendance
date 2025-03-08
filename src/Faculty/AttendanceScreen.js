@@ -209,6 +209,7 @@ const AttendanceScreen = ({route}) => {
         <Modal transparent visible={facultyModalVisible} animationType="fade">
           <Pressable style={styles.overlay} onPress={toggleFacultyModal}>
             <AddFaculty
+              toggleSideMenu={toggleSideMenu}
               toggleFacultyModal={toggleFacultyModal}
               subjectID={subjectRecord.subjectID}
             />

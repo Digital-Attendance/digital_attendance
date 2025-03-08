@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Linking,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Animated, {SlideInLeft, SlideOutLeft} from 'react-native-reanimated';
@@ -13,10 +14,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'react-native-image-picker';
-import { useUserContext } from '../../Context';
+import axios from 'axios';
+import {useUserContext} from '../../Context';
+import BASE_URL from '../../../url';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
-  const {userEmail} = useUserContext();
+  const {userEmail, userName} = useUserContext();
+  const [requests, setRequests] = useState([]);
   const [profileImage, setProfileImage] = useState(
     'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
   );
@@ -29,8 +33,29 @@ const SideMenu = ({toggleSideMenu}) => {
         setProfileImage(image);
       }
     };
+    const fetchRequests = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/faculty/pending-requests`,
+          {
+            params: {email: userEmail},
+          },
+        );
+        setRequests(response.data.pendingRequests || []);
+      } catch (error) {
+        console.error('Error fetching collab requests:', error);
+      }
+    };
     getProfileImage();
+    fetchRequests();
   }, []);
+
+  const handleRequest = subjectID => {
+    setRequests(prevRequests =>
+      prevRequests.filter(req => req.subjectID !== subjectID),
+    );
+  };
+
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       {
@@ -81,7 +106,7 @@ const SideMenu = ({toggleSideMenu}) => {
             <Image source={{uri: profileImage}} style={styles.avatar} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.userName}>John Doe</Text>
+        <Text style={styles.userName}>{userName}</Text>
         <View style={styles.menuItems}>
           <TouchableOpacity
             style={styles.menuItem}
@@ -91,7 +116,11 @@ const SideMenu = ({toggleSideMenu}) => {
             <MaterialCommunityIcons name="archive" size={20} color="grey" />
             <Text style={styles.menuItemText}>Archive Subjects</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('EnrollRequests')}}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              navigation.navigate('EnrollRequests');
+            }}>
             <MaterialCommunityIcons
               name="account-search"
               size={20}
@@ -99,15 +128,29 @@ const SideMenu = ({toggleSideMenu}) => {
             />
             <Text style={styles.menuItemText}>Enrollment Requests</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => {navigation.navigate('CollabRequests')}}>
-            <MaterialCommunityIcons
-              name="account-multiple-plus"
-              size={20}
-              color="grey"
-            />
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              navigation.navigate('CollabRequests', {requests, handleRequest});
+            }}>
+            <View style={{position: 'relative'}}>
+              <MaterialCommunityIcons
+                name="account-multiple-plus"
+                size={20}
+                color="grey"
+              />
+              {requests.length > 0 && <View style={styles.redDot} />}
+            </View>
             <Text style={styles.menuItemText}>Collab Requests</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Linking.openURL(
+                'mailto:digital.attendance.nits@gmail.com,',
+              );
+            }}>
             <MaterialCommunityIcons name="account-box" size={20} color="grey" />
             <Text style={styles.menuItemText}>Contact Us</Text>
           </TouchableOpacity>
@@ -232,5 +275,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     color: '#fff',
     fontFamily: 'Raleway-Regular',
+  },
+  redDot: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'red',
   },
 });
