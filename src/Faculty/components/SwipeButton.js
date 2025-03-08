@@ -15,12 +15,12 @@ import Animated, {
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
-
-import BASE_URL from '../../../url';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
+
+import BASE_URL from '../../../url';
+
 const {width} = Dimensions.get('window');
 const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
