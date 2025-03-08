@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -32,7 +33,7 @@ const Records = ({
   const students = recordForDate ? recordForDate.Students : [];
   const [isEditing, setIsEditing] = useState(false);
   const [updatedAttendance, setUpdatedAttendance] = useState([...students]);
-  
+
   useEffect(() => {
     setUpdatedAttendance([...students]);
   }, [selectedDate]);
@@ -52,46 +53,104 @@ const Records = ({
     );
   };
 
+  // const handleDeleteAttendanceRecord = async () => {
+  //   try {
+  //     if (!recordForDate || !recordForDate.date) {
+  //       Snackbar.show({
+  //         text: 'No attendance record found for this date',
+  //         duration: Snackbar.LENGTH_SHORT,
+  //       });
+  //       return;
+  //     }
+  //     const response = await axios.delete(
+  //       `${BASE_URL}/faculty/delete-attendance`,
+  //       {
+  //         data: {
+  //           subjectID,
+  //           date: recordForDate.date,
+  //         },
+  //       },
+  //     );
+
+  //     if (response.status === 200) {
+  //       Snackbar.show({
+  //         text: 'Attendance record deleted successfully',
+  //         duration: Snackbar.LENGTH_SHORT,
+  //       });
+  //       if (onAttendanceDeleted) {
+  //         onAttendanceDeleted(recordForDate.date);
+  //       }
+  //     } else {
+  //       Snackbar.show({
+  //         text: 'An error occurred while deleting attendance record',
+  //         duration: Snackbar.LENGTH_SHORT,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error deleting attendance record:', error);
+  //     Snackbar.show({
+  //       text: 'Network error. Please try again.',
+  //       duration: Snackbar.LENGTH_SHORT,
+  //     });
+  //   }
+  // };
+
   const handleDeleteAttendanceRecord = async () => {
-    try {
-      if (!recordForDate || !recordForDate.date) {
-        Snackbar.show({
-          text: 'No attendance record found for this date',
-          duration: Snackbar.LENGTH_SHORT,
-        });
-        return;
-      }
-      const response = await axios.delete(
-        `${BASE_URL}/faculty/delete-attendance`,
+    Alert.alert(
+      'Delete Record',
+      'Are you sure you want to delete this record?',
+      [
         {
-          data: {
-            subjectID,
-            date: recordForDate.date,
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            try {
+              if (!recordForDate || !recordForDate.date) {
+                Snackbar.show({
+                  text: 'No attendance record found for this date',
+                  duration: Snackbar.LENGTH_SHORT,
+                });
+                return;
+              }
+              const response = await axios.delete(
+                `${BASE_URL}/faculty/delete-attendance`,
+                {
+                  data: {
+                    subjectID,
+                    date: recordForDate.date,
+                  },
+                },
+              );
+
+              if (response.status === 200) {
+                Snackbar.show({
+                  text: 'Attendance record deleted successfully',
+                  duration: Snackbar.LENGTH_SHORT,
+                });
+                if (onAttendanceDeleted) {
+                  onAttendanceDeleted(recordForDate.date);
+                }
+              } else {
+                Snackbar.show({
+                  text: 'An error occurred while deleting attendance record',
+                  duration: Snackbar.LENGTH_SHORT,
+                });
+              }
+            } catch (error) {
+              console.error('Error deleting attendance record:', error);
+              Snackbar.show({
+                text: 'Network error. Please try again.',
+                duration: Snackbar.LENGTH_SHORT,
+              });
+            }
           },
         },
-      );
-
-      if (response.status === 200) {
-        Snackbar.show({
-          text: 'Attendance record deleted successfully',
-          duration: Snackbar.LENGTH_SHORT,
-        });
-        if (onAttendanceDeleted) {
-          onAttendanceDeleted(recordForDate.date);
-        }
-      } else {
-        Snackbar.show({
-          text: 'An error occurred while deleting attendance record',
-          duration: Snackbar.LENGTH_SHORT,
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting attendance record:', error);
-      Snackbar.show({
-        text: 'Network error. Please try again.',
-        duration: Snackbar.LENGTH_SHORT,
-      });
-    }
+      ],
+    );
   };
 
   const saveChanges = async () => {

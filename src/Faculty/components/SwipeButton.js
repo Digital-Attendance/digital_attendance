@@ -231,6 +231,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
           autoHide: true,
           topOffset: 10,      
         });
+        
       } else {
         Toast.show({
           type: 'error',

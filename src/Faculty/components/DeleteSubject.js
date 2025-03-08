@@ -63,7 +63,7 @@ const DeleteSubject = ({toggleMenu, subjectID}) => {
         <TouchableOpacity
           style={[
             styles.deleteButton,
-            typedCode === subjectCode ? {} : styles.disabled,
+            typedCode === subjectID ? {} : styles.disabled,
           ]}
           onPress={handleDelete}
         >

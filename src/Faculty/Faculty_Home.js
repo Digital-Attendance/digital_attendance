@@ -14,6 +14,7 @@ const Faculty_Home = () => {
   );
   const onRefresh = () => {
     setRefreshing(true);
+    console.log('Refreshing');
     setRefresh(prev => !prev);
     setTimeout(() => setRefreshing(false), 1000);
   };

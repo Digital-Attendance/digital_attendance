@@ -110,7 +110,7 @@ const SubjectCard = ({refresh}) => {
               key={activeIndex}
               setIsSwipeActive={setIsSwipeActive}
               userEmail={userEmail}
-              subjectCode={subjects[activeIndex]?.subjectID}
+              subjectID={subjects[activeIndex]?.subjectID}
             />
           </>
         ) : (

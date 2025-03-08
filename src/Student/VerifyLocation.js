@@ -22,6 +22,7 @@ import BASE_URL from '../../url';
 const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
   const {subjectID} = route.params;
+  console.log('SSS' + subjectID);
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');

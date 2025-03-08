@@ -17,6 +17,8 @@ const SubjectCard = ({refresh}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
 
+  
+
   const fetchSubjects =async () => {
     const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
     if (cachedSubjects) {
@@ -34,6 +36,7 @@ const SubjectCard = ({refresh}) => {
 
   useEffect(() => {
     fetchSubjects();
+    console.log(subjects);  
   }, [refresh]);
 
   const renderItem = useCallback(({item, index}) => {
@@ -75,7 +78,7 @@ const SubjectCard = ({refresh}) => {
             cumulativeAttendance={subjects[activeIndex]?.cumulativeAttendance}
           />
 
-          <AttendanceButton key={activeIndex} subjectCode={subjects[activeIndex]?.subjectID} />
+          <AttendanceButton key={activeIndex} subjectID={subjects[activeIndex]?.subjectID} />
         </>
       ) : (
         <View style={styles.noSubjectContainer}>

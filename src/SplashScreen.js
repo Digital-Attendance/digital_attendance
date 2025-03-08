@@ -5,7 +5,7 @@ import { useUserContext } from './Context';
 import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
 export default function SplashScreen({navigation}) {
-  const {setUserEmail} = useUserContext();
+  const {setUserEmail,setUserName} = useUserContext();
   const [isSessionChecked, setIsSessionChecked] = useState(false);
 
   useEffect(() => {
@@ -17,8 +17,10 @@ export default function SplashScreen({navigation}) {
       const token = await AsyncStorage.getItem('access_token');
       const selectedRole = await AsyncStorage.getItem('role');
       const userEmail = await AsyncStorage.getItem('email');
+      const userName = await AsyncStorage.getItem('name');
       if (token) {
         setUserEmail(userEmail);
+        setUserName(userName);
         navigation.replace(
           selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
         );

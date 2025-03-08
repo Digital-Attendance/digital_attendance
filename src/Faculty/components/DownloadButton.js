@@ -13,6 +13,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import BASE_URL from "../../../url";
 import Snackbar from "react-native-snackbar";
 import axios from "axios";
+import { useUserContext } from "../../Context";
 
 const { width } = Dimensions.get("window");
 const BUTTON_WIDTH = width - 40;
@@ -22,11 +23,15 @@ const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 const DownloadButton = ({subjectID}) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const [isDownloading, setIsDownloading] = useState(false);
+  const {userEmail} = useUserContext();
   
   const handleEmailAttendance = async () => {    
     try {
-      const response = await axios.get(
-        `${BASE_URL}/faculty/email-attendance/${subjectID}`,{
+      const response = await axios.post(
+        `${BASE_URL}/faculty/email-attendance`,{
+          subjectID,
+          email: userEmail,
+        },{
           validateStatus: function (status) {
             return status < 500;
           },
