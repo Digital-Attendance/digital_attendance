@@ -6,15 +6,29 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
+  LayoutAnimation,
+  UIManager,
+  Platform,
 } from 'react-native';
 import axios from 'axios';
 import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
 import Toast from 'react-native-toast-message';
+import LinearGradient from 'react-native-linear-gradient';
+import {ChevronDown, ChevronUp} from 'lucide-react-native';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const EnrollRequests = () => {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState({});
+  const [expandedSubject, setExpandedSubject] = useState({});
   const {userEmail} = useUserContext();
 
   useEffect(() => {
@@ -23,32 +37,29 @@ const EnrollRequests = () => {
 
   const fetchEnrollmentRequests = async () => {
     try {
-      console.log('Fetching enrollment requests' + userEmail);
       const response = await axios.get(
         `${BASE_URL}/faculty/enrollment-requests`,
         {
           params: {facultyEmail: userEmail},
         },
-        {
-          validateStatus: function (status) {
-            return status < 500;
-          },
-        },
       );
-      
+
       if (response.status === 200) {
         setRequests(response.data.enrollmentRequests);
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: response.data.error,
+        const autoExpandSubject = {};
+        Object.entries(
+          response.data.enrollmentRequests,
+        ).forEach(([subjectID, students]) => {
+          if (students.length > 0) {
+            autoExpandSubject[subjectID] = true;
+          }
         });
+        setExpandedSubject(autoExpandSubject);
+      } else {
+        Toast.show({type: 'error', text1: response.data.error});
       }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Failed to fetch requests',
-      });
+      Toast.show({type: 'error', text1: 'Failed to fetch requests'});
     } finally {
       setLoading(false);
     }
@@ -61,13 +72,7 @@ const EnrollRequests = () => {
         studentEmail,
         subjectID,
         action,
-      },
-      {
-        validateStatus: function (status) {
-          return status < 500;
-        },
-      }
-    );
+      });
 
       if (response.status === 200) {
         Toast.show({
@@ -76,18 +81,21 @@ const EnrollRequests = () => {
         });
         fetchEnrollmentRequests();
       } else {
-        Toast.show({
-          type: 'error',
-          text1: `Failed to ${action} enrollment`,
-        });
+        Toast.show({type: 'error', text1: `Failed to ${action} enrollment`});
       }
     } catch (error) {
-      console.error(`Error during ${action}:`, error);
-      Toast.show({
-        type: 'error',
-        text1: `Failed to ${action} enrollment`,
-      });
+      Toast.show({type: 'error', text1: `Failed to ${action} enrollment`});
     }
+  };
+
+  const toggleExpand = subjectID => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedSubject((prev) => (
+      {
+        ...prev,
+        [subjectID]: !prev[subjectID]
+      }
+    ))
   };
 
   return (
@@ -101,43 +109,65 @@ const EnrollRequests = () => {
           keyExtractor={item => item[0]}
           renderItem={({item}) => {
             const [subjectID, students] = item;
+            // const isExpanded = expandedSubject === subjectID;
             return (
-              <View style={styles.subjectContainer}>
-                <Text style={styles.subjectTitle}>Subject: {subjectID}</Text>
-                {students.length > 0 ? (
-                  students.map(student => (
-                    <View key={student.studentEmail} style={styles.requestItem}>
-                      <Text style={styles.studentText}>
-                        {student.studentEmail}
-                      </Text>
-                      <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                          style={[styles.button, styles.approve]}
-                          onPress={() =>
-                            handleDecision(
-                              subjectID,
-                              student.studentEmail,
-                              'approve',
-                            )
-                          }>
-                          <Text style={styles.buttonText}>Approve</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.button, styles.deny]}
-                          onPress={() =>
-                            handleDecision(
-                              subjectID,
-                              student.studentEmail,
-                              'deny',
-                            )
-                          }>
-                          <Text style={styles.buttonText}>Deny</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  ))
-                ) : (
-                  <Text style={styles.noRequests}>No pending requests</Text>
+              <View>
+                <TouchableOpacity onPress={() => toggleExpand(subjectID)}>
+                  <LinearGradient
+                    colors={['#004d4d', '#004d4d']}
+                    style={styles.subjectContainer}>
+                    <Text style={styles.subjectTitle}>{subjectID}</Text>
+                    {expandedSubject[subjectID] ? (
+                      <ChevronUp color="#fff" />
+                    ) : (
+                      <ChevronDown color="#fff" />
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+                {expandedSubject[subjectID] && (
+                  <View style={styles.studentListContainer}>
+                    <ScrollView style={styles.scrollContainer}>
+                      {students.length > 0 ? (
+                        students.map(student => (
+                          <View
+                            key={student.studentEmail}
+                            style={styles.requestItem}>
+                            <Text style={styles.studentText}>
+                              {student.name} - ({student.scholarID})
+                            </Text>
+                            <View style={styles.buttonContainer}>
+                              <TouchableOpacity
+                                style={[styles.button, styles.approve]}
+                                onPress={() =>
+                                  handleDecision(
+                                    subjectID,
+                                    student.studentEmail,
+                                    'approve',
+                                  )
+                                }>
+                                <Text style={styles.buttonText}>Admit</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.button, styles.deny]}
+                                onPress={() =>
+                                  handleDecision(
+                                    subjectID,
+                                    student.studentEmail,
+                                    'deny',
+                                  )
+                                }>
+                                <Text style={styles.buttonText}>Kick</Text>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        ))
+                      ) : (
+                        <Text style={styles.noRequests}>
+                          No pending requests
+                        </Text>
+                      )}
+                    </ScrollView>
+                  </View>
                 )}
               </View>
             );
@@ -153,69 +183,55 @@ const EnrollRequests = () => {
 export default EnrollRequests;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#1E1E1E',
-  },
+  container: {flex: 1, padding: 20, backgroundColor: '#1E1E1E'},
   header: {
     fontSize: 22,
-    fontFamily: 'Raleway-Bold',
-    color: '#2196F3FF',
+    color: '#2196F3',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   subjectContainer: {
-    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
-    shadowRadius: 4,
     elevation: 3,
   },
-  subjectTitle: {
-    fontSize: 18,
-    fontFamily: 'Raleway-Bold',
-    marginBottom: 8,
+  subjectTitle: {fontSize: 18, color: '#fff',fontFamily: 'Raleway-Medium'},
+  studentListContainer: {
+    marginBottom: 30,
+    padding: 10,
+    backgroundColor: '#000',
+    borderRadius: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: 'skyblue',
+
   },
+  scrollContainer: {maxHeight: 150},
   requestItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#444',
   },
-  studentText: {
-    fontSize: 10,
-    fontFamily: 'Raleway-Regular',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-  },
+  studentText: {fontSize: 14, color: '#fff',fontFamily: 'Raleway-Medium'},
+  buttonContainer: {flexDirection: 'row'},
   button: {
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginHorizontal: 5,
   },
-  approve: {
-    backgroundColor: '#28A745',
-  },
-  deny: {
-    backgroundColor: '#DC3545',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontFamily: 'Raleway-Italic',
-  },
+  approve: {backgroundColor: '#28A745'},
+  deny: {backgroundColor: '#DC3545'},
+  buttonText: {color: '#FFF', fontSize: 12},
   noRequests: {
     textAlign: 'center',
     fontSize: 16,
     color: '#6C757D',
-    fontFamily: 'Raleway-Regular',
+    marginTop: 20,
   },
 });

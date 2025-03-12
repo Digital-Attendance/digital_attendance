@@ -23,7 +23,7 @@ const SubjectInfo = ({navigation, route}) => {
               const response = await axios.post(
                 `${BASE_URL}/student/unenroll`,
                 {
-                  subjectCode: subjectRecord.subjectID,
+                  subjectID: subjectRecord.subjectID,
                   email: userEmail,
                 },
                 {

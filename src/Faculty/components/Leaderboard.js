@@ -39,11 +39,11 @@ const StudentList = ({name, scholarID, attended, progress}) => {
   );
 };
 
-const Leaderboard = ({subjectRecord}) => {
+const Leaderboard = ({subjectRecord,attendanceRecords}) => {
 
   const studentAttendanceMap = new Map();
 
-  subjectRecord.attendanceRecords.forEach(record => {
+  attendanceRecords.forEach(record => {
     record.Students.forEach(student => {
       const {scholarID, name, present} = student;
 

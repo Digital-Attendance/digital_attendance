@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import {View, Text, StyleSheet, ScrollView} from 'react-native';
+import {format} from 'date-fns';
 
-const AttendanceStats = ({ subjectRecord, userEmail }) => {
+const AttendanceStats = ({subjectRecord, userEmail}) => {
   const attendanceDetails = subjectRecord.attendanceRecords.map(record => {
-    const userEntry = record.Students.find(student => student.email === userEmail);
+    const userEntry = record.Students.find(
+      student => student.email === userEmail,
+    );
     return {
       date: record.date,
       present: userEntry ? userEntry.present : false,
@@ -19,15 +22,24 @@ const AttendanceStats = ({ subjectRecord, userEmail }) => {
             attendanceDetails.map((stat, index) => (
               <View key={index} style={styles.attendanceCard}>
                 <Text style={styles.dateText}>
-                  {new Date(stat.date).toDateString()}
+                  {format(new Date(stat.date).getDay(), 'EEE')}
                 </Text>
-                <Text style={[styles.statusText, stat.present ? styles.present : styles.absent]}>
+                <Text style={styles.dateText}>
+                  {format(new Date(stat.date), 'dd MMMM yyyy')}
+                </Text>
+                <Text
+                  style={[
+                    styles.statusText,
+                    stat.present ? styles.present : styles.absent,
+                  ]}>
                   {stat.present ? 'Present' : 'Absent'}
                 </Text>
               </View>
             ))
           ) : (
-            <Text style={styles.noDataText}>No attendance records available.</Text>
+            <Text style={styles.noDataText}>
+              No attendance records available.
+            </Text>
           )}
         </ScrollView>
       </View>
@@ -69,11 +81,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
-    // borderWidth: 1,
-    // borderBottomColor: '#333',
+    borderWidth: 1,
+    borderBottomColor: '#333',
     marginBottom: 5,
     borderRadius: 4,
-    backgroundColor: '#222',
   },
   dateText: {
     color: '#fff',

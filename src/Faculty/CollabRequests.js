@@ -8,14 +8,35 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
+import Toast from 'react-native-toast-message';
+import LinearGradient from 'react-native-linear-gradient';
 import {useUserContext} from '../Context';
 
 import BASE_URL from '../../url';
-import Toast from 'react-native-toast-message';
 
-const CollabRequests = ({route}) => {
-  const {requests,handleRequest} = route.params;
+const CollabRequests = () => {
   const {userEmail} = useUserContext();
+  const [requests, setRequests] = useState([]);
+
+  useEffect(() => {
+    const fetchColabRequests = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/faculty/pending-requests`,
+          {
+            params: {email: userEmail},
+          },
+        );
+        setRequests(response.data.pendingRequests || []);
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to fetch requests',
+        });
+      }
+    };
+    fetchColabRequests();
+  }, []);
 
   const handleRequestResponse = async (subjectID, action) => {
     try {
@@ -29,7 +50,9 @@ const CollabRequests = ({route}) => {
         type: 'success',
         text1: response.data.message,
       });
-      handleRequest(subjectID);
+      setRequests(prevRequests =>
+        prevRequests.filter(req => req.subjectID !== subjectID),
+      );
     } catch (error) {
       console.error(`Error ${action}ing request:`, error);
       Toast.show({
@@ -50,30 +73,38 @@ const CollabRequests = ({route}) => {
           data={requests}
           keyExtractor={item => item.subjectID}
           renderItem={({item}) => (
-            <View style={styles.requestCard}>
-              <Text style={styles.subjectName}>{item.subjectID}</Text>
-              <Text style={styles.requester}>
-                Requested by: {item.requestedByEmail}
-              </Text>
-
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.acceptButton]}
-                  onPress={() =>
-                    handleRequestResponse(item.subjectID, 'accept')
-                  }>
-                  <Text style={styles.buttonText}>Accept</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.button, styles.rejectButton]}
-                  onPress={() =>
-                    handleRequestResponse(item.subjectID, 'reject')
-                  }>
-                  <Text style={styles.buttonText}>Reject</Text>
-                </TouchableOpacity>
+            <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.requestCard}>
+              <View style={styles.subjectDetails}>
+                <Text style={styles.subjectName} >{item.subjectName}</Text>
+                <Text style={styles.subjectInfo}>
+                  {item.programme}-{item.department}-{item.semester}-
+                  {item.section}
+                </Text>
               </View>
-            </View>
+              <View style={styles.details}>
+                <View style={styles.requesterDetails}>
+                  <Text style={styles.requester}>Requested by:</Text>
+                  <Text style={styles.requesterName}>{item.name}</Text>
+                  <Text style={styles.requesterEmail}>{item.email}</Text>
+                </View>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.acceptButton]}
+                    onPress={() =>
+                      handleRequestResponse(item.subjectID, 'accept')
+                    }>
+                    <Text style={styles.buttonText}>Accept</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.button, styles.rejectButton]}
+                    onPress={() =>
+                      handleRequestResponse(item.subjectID, 'reject')
+                    }>
+                    <Text style={styles.buttonText}>Deny</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </LinearGradient>
           )}
         />
       )}
@@ -114,26 +145,50 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginBottom: 12,
   },
-  subjectName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  subjectDetails: {
+    // flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
   },
-  requester: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  subjectName: {
+    fontSize: 24,
+    color: '#fff',
+    fontFamily: 'Raleway-Bold',
   },
-  buttonContainer: {
+  subjectInfo: {
+    fontSize: 12,
+    color: '#ffea00',
+  },
+  details: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  
+  requester: {
+    fontSize: 10,
+    color: '#ffea00',
+    fontFamily: 'Raleway-Medium',
+    marginVertical: 8,
+  },
+  requesterName: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'Raleway-Bold',
+  },
+  requesterEmail: {
+    fontSize: 14,
+    color: '#ccc',
+    fontFamily: 'Raleway-Italic',
+  },
+
+  buttonContainer: {
+    justifyContent: 'space-between',
+  },
   button: {
-    flex: 1,
-    padding: 10,
+    padding: 8,
     borderRadius: 5,
     alignItems: 'center',
-    marginHorizontal: 5,
   },
   acceptButton: {
     backgroundColor: '#28a745',
@@ -143,7 +198,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 10,    
   },
 });

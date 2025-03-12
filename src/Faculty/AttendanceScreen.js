@@ -7,7 +7,7 @@ import {
   Pressable,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
+  // ActivityIndicator,
   Alert,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -21,7 +21,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUserContext} from '../Context';
 import Leaderboard from './components/Leaderboard';
 import Records from './components/Records';
-import DeleteSubject from './components/DeleteSubject';
 import AddFaculty from './components/AddFaculty';
 import DownloadButton from './components/DownloadButton';
 import BASE_URL from '../../url';
@@ -31,9 +30,7 @@ const AttendanceScreen = ({route}) => {
   
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [menuVisible, setMenuVisible] = useState(false);
   const [facultyModalVisible, setFacultyModalVisible] = useState(false);
-  const [sideMenuVisible, setSideMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const {userEmail} = useUserContext();
   const navigation = useNavigation();
@@ -116,7 +113,7 @@ const AttendanceScreen = ({route}) => {
 
   const fetchAttendanceRecords = useCallback(async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const response = await axios.get(
         `${BASE_URL}/faculty/attendanceRecord/${subjectRecord.subjectID}`,
         {
@@ -126,7 +123,7 @@ const AttendanceScreen = ({route}) => {
         },
       );
       const data = await response.data;
-      console.log(response);
+
       if (response.status === 200) {
         setAttendanceRecords(data.attendanceRecords);
 
@@ -154,7 +151,7 @@ const AttendanceScreen = ({route}) => {
         topOffset: 10,
       });
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   }, [subjectRecord.subjectID]);
 
@@ -171,12 +168,6 @@ const AttendanceScreen = ({route}) => {
       .sort((a, b) => new Date(b) - new Date(a));
   }, [attendanceRecords]);
 
-  const toggleMenu = useCallback(() => {
-    setMenuVisible(prev => !prev);
-  }, []);
-  const toggleSideMenu = useCallback(() => {
-    setSideMenuVisible(prev => !prev);
-  }, []);
   const toggleFacultyModal = () => {
     setFacultyModalVisible(prev => !prev);
   };
@@ -194,6 +185,13 @@ const AttendanceScreen = ({route}) => {
         end={{x: 1, y: 0}}
         colors={['#007a7a', '#005758']}
         style={styles.header}>
+        <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
+          <MaterialCommunityIcons
+            name="account-plus-outline"
+            size={20}
+            color="#fff"
+          />
+        </Pressable>
         <View style={styles.subjectContainer}>
           <Text
             style={styles.subjectName}
@@ -203,63 +201,18 @@ const AttendanceScreen = ({route}) => {
           </Text>
           <Text style={styles.subjectCode}>{subjectRecord.subjectCode}</Text>
         </View>
-        <TouchableOpacity onPress={toggleSideMenu}>
-          <MaterialCommunityIcons name="widgets" size={28} color="#fff" />
-        </TouchableOpacity>
+        <Pressable style={styles.menuItem} onPress={handleArchiveSubject}>
+          <MaterialCommunityIcons name="archive-lock" size={20} color="#fff" />
+        </Pressable>
         <Modal transparent visible={facultyModalVisible} animationType="fade">
           <Pressable style={styles.overlay} onPress={toggleFacultyModal}>
             <AddFaculty
-              toggleSideMenu={toggleSideMenu}
               toggleFacultyModal={toggleFacultyModal}
               subjectID={subjectRecord.subjectID}
             />
           </Pressable>
         </Modal>
-        <Modal transparent visible={menuVisible} animationType="fade">
-          <Pressable style={styles.overlay} onPress={toggleMenu}>
-            <DeleteSubject
-              toggleMenu={toggleMenu}
-              subjectID={subjectRecord.subjectID}
-            />
-          </Pressable>
-        </Modal>
       </LinearGradient>
-      {sideMenuVisible && (
-        <Modal transparent visible={sideMenuVisible} animationType="fade">
-          <Pressable style={styles.sideMenuOverlay} onPress={toggleSideMenu}>
-            <View style={styles.sideMenu}>
-              <Pressable style={styles.menuItem} onPress={toggleFacultyModal}>
-                <MaterialCommunityIcons
-                  name="account-plus-outline"
-                  size={20}
-                  color="#fff"
-                />
-                <Text style={styles.menuText}>Add Faculty</Text>
-              </Pressable>
-              <Pressable style={styles.menuItem} onPress={toggleMenu}>
-                <MaterialCommunityIcons name="delete" size={20} color="#fff" />
-                <Text style={styles.menuText}>Delete Subject</Text>
-              </Pressable>
-              <Pressable style={styles.menuItem} onPress={handleArchiveSubject}>
-                <MaterialCommunityIcons
-                  name="archive-lock"
-                  size={20}
-                  color="#fff"
-                />
-                <Text style={styles.menuText}>Archive Subject</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Modal>
-      )}
-
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#ff6200"
-          style={{marginTop: 20}}
-        />
-      ) : (
         <>
           <View style={styles.dateContainer}>
             <TouchableOpacity onPress={() => setSelectedDate(null)}>
@@ -307,7 +260,8 @@ const AttendanceScreen = ({route}) => {
 
           {selectedDate === null ? (
             <Leaderboard
-              subjectRecord={subjectRecord}              
+              subjectRecord={subjectRecord}
+              attendanceRecords={attendanceRecords}
             />
           ) : (
             <Records
@@ -320,7 +274,6 @@ const AttendanceScreen = ({route}) => {
           )}
           <DownloadButton subjectID={subjectRecord.subjectID} />
         </>
-      )}
     </View>
   );
 };
@@ -362,7 +315,6 @@ const styles = StyleSheet.create({
   },
   subjectContainer: {
     alignItems: 'center',
-    width: '90%',
   },
   subjectName: {
     fontSize: 16,

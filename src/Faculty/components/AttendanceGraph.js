@@ -2,7 +2,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {BarChart} from 'react-native-gifted-charts';
 
-const AttendanceGraph = ({barData}) => {
+const AttendanceGraph = ({students,barData}) => {
   return (
     <View style={styles.graphContainer}>
       <Text style={styles.graphTitle}>Head-Count</Text>
@@ -17,16 +17,17 @@ const AttendanceGraph = ({barData}) => {
             value: item.studentsPresent,
             label: item.date,
           }))}
+          maxValue={students}
           yAxisThickness={0}
           xAxisThickness={0}
           yAxisTextStyle={{fontSize: 8, color: 'gray'}}
           xAxisLabelTextStyle={{fontSize: 8, color: 'gray'}}
-          yAxisLabelTexts={Array.from({ length: 5 }, (_, i) => String(i * 10))} 
           showGradient
           gradientColor="#147df5"
           showValuesAsTopLabel
           hideRules
           topLabelTextStyle={{fontSize: 8, color: 'gray'}}
+          // yAxisLabelTexts={Array.from({ length: students }, (_, i) => String(i * 10))} 
           // rulesLength={500}
           // rulesColor="#333" 
                 

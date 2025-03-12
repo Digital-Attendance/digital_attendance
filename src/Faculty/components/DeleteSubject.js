@@ -5,7 +5,7 @@ import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
 import { useNavigation } from '@react-navigation/native';
 
-const DeleteSubject = ({toggleMenu, subjectID}) => {
+const DeleteSubject = ({toggleMenu, subjectID, setArchivedSubjects}) => {
   const [typedCode, setTypedCode] = useState('');
   const [error, setError] = useState('');
   const navigation = useNavigation();
@@ -29,7 +29,9 @@ const DeleteSubject = ({toggleMenu, subjectID}) => {
           duration: Snackbar.LENGTH_SHORT,
         });
         toggleMenu();
-        navigation.replace('Faculty_Home');
+        setArchivedSubjects((prev) =>
+          prev.filter((subject) => subject.subjectID !== subjectID)
+        );
         
       } else {
         setError(data.error || "Failed to delete subject");

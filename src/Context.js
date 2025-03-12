@@ -18,6 +18,7 @@ export const AsyncStorageProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
+  const [isSwipeActive, setIsSwipeActive] = useState(false);
 
   const logout = async () => {
     await axios.post(`${BASE_URL}/logout`);
@@ -34,8 +35,19 @@ export const AsyncStorageProvider = ({children}) => {
       setUserEmail,
       setUserName,
       logout,
+      isSwipeActive,
+      setIsSwipeActive,
     }),
-    [user, userEmail, userName, setUserName, setUserEmail, logout],
+    [
+      user,
+      userEmail,
+      userName,
+      isSwipeActive,
+      setUserName,
+      setUserEmail,
+      logout,
+      setIsSwipeActive,
+    ],
   );
 
   return (

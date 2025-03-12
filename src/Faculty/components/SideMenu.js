@@ -17,13 +17,13 @@ import * as ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import {useUserContext} from '../../Context';
 import BASE_URL from '../../../url';
+import { CodeSquare } from 'lucide-react-native';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
-  const {userEmail, userName} = useUserContext();
-  const [requests, setRequests] = useState([]);
-  const [profileImage, setProfileImage] = useState(
-    'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-  );
+  const {userEmail, userName} = useUserContext();  
+  const [profileImage, setProfileImage] = useState(null);
+  const [enrollnotification,setEnrollNotification] = useState(false);
+  const [collabNotifications, setCollabNotifications] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -33,29 +33,36 @@ const SideMenu = ({toggleSideMenu}) => {
         setProfileImage(image);
       }
     };
+    
     const fetchRequests = async () => {
       try {
         const response = await axios.get(
-          `${BASE_URL}/faculty/pending-requests`,
+          `${BASE_URL}/faculty/new-requests`,
           {
-            params: {email: userEmail},
+            params: {facultyEmail: userEmail},
           },
         );
-        setRequests(response.data.pendingRequests || []);
+
+        if (
+          response.status === 200
+        ) {
+          console.log(response.data);
+          setEnrollNotification(response.data.enrollmentRequest);
+          setCollabNotifications(response.data.collabRequest);
+        } else {
+          Toast.show({type: 'error', text1: response.data.error});
+        }
       } catch (error) {
-        console.error('Error fetching collab requests:', error);
+        Toast.show({type: 'error', text1: 'Failed to fetch requests'});
+      } finally {
+        setLoading(false);
       }
     };
     getProfileImage();
     fetchRequests();
   }, []);
 
-  const handleRequest = subjectID => {
-    setRequests(prevRequests =>
-      prevRequests.filter(req => req.subjectID !== subjectID),
-    );
-  };
-
+ 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       {
@@ -103,7 +110,14 @@ const SideMenu = ({toggleSideMenu}) => {
         </View>
         <View style={styles.avatarContainer}>
           <TouchableOpacity onPress={selectProfileImage}>
-            <Image source={{uri: profileImage}} style={styles.avatar} />
+            <Image
+              source={
+                profileImage
+                  ? {uri: profileImage}
+                  : require('../../../assets/account-pic.png')
+              }
+              style={styles.avatar}
+            />
           </TouchableOpacity>
         </View>
         <Text style={styles.userName}>{userName}</Text>
@@ -121,25 +135,29 @@ const SideMenu = ({toggleSideMenu}) => {
             onPress={() => {
               navigation.navigate('EnrollRequests');
             }}>
-            <MaterialCommunityIcons
-              name="account-search"
-              size={20}
-              color="grey"
-            />
+            <View>
+              <MaterialCommunityIcons
+                name="account-search"
+                size={20}
+                color="grey"
+              />
+              {enrollnotification && <View style={styles.redDot} />}
+            </View>
+
             <Text style={styles.menuItemText}>Enrollment Requests</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
-              navigation.navigate('CollabRequests', {requests, handleRequest});
+              navigation.navigate('CollabRequests');
             }}>
-            <View style={{position: 'relative'}}>
+            <View>
               <MaterialCommunityIcons
                 name="account-multiple-plus"
                 size={20}
                 color="grey"
               />
-              {requests.length > 0 && <View style={styles.redDot} />}
+              {collabNotifications && <View style={styles.redDot} />}
             </View>
             <Text style={styles.menuItemText}>Collab Requests</Text>
           </TouchableOpacity>
@@ -147,9 +165,7 @@ const SideMenu = ({toggleSideMenu}) => {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
-              Linking.openURL(
-                'mailto:digital.attendance.nits@gmail.com,',
-              );
+              Linking.openURL('mailto:digital.attendance.nits@gmail.com,');
             }}>
             <MaterialCommunityIcons name="account-box" size={20} color="grey" />
             <Text style={styles.menuItemText}>Contact Us</Text>

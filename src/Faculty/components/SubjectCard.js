@@ -16,13 +16,13 @@ import BASE_URL from '../../../url';
 
 const {width} = Dimensions.get('window');
 
-const SubjectCard = ({refresh}) => {
-  const {userEmail} = useUserContext();
+const SubjectCard = ({onRefresh,refresh}) => {
+  const {userEmail,isSwipeActive} = useUserContext();
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
   const [barData, setBarData] = useState([]);
-  const [isSwipeActive, setIsSwipeActive] = useState(false);
+  
   
 
   const fetchSubjects = async () => {
@@ -39,7 +39,7 @@ const SubjectCard = ({refresh}) => {
       .then(response => {
         setSubjects(response.data);
         if (response.data.length > 0) {
-          updateGraphData(0, response.data);
+          updateGraphData(activeIndex, response.data);
         }
         AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
       })
@@ -76,8 +76,8 @@ const SubjectCard = ({refresh}) => {
   };
 
   const renderItem = useCallback(({item, index}) => {
-    return <SummaryCard key={index} subjectRecord={item} />;
-  }, []);
+    return <SummaryCard key={index} subjectRecord={item}/>;
+  }, [isSwipeActive]);
 
   return (
     <View style={styles.wrapper}>
@@ -105,11 +105,10 @@ const SubjectCard = ({refresh}) => {
               inactiveDotOpacity={0.4}
               inactiveDotScale={0.6}
             />
-            <AttendanceGraph barData={barData} />
+            <AttendanceGraph students={subjects[activeIndex]?.numberOfStudents} barData={barData} />
             <SwipeButton
               key={activeIndex}
-              setIsSwipeActive={setIsSwipeActive}
-              userEmail={userEmail}
+              onRefresh={onRefresh}
               subjectID={subjects[activeIndex]?.subjectID}
             />
           </>

@@ -10,9 +10,10 @@ import {
 import CheckBox from '@react-native-community/checkbox';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {format} from 'date-fns';
-import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
+import { useUserContext } from '../../Context';
 import axios from 'axios';
+import BASE_URL from '../../../url';
 
 const convertUTCtoIST = utcDate => {
   const istDate = new Date(utcDate);
@@ -29,14 +30,15 @@ const Records = ({
   const recordForDate = attendanceRecords.find(record => {
     return convertUTCtoIST(record.date) === selectedDate;
   });
-
+  const {isSwipeActive} = useUserContext();
   const students = recordForDate ? recordForDate.Students : [];
+  const [latestAttendance, setLatestAttendance] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [updatedAttendance, setUpdatedAttendance] = useState([...students]);
+  const [updatedAttendance, setUpdatedAttendance] = useState([]);
 
-  useEffect(() => {
-    setUpdatedAttendance([...students]);
-  }, [selectedDate]);
+  // useEffect(() => {
+  //   setUpdatedAttendance([...students]);
+  // }, [selectedDate]);
 
   const toggleEditing = () => {
     if (isEditing) {
@@ -53,47 +55,48 @@ const Records = ({
     );
   };
 
-  // const handleDeleteAttendanceRecord = async () => {
-  //   try {
-  //     if (!recordForDate || !recordForDate.date) {
-  //       Snackbar.show({
-  //         text: 'No attendance record found for this date',
-  //         duration: Snackbar.LENGTH_SHORT,
-  //       });
-  //       return;
-  //     }
-  //     const response = await axios.delete(
-  //       `${BASE_URL}/faculty/delete-attendance`,
-  //       {
-  //         data: {
-  //           subjectID,
-  //           date: recordForDate.date,
-  //         },
-  //       },
-  //     );
+  const fetchAttendanceData = async () => {
+    try {
+      console.log(selectedDate);
+      const response = await axios.get(
+        `${BASE_URL}/faculty/get-attendance/${subjectID}/${selectedDate}`,
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
+      if (response.status === 200) {
+        setLatestAttendance(response.data.Students || []);
+      }
+      else {
+        console.log('Error :', response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching attendance data:', error);
+    }
+  };
 
-  //     if (response.status === 200) {
-  //       Snackbar.show({
-  //         text: 'Attendance record deleted successfully',
-  //         duration: Snackbar.LENGTH_SHORT,
-  //       });
-  //       if (onAttendanceDeleted) {
-  //         onAttendanceDeleted(recordForDate.date);
-  //       }
-  //     } else {
-  //       Snackbar.show({
-  //         text: 'An error occurred while deleting attendance record',
-  //         duration: Snackbar.LENGTH_SHORT,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error deleting attendance record:', error);
-  //     Snackbar.show({
-  //       text: 'Network error. Please try again.',
-  //       duration: Snackbar.LENGTH_SHORT,
-  //     });
-  //   }
-  // };
+  useEffect(()=>{
+    fetchAttendanceData();
+  },[]);
+
+  useEffect(() => {
+    let interval;
+    if (isSwipeActive) {
+      fetchAttendanceData();
+      interval = setInterval(() => {
+        fetchAttendanceData();
+      }, 5000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isSwipeActive]);
+
+  useEffect(() => {
+    setUpdatedAttendance(latestAttendance);
+  }, [latestAttendance]);
 
   const handleDeleteAttendanceRecord = async () => {
     Alert.alert(
@@ -131,9 +134,9 @@ const Records = ({
                   text: 'Attendance record deleted successfully',
                   duration: Snackbar.LENGTH_SHORT,
                 });
-                if (onAttendanceDeleted) {
-                  onAttendanceDeleted(recordForDate.date);
-                }
+                // if (onAttendanceDeleted) {
+                //   onAttendanceDeleted(recordForDate.date);
+                // }
               } else {
                 Snackbar.show({
                   text: 'An error occurred while deleting attendance record',
@@ -184,9 +187,9 @@ const Records = ({
           duration: Snackbar.LENGTH_SHORT,
         });
         setIsEditing(false);
-        if (onAttendanceUpdated) {
-          onAttendanceUpdated({...recordForDate, Students: updatedAttendance});
-        }
+        // if (onAttendanceUpdated) {
+        //   onAttendanceUpdated({...recordForDate, Students: updatedAttendance});
+        // }
       } else {
         Snackbar.show({
           text: data.error || 'An error occurred while updating attendance',

@@ -67,7 +67,7 @@ const LivenessDetection = ({route}) => {
       });
       if (response.status === 200) {
         setTimeout(() => {
-          navigation.navigate('Student_Home');
+          navigation.replace('Student_Home');
         }, 500);
       }
     } catch (error) {

@@ -1,5 +1,5 @@
 import {ScrollView, StyleSheet, RefreshControl} from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState,useRef} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import Navbar from './components/Navbar';
 import SubjectCard from './components/SubjectCard';
@@ -7,8 +7,13 @@ import SubjectCard from './components/SubjectCard';
 const Student_Home = () => {
   const [refresh, setRefresh] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const isFirstRun = useRef(true);
   useFocusEffect(
     useCallback(() => {
+      if (isFirstRun.current) {
+        isFirstRun.current = false;
+        return;
+      }
       setRefresh(prev => !prev);
     }, []),
   );

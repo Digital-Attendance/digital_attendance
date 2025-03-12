@@ -18,7 +18,7 @@ import axios from 'axios';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Toast from 'react-native-toast-message';
-
+import {useUserContext} from '../../Context';
 import BASE_URL from '../../../url';
 
 const {width} = Dimensions.get('window');
@@ -26,15 +26,16 @@ const BUTTON_WIDTH = width - 10;
 const BUTTON_HEIGHT = 60;
 const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
-const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
+const SwipeButton = ({onRefresh, subjectID}) => {
   const translateX = useSharedValue(0);
+  const {userEmail, setIsSwipeActive} = useUserContext();
   const [isStarted, setIsStarted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
   const watchId = useRef(null);
 
   const checkGPSStatus = async () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       Geolocation.getCurrentPosition(
         () => {
           resolve(true);
@@ -46,7 +47,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
             position: 'top',
             visibilityTime: 1000,
             autoHide: true,
-            topOffset: 10,      
+            topOffset: 10,
           });
           resolve(false);
         },
@@ -86,7 +87,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
       return null;
     }
@@ -98,7 +99,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
       return null;
     }
@@ -127,7 +128,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
             position: 'top',
             visibilityTime: 1000,
             autoHide: true,
-            topOffset: 10,      
+            topOffset: 10,
           });
           reject(error);
         },
@@ -159,7 +160,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
 
       const response = await axios.post(
@@ -175,16 +176,24 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
+        setTimeout(() => {
+          stopAttendance();
+          translateX.value = withTiming(0);
+          runOnJS(setIsStarted)(false);
+          runOnJS(setIsSwipeActive)(false);
+        }, 300000);
       } else {
         Toast.show({
           type: 'error',
-          text1: response.data.error || 'An error occurred while starting attendance!',
+          text1:
+            response.data.error ||
+            'An error occurred while starting attendance!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
         translateX.value = withTiming(0);
         runOnJS(setIsStarted)(false);
@@ -197,7 +206,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
     }
   };
@@ -212,7 +221,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
       position: 'top',
       visibilityTime: 1000,
       autoHide: true,
-      topOffset: 10,      
+      topOffset: 10,
     });
 
     try {
@@ -229,17 +238,19 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
-        
+        onRefresh();
       } else {
         Toast.show({
           type: 'error',
-          text1: response.data.error || 'An error occurred while stopping attendance!',
+          text1:
+            response.data.error ||
+            'An error occurred while stopping attendance!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     } catch (error) {
@@ -249,7 +260,7 @@ const SwipeButton = ({setIsSwipeActive, subjectID, userEmail}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
     }
   };
