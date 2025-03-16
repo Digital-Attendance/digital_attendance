@@ -22,11 +22,11 @@ import BASE_URL from '../../url';
 const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
   const {subjectID} = route.params;
-  console.log('SSS' + subjectID);
   const [verifying, setVerifying] = useState(true);
   const [locationVerified, setLocationVerified] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [fetchingLocation, setFetchingLocation] = useState(false);
   // const [facultyLoc, setFacultyLocation] = useState(null);
 
   const navigation = useNavigation();
@@ -57,7 +57,6 @@ const VerifyLocation = ({route}) => {
       );
 
       if (response.data.success) {
-        // setFacultyLocation(response.data.location);
         return response.data.location;
       } else if (!response.data.success) {
         setErrorMsg('Attendance not started yet');
@@ -67,7 +66,7 @@ const VerifyLocation = ({route}) => {
     } catch (error) {
       setErrorMsg(error.message);
       setVerifying(false);
-    }
+    } 
   };
 
   const checkGPSStatus = async () => {
@@ -85,6 +84,7 @@ const VerifyLocation = ({route}) => {
   };
 
   const verifyLocation = async () => {
+    setVerifying(true);
     const gpsStatus = await checkGPSStatus();
     if (!gpsStatus) {
       setErrorMsg("Please turn on your device's GPS");
@@ -93,12 +93,10 @@ const VerifyLocation = ({route}) => {
     }
     const facultyLocation = await fetchFacultyLocation();
     if (!facultyLocation) {
-      setErrorMsg('Faculty location not found, Retry !');
-      setVerifying(false);
+      // setErrorMsg('Faculty location not found, Retry !');
+      // setVerifying(false);
       return;
     }
-
-    setVerifying(true);
     setErrorMsg('');
     setLocationVerified(null);
     setCurrentLocation(null);
@@ -139,9 +137,8 @@ const VerifyLocation = ({route}) => {
 
     if (watchId.current !== null) {
       Geolocation.clearWatch(watchId.current);
-      
     }
-    
+
     watchId.current = Geolocation.watchPosition(
       position => {
         const {latitude, longitude} = position.coords;
@@ -159,7 +156,7 @@ const VerifyLocation = ({route}) => {
         // const isVerified =
         //   Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
         //   Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
-        console.log('Distance:', distance, 'meters. Location Verified:', isVerified);
+        
         setLocationVerified(isVerified);
         setVerifying(false);
 
@@ -232,7 +229,7 @@ const VerifyLocation = ({route}) => {
         </View>
       )} */}
       {!verifying && (
-        <TouchableOpacity style={styles.recheck} onPress={verifyLocation}>
+        <TouchableOpacity disabled={verifying} style={styles.recheck} onPress={verifyLocation}>
           <Text style={styles.recheckText}>Re-check Location</Text>
         </TouchableOpacity>
       )}

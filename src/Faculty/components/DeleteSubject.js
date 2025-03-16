@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
 import {View, Text, TextInput, TouchableOpacity} from 'react-native';
 import {StyleSheet} from 'react-native';
-import BASE_URL from '../../../url';
 import Snackbar from 'react-native-snackbar';
-import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import {useNavigation} from '@react-navigation/native';
+import BASE_URL from '../../../url';
 
 const DeleteSubject = ({toggleMenu, subjectID, setArchivedSubjects}) => {
   const [typedCode, setTypedCode] = useState('');
@@ -11,37 +12,38 @@ const DeleteSubject = ({toggleMenu, subjectID, setArchivedSubjects}) => {
   const navigation = useNavigation();
   const handleDelete = async () => {
     if (typedCode !== subjectID) {
-      setError("Subject code does not match.");
+      setError('Subject code does not match.');
       return;
     }
-  
+
     try {
-      const response = await fetch(`${BASE_URL}/faculty/delete-subject/${subjectID}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
+      const response = await axios.delete(
+        `${BASE_URL}/faculty/delete-subject/${subjectID}`,
+        {
+          validationStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
+
+      const data = await response.data;
+
+      if (response.status === 200) {
         Snackbar.show({
           text: data.message,
           duration: Snackbar.LENGTH_SHORT,
         });
         toggleMenu();
-        setArchivedSubjects((prev) =>
-          prev.filter((subject) => subject.subjectID !== subjectID)
+        setArchivedSubjects(prev =>
+          prev.filter(subject => subject.subjectID !== subjectID),
         );
-        
       } else {
-        setError(data.error || "Failed to delete subject");
+        setError(data.error || 'Failed to delete subject');
       }
     } catch (error) {
-      setError("Error deleting subject. Please try again.");
-      
+      setError('Error deleting subject. Please try again.');
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -67,8 +69,7 @@ const DeleteSubject = ({toggleMenu, subjectID, setArchivedSubjects}) => {
             styles.deleteButton,
             typedCode === subjectID ? {} : styles.disabled,
           ]}
-          onPress={handleDelete}
-        >
+          onPress={handleDelete}>
           <Text style={styles.deleteText}>Delete</Text>
         </TouchableOpacity>
       </View>

@@ -21,11 +21,6 @@ const Navbar = () => {
   }
 
 
-  /*onLongPress={async () => {
-          await AsyncStorage.removeItem('access_token');
-          navigation.popTo('SplashScreen');
-        }} */
-
   return (
     <View style={styles.navContainer}>
       <TouchableOpacity

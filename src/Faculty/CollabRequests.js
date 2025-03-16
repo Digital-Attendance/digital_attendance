@@ -26,6 +26,11 @@ const CollabRequests = () => {
           {
             params: {email: userEmail},
           },
+          {
+            validateStatus: function (status) {
+              return status < 500;
+            },
+          },
         );
         setRequests(response.data.pendingRequests || []);
       } catch (error) {
@@ -54,7 +59,7 @@ const CollabRequests = () => {
         prevRequests.filter(req => req.subjectID !== subjectID),
       );
     } catch (error) {
-      console.error(`Error ${action}ing request:`, error);
+      
       Toast.show({
         type: 'error',
         text1: 'Error responding to request',
@@ -73,9 +78,11 @@ const CollabRequests = () => {
           data={requests}
           keyExtractor={item => item.subjectID}
           renderItem={({item}) => (
-            <LinearGradient colors={['#007a7a', '#004d4d']} style={styles.requestCard}>
+            <LinearGradient
+              colors={['#007a7a', '#004d4d']}
+              style={styles.requestCard}>
               <View style={styles.subjectDetails}>
-                <Text style={styles.subjectName} >{item.subjectName}</Text>
+                <Text style={styles.subjectName}>{item.subjectName}</Text>
                 <Text style={styles.subjectInfo}>
                   {item.programme}-{item.department}-{item.semester}-
                   {item.section}
@@ -164,7 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  
+
   requester: {
     fontSize: 10,
     color: '#ffea00',
@@ -198,6 +205,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 10,    
+    fontSize: 10,
   },
 });

@@ -17,7 +17,7 @@ import * as ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import {useUserContext} from '../../Context';
 import BASE_URL from '../../../url';
-import { CodeSquare } from 'lucide-react-native';
+import { CommonActions } from '@react-navigation/native';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
   const {userEmail, userName} = useUserContext();  
@@ -41,12 +41,17 @@ const SideMenu = ({toggleSideMenu}) => {
           {
             params: {facultyEmail: userEmail},
           },
+          {
+            validateStatus: function (status) {
+              return status < 500;
+            },
+          }
         );
 
         if (
           response.status === 200
         ) {
-          console.log(response.data);
+          
           setEnrollNotification(response.data.enrollmentRequest);
           setCollabNotifications(response.data.collabRequest);
         } else {
@@ -74,7 +79,12 @@ const SideMenu = ({toggleSideMenu}) => {
         text: 'Logout',
         onPress: async () => {
           await AsyncStorage.clear();
-          navigation.popTo('SplashScreen');
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: 'SplashScreen'}],
+            }),
+          );
         },
       },
     ]);
@@ -167,7 +177,7 @@ const SideMenu = ({toggleSideMenu}) => {
             onPress={() => {
               Linking.openURL('mailto:digital.attendance.nits@gmail.com,');
             }}>
-            <MaterialCommunityIcons name="account-box" size={20} color="grey" />
+            <MaterialCommunityIcons name="phone-outline" size={20} color="grey" />
             <Text style={styles.menuItemText}>Contact Us</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
@@ -177,7 +187,7 @@ const SideMenu = ({toggleSideMenu}) => {
           <TouchableOpacity
             style={[styles.menuItem, styles.logout]}
             onPress={handleLogout}>
-            <MaterialCommunityIcons name="account" size={20} color="grey" />
+            <MaterialCommunityIcons name="logout" size={20} color="grey" />
             <Text style={styles.menuItemText}>Logout</Text>
           </TouchableOpacity>
         </View>

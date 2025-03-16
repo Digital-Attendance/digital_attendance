@@ -29,6 +29,8 @@ import SubjectInfo from './src/Student/SubjectInfo';
 import ArchivedSubjects from './src/Faculty/ArchivedSubjects';
 import EnrollRequests from './src/Faculty/EnrollRequests';
 import CollabRequests from './src/Faculty/CollabRequests';
+import PendingEnrollments from './src/Student/PendingEnrollments';
+import GetStartedScreen from './src/GetStartedScreen';
 
 const toastConfig = {
   success: (props : ToastConfigParams<any>) => (
@@ -98,6 +100,7 @@ const App = () => {
                 animation: 'fade',
               }}>
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
+              <Stack.Screen name="GetStarted" component={GetStartedScreen} />
               <Stack.Screen name="Start" component={Start} />
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Register" component={Register} />
@@ -134,6 +137,7 @@ const App = () => {
                 name="LivenessDetection"
                 component={LivenessDetection}
               />
+              <Stack.Screen name="PendingEnrollments" component={PendingEnrollments} />
             </Stack.Navigator>
           </NavigationContainer>
         </AsyncStorageProvider>

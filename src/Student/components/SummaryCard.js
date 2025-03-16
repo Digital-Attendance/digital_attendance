@@ -16,7 +16,8 @@ import Performers from '../../Faculty/components/Performers';
 
 
 const getProgressColor = progress => {
-  if (progress <= 50) return ['#ff0000', '#ff4d4d'];
+  if (progress <= 30) return ['#ff0000', '#ff4d4d'];
+  if (progress <= 50) return ['#FF6200', '#FDB777'];
   if (progress <= 75) return ['#f9ed39', '#f9f9ae'];
   if (progress <= 85) return ['#0575E6', '#00F260'];
   return ['#86e83c', '#2bb539'];
@@ -33,7 +34,7 @@ const SummaryCard = ({subjectRecord}) => {
     if (totalClasses > 0) {
       percentage = (attendedClasses / totalClasses) * 100;
     }
-    setProgress(percentage);
+    setProgress(Math.ceil(percentage));
   }, [subjectRecord]);
   const progressColors = getProgressColor(progress);
 

@@ -46,10 +46,10 @@ const Start = ({ navigation }) => {
       />
       
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.replace('Login')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={() => navigation.replace('Register')}>
+        <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={() => navigation.navigate('Register')}>
           <Text style={[styles.buttonText, styles.registerText]}>Register</Text>
         </TouchableOpacity>
       </View>

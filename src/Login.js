@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
-
+import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const windowHeight = Dimensions.get('window').height;
@@ -33,7 +33,7 @@ export default function Login({navigation}) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [logging, setLogging] = useState(false);
 
-  const {setUserEmail,setUserName} = useUserContext();
+  const {setUserEmail, setUserName} = useUserContext();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -86,7 +86,7 @@ export default function Login({navigation}) {
           validateStatus: function (status) {
             return status < 500;
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -118,9 +118,21 @@ export default function Login({navigation}) {
         setTimeout(() => {
           setEmail('');
           setPassword('');
-          navigation.replace(
-            selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
+
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name:
+                    selectedRole === 'Faculty'
+                      ? 'Faculty_Home'
+                      : 'Student_Home',
+                },
+              ],
+            }),
           );
+          
         }, 500);
       } else {
         // Snackbar.show({
@@ -178,7 +190,7 @@ export default function Login({navigation}) {
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       } else {
         Toast.show({
@@ -187,7 +199,7 @@ export default function Login({navigation}) {
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     } finally {

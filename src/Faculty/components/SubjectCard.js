@@ -16,26 +16,30 @@ import BASE_URL from '../../../url';
 
 const {width} = Dimensions.get('window');
 
-const SubjectCard = ({onRefresh,refresh}) => {
-  const {userEmail,isSwipeActive} = useUserContext();
+const SubjectCard = ({onRefresh, refresh}) => {
+  const {userEmail, isSwipeActive} = useUserContext();
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
   const [barData, setBarData] = useState([]);
-  
-  
 
   const fetchSubjects = async () => {
     const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
+    
     if (cachedSubjects) {
       const parsedSubjects = JSON.parse(cachedSubjects);
+      console.log('Parsed: ',subjects.length);
       setSubjects(parsedSubjects);
       if (parsedSubjects.length > 0) {
         updateGraphData(0, parsedSubjects);
       }
     }
     axios
-      .get(`${BASE_URL}/faculty/dashboard/${userEmail}`)
+      .get(`${BASE_URL}/faculty/dashboard/${userEmail}`, {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      })
       .then(response => {
         setSubjects(response.data);
         if (response.data.length > 0) {
@@ -46,7 +50,7 @@ const SubjectCard = ({onRefresh,refresh}) => {
       .catch(error =>
         Toast.show({
           type: 'error',
-          text1: error,
+          text1: 'Failed to fetch subjects',
           visibilityTime: 1000,
           autoHide: true,
           topOffset: 10,
@@ -75,9 +79,12 @@ const SubjectCard = ({onRefresh,refresh}) => {
     }
   };
 
-  const renderItem = useCallback(({item, index}) => {
-    return <SummaryCard key={index} subjectRecord={item}/>;
-  }, [isSwipeActive]);
+  const renderItem = useCallback(
+    ({item, index}) => {
+      return <SummaryCard key={index} subjectRecord={item} />;
+    },
+    [isSwipeActive],
+  );
 
   return (
     <View style={styles.wrapper}>
@@ -105,7 +112,10 @@ const SubjectCard = ({onRefresh,refresh}) => {
               inactiveDotOpacity={0.4}
               inactiveDotScale={0.6}
             />
-            <AttendanceGraph students={subjects[activeIndex]?.numberOfStudents} barData={barData} />
+            <AttendanceGraph
+              students={subjects[activeIndex]?.numberOfStudents}
+              barData={barData}
+            />
             <SwipeButton
               key={activeIndex}
               onRefresh={onRefresh}

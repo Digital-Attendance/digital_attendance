@@ -27,24 +27,20 @@ import BASE_URL from '../../url';
 
 const AttendanceScreen = ({route}) => {
   const {subjectRecord} = route.params;
-  
+
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [facultyModalVisible, setFacultyModalVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
   const {userEmail} = useUserContext();
   const navigation = useNavigation();
 
-  const handleAttendanceUpdate = updatedRecord => {
-    setAttendanceRecords(prevRecords =>
-      prevRecords.map(record =>
-        record.date === updatedRecord.date ? updatedRecord : record,
-      ),
-    );
-  };
   const handleAttendanceDeletion = deletedDate => {
     setAttendanceRecords(prevRecords =>
-      prevRecords.filter(record => record.date !== deletedDate),
+      prevRecords.filter(
+        record =>
+          new Date(record.date).toDateString() !==
+          new Date(deletedDate).toDateString(),
+      ),
     );
     setSelectedDate(null);
   };
@@ -113,7 +109,6 @@ const AttendanceScreen = ({route}) => {
 
   const fetchAttendanceRecords = useCallback(async () => {
     try {
-      // setLoading(true);
       const response = await axios.get(
         `${BASE_URL}/faculty/attendanceRecord/${subjectRecord.subjectID}`,
         {
@@ -126,7 +121,6 @@ const AttendanceScreen = ({route}) => {
 
       if (response.status === 200) {
         setAttendanceRecords(data.attendanceRecords);
-
         await AsyncStorage.setItem(
           'cachedAttendanceRecords',
           JSON.stringify(data.attendanceRecords),
@@ -150,14 +144,12 @@ const AttendanceScreen = ({route}) => {
         autoHide: true,
         topOffset: 10,
       });
-    } finally {
-      // setLoading(false);
     }
-  }, [subjectRecord.subjectID]);
+  }, [subjectRecord]);
 
   useEffect(() => {
     fetchAttendanceRecords();
-  }, [fetchAttendanceRecords]);
+  }, []);
 
   const dates = useMemo(() => {
     return attendanceRecords
@@ -172,11 +164,9 @@ const AttendanceScreen = ({route}) => {
     setFacultyModalVisible(prev => !prev);
   };
 
-  const handleDateSelect = useCallback(date => {
-    setSelectedDate(prev =>
-      prev?.getTime() === date.getTime() ? null : new Date(date),
-    );
-  }, []);
+  const handleDateSelect = date => {
+    setSelectedDate(new Date(date));
+  };
 
   return (
     <View style={styles.container}>
@@ -213,67 +203,65 @@ const AttendanceScreen = ({route}) => {
           </Pressable>
         </Modal>
       </LinearGradient>
-        <>
-          <View style={styles.dateContainer}>
-            <TouchableOpacity onPress={() => setSelectedDate(null)}>
-              <LinearGradient
-                colors={[selectedDate ? '#fff' : '#FF6200', '#FDB777']}
-                style={styles.statsContainer}>
-                <Text style={styles.statsTitle}>Stats</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+      <>
+        <View style={styles.dateContainer}>
+          <TouchableOpacity onPress={() => setSelectedDate(null)}>
+            <LinearGradient
+              colors={[selectedDate ? '#fff' : '#FF6200', '#FDB777']}
+              style={styles.statsContainer}>
+              <Text style={styles.statsTitle}>Stats</Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
-            <FlatList
-              horizontal
-              data={dates}
-              keyExtractor={date => date.toString()}
-              renderItem={({item: date}) => {
-                const isSelected =
-                  selectedDate?.toDateString() === date.toDateString();
-                return (
-                  <View style={{alignItems: 'center'}}>
-                    <TouchableOpacity
-                      onPress={() => handleDateSelect(date)}
-                      style={[
-                        styles.dateItem,
+          <FlatList
+            horizontal
+            data={dates}
+            keyExtractor={date => date.toString()}
+            renderItem={({item: date}) => {
+              const isSelected =
+                selectedDate?.toDateString() === date.toDateString();
+              return (
+                <View style={{alignItems: 'center'}}>
+                  <TouchableOpacity
+                    onPress={() => handleDateSelect(date)}
+                    style={[
+                      styles.dateItem,
+                      isSelected ? styles.selectedDate : styles.unselectedDate,
+                    ]}>
+                    <Text
+                      style={
                         isSelected
-                          ? styles.selectedDate
-                          : styles.unselectedDate,
-                      ]}>
-                      <Text
-                        style={
-                          isSelected
-                            ? styles.selectedDateText
-                            : styles.unselectedDateText
-                        }>
-                        {format(date, 'dd')}
-                      </Text>
-                      <Text style={styles.dateText}>{format(date, 'EEE')}</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.monthText}>{format(date, 'MMM')}</Text>
-                  </View>
-                );
-              }}
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
+                          ? styles.selectedDateText
+                          : styles.unselectedDateText
+                      }>
+                      {format(date, 'dd')}
+                    </Text>
+                    <Text style={styles.dateText}>{format(date, 'EEE')}</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.monthText}>{format(date, 'MMM')}</Text>
+                </View>
+              );
+            }}
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
 
-          {selectedDate === null ? (
-            <Leaderboard
-              subjectRecord={subjectRecord}
-              attendanceRecords={attendanceRecords}
-            />
-          ) : (
-            <Records
-              subjectID={subjectRecord.subjectID}
-              attendanceRecords={attendanceRecords}
-              selectedDate={format(selectedDate, 'yyyy-MM-dd')}
-              onAttendanceUpdated={handleAttendanceUpdate}
-              onAttendanceDeleted={handleAttendanceDeletion}
-            />
-          )}
-          <DownloadButton subjectID={subjectRecord.subjectID} />
-        </>
+        {selectedDate === null ? (
+          <Leaderboard
+            subjectRecord={subjectRecord}
+            attendanceRecords={attendanceRecords}
+          />
+        ) : (
+          <Records
+            key={selectedDate}
+            subjectID={subjectRecord.subjectID}
+            attendanceRecords={attendanceRecords}
+            selectedDate={format(selectedDate, 'yyyy-MM-dd')}
+            onAttendanceDeleted={handleAttendanceDeletion}
+          />
+        )}
+        <DownloadButton subjectID={subjectRecord.subjectID} />
+      </>
     </View>
   );
 };

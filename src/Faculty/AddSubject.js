@@ -13,8 +13,9 @@ import {
 } from 'react-native';
 
 import Toast from 'react-native-toast-message';
-import {useUserContext} from '../Context';
 import {Dropdown} from 'react-native-element-dropdown';
+import axios from 'axios';
+import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
 
 const programmes = [
@@ -49,7 +50,7 @@ const departments = [
 
 const AddSubject = ({navigation}) => {
   const {userEmail} = useUserContext();
-  
+
   const [form, setForm] = useState({
     subjectCode: '',
     subjectName: '',
@@ -59,32 +60,57 @@ const AddSubject = ({navigation}) => {
     section: 'NA',
   });
 
+  
+
   const handleChange = (field, value) => {
     setForm(prev => ({...prev, [field]: value}));
   };
 
   const handleSubmit = async () => {
-    const {subjectCode, subjectName, programme, semester, department, section} = form;
+    const {subjectCode, subjectName, programme, semester, department, section} =
+      form;
 
-    if (!subjectCode || !subjectName || !programme || !semester || !department || !section) {
+    if (
+      !subjectCode ||
+      !subjectName ||
+      !programme ||
+      !semester ||
+      !department ||
+      !section
+    ) {
       Toast.show({
         type: 'error',
         text1: 'All fields are required!',
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
       return;
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/faculty/add-subject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // const response = await fetch(`${BASE_URL}/faculty/add-subject`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     subjectID: `${subjectCode}_${department}_${section}`,
+      //     subjectCode,
+      //     subjectName,
+      //     programme,
+      //     semester,
+      //     department,
+      //     section,
+      //     facultyEmail: userEmail,
+      //   }),
+      // });
+
+      // const data = await response.json();
+      const response = await axios.post(
+        `${BASE_URL}/faculty/add-subject`,
+        {
           subjectID: `${subjectCode}_${department}_${section}`,
           subjectCode,
           subjectName,
@@ -93,19 +119,25 @@ const AddSubject = ({navigation}) => {
           department,
           section,
           facultyEmail: userEmail,
-        }),
-      });
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
-      const data = await response.json();
+      const data = response.data;
+      
 
-      if (response.ok) {
+      if (response.status === 201) {
         Toast.show({
           type: 'success',
           text1: 'Subject added successfully!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
 
         navigation.goBack();
@@ -116,7 +148,7 @@ const AddSubject = ({navigation}) => {
           position: 'top',
           visibilityTime: 3000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     } catch (error) {
@@ -126,7 +158,7 @@ const AddSubject = ({navigation}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
     }
   };
@@ -215,8 +247,6 @@ const AddSubject = ({navigation}) => {
     </KeyboardAvoidingView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {

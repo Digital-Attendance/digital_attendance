@@ -42,18 +42,23 @@ const EnrollRequests = () => {
         {
           params: {facultyEmail: userEmail},
         },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
       );
 
       if (response.status === 200) {
         setRequests(response.data.enrollmentRequests);
         const autoExpandSubject = {};
-        Object.entries(
-          response.data.enrollmentRequests,
-        ).forEach(([subjectID, students]) => {
-          if (students.length > 0) {
-            autoExpandSubject[subjectID] = true;
-          }
-        });
+        Object.entries(response.data.enrollmentRequests).forEach(
+          ([subjectID, students]) => {
+            if (students.length > 0) {
+              autoExpandSubject[subjectID] = true;
+            }
+          },
+        );
         setExpandedSubject(autoExpandSubject);
       } else {
         Toast.show({type: 'error', text1: response.data.error});
@@ -67,12 +72,20 @@ const EnrollRequests = () => {
 
   const handleDecision = async (subjectID, studentEmail, action) => {
     try {
-      const response = await axios.post(`${BASE_URL}/faculty/enroll-student`, {
-        facultyEmail: userEmail,
-        studentEmail,
-        subjectID,
-        action,
-      });
+      const response = await axios.post(
+        `${BASE_URL}/faculty/enroll-student`,
+        {
+          facultyEmail: userEmail,
+          studentEmail,
+          subjectID,
+          action,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
       if (response.status === 200) {
         Toast.show({
@@ -90,12 +103,10 @@ const EnrollRequests = () => {
 
   const toggleExpand = subjectID => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedSubject((prev) => (
-      {
-        ...prev,
-        [subjectID]: !prev[subjectID]
-      }
-    ))
+    setExpandedSubject(prev => ({
+      ...prev,
+      [subjectID]: !prev[subjectID],
+    }));
   };
 
   return (
@@ -198,7 +209,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     elevation: 3,
   },
-  subjectTitle: {fontSize: 18, color: '#fff',fontFamily: 'Raleway-Medium'},
+  subjectTitle: {fontSize: 18, color: '#fff', fontFamily: 'Raleway-Medium'},
   studentListContainer: {
     marginBottom: 30,
     padding: 10,
@@ -206,7 +217,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderBottomWidth: 2,
     borderBottomColor: 'skyblue',
-
   },
   scrollContainer: {maxHeight: 150},
   requestItem: {
@@ -217,7 +227,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#444',
   },
-  studentText: {fontSize: 14, color: '#fff',fontFamily: 'Raleway-Medium'},
+  studentText: {fontSize: 14, color: '#fff', fontFamily: 'Raleway-Medium'},
   buttonContainer: {flexDirection: 'row'},
   button: {
     paddingVertical: 5,

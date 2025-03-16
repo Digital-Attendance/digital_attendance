@@ -15,6 +15,7 @@ import {
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
+import {CommonActions} from '@react-navigation/native';
 import BASE_URL from '../url';
 const Registration_FaceVerification = ({navigation, route}) => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -90,28 +91,35 @@ const Registration_FaceVerification = ({navigation, route}) => {
       return;
     }
     try {
-      const res = await fetch(
+      // const res = await fetch(
+      //   'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
+      //   {
+      //     method: 'POST',
+      //     headers: {'Content-Type': 'application/json'},
+      //     body: JSON.stringify({
+      //       email: email,
+      //       image: base64Data,
+      //       registration: true,
+      //     }),
+      //   },
+      // );
+      const res = await axios.post(
         'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
         {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            email: email,
-            image: base64Data,
-            registration: true,
-          }),
+          email: email,
+          image: base64Data,
+          registration: true,
+        },
+        {
+          validationStatus: function (status) {
+            return status < 500;
+          },
         },
       );
 
-      console.log(res);
-      const resJson = await res.json();
-      console.log(resJson);
-      
-
-
-      if (!res.ok) {
+      if (res.status !== 200) {
         Snackbar.show({
-          text: resJson.Message,
+          text: response.data.error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -120,12 +128,14 @@ const Registration_FaceVerification = ({navigation, route}) => {
       }
 
       Snackbar.show({
-        text: 'Registration successful!',
+        text: response.data.message,
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#5CB85C',
         textColor: '#fff',
       });
-      navigation.navigate('SplashScreen');
+      navigation.dispatch(
+        CommonActions.reset({index: 0, routes: [{name: 'Start'}]}),
+      );
     } catch (error) {
       Snackbar.show({
         text: error,
@@ -160,24 +170,28 @@ const Registration_FaceVerification = ({navigation, route}) => {
       email: email,
       password: password,
       registration_number: registration_number,
-      selected_role : selectedRole,
+      selected_role: selectedRole,
     };
 
     try {
-      const response = await fetch(`${BASE_URL}/register`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-        headers: {
-          'Content-Type': 'application/json',
+      // const response = await fetch(`${BASE_URL}/register`, {
+      //   method: 'POST',
+      //   body: JSON.stringify(requestBody),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+
+      const response = await axios.post(`${BASE_URL}/register`, requestBody, {
+        validationStatus: function (status) {
+          return status < 500;
         },
       });
 
-      console.log(response);
-
-      if (!response.ok) {
-        const errorText = await response.json();
+      if (response.status !== 201) {
+        const errorText = response.data.error;
         Snackbar.show({
-          text: errorText.message,
+          text: errorText,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',

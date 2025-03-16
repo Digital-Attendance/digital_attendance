@@ -11,6 +11,7 @@ import axios from 'axios';
 
 import Toast from 'react-native-toast-message';
 import Snackbar from 'react-native-snackbar';
+import {CommonActions} from '@react-navigation/native';
 import BASE_URL from '../url';
 const EmailOTPVerification = ({navigation, route}) => {
   const {form} = route.params;
@@ -67,7 +68,7 @@ const EmailOTPVerification = ({navigation, route}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
       return;
     }
@@ -87,7 +88,7 @@ const EmailOTPVerification = ({navigation, route}) => {
             position: 'top',
             visibilityTime: 1000,
             autoHide: true,
-            topOffset: 10,      
+            topOffset: 10,
           });
           if (selectedRole === 'Student') {
             setTimeout(() => {
@@ -104,17 +105,17 @@ const EmailOTPVerification = ({navigation, route}) => {
               position: 'top',
               visibilityTime: 1000,
               autoHide: true,
-              topOffset: 10,      
+              topOffset: 10,
             });
           }
         } else {
           Toast.show({
             type: 'error',
-            text1: response.data.message,
+            text1: response.data.error || 'Invalid OTP',
             position: 'top',
             visibilityTime: 1000,
             autoHide: true,
-            topOffset: 10,      
+            topOffset: 10,
           });
         }
       } catch (error) {
@@ -124,7 +125,7 @@ const EmailOTPVerification = ({navigation, route}) => {
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     }, 500);
@@ -139,7 +140,7 @@ const EmailOTPVerification = ({navigation, route}) => {
       position: 'top',
       visibilityTime: 1000,
       autoHide: true,
-      topOffset: 10,      
+      topOffset: 10,
     });
 
     const requestBody = {
@@ -147,37 +148,46 @@ const EmailOTPVerification = ({navigation, route}) => {
       email: email,
       password: password,
       registration_number: registration_number,
-      selected_role : selectedRole
+      selected_role: selectedRole,
     };
 
     try {
-      const response = await fetch(`${BASE_URL}/register`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // const response = await fetch(`${BASE_URL}/register`, {
+      //   method: 'POST',
+      //   body: JSON.stringify(requestBody),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+
+      const response = await axios.post(`${BASE_URL}/register`, requestBody, {
+        validateStatus: status => status < 500,
       });
 
-      if (response.ok) {
+      if (response.status === 201) {
         Toast.show({
           type: 'success',
           text1: 'Registration Successful',
           position: 'top',
           visibilityTime: 500,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
-        navigation.navigate('SplashScreen');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Start'}],
+          }),
+        );
       } else {
-        const errorText = await response.text();
+        const errorText = response.data.error ;
         Toast.show({
           type: 'error',
           text1: errorText || 'Registration failed!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
-          topOffset: 10,      
+          topOffset: 10,
         });
       }
     } catch (error) {
@@ -187,7 +197,7 @@ const EmailOTPVerification = ({navigation, route}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
     } finally {
       setIsRegistering(false);
@@ -223,7 +233,7 @@ const EmailOTPVerification = ({navigation, route}) => {
           setTimer(30);
         } else {
           Snackbar.show({
-            text: response.data.message,
+            text: response.data.error,
             duration: Snackbar.LENGTH_SHORT,
             backgroundColor: '#D9534F',
             textColor: '#fff',

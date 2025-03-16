@@ -48,9 +48,9 @@ const Register = ({navigation}) => {
       setPasswordError(!isValid);
     }
 
-    // if (field === 'email') {
-    //   setEmailError(!value.endsWith('.nits.ac.in'));
-    // }
+    if (field === 'email') {
+      setEmailError(!value.endsWith('.nits.ac.in'));
+    }
     
   };
 
@@ -83,16 +83,16 @@ const Register = ({navigation}) => {
       return;
     }
 
-    // if (!email.endsWith('.nits.ac.in')) {
-    //   Snackbar.show({
-    //     text: 'Please enter an institute email ID',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //     backgroundColor: '#D9534F',
-    //     textColor: '#fff',
-    //   });
-    //   setIsRegistering(false);
-    //   return;
-    // }
+    if (!email.endsWith('.nits.ac.in')) {
+      Snackbar.show({
+        text: 'Please enter an institute email ID',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: '#D9534F',
+        textColor: '#fff',
+      });
+      setIsRegistering(false);
+      return;
+    }
 
     if (passwordError) {
       Snackbar.show({

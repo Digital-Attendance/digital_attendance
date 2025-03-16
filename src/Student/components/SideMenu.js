@@ -12,15 +12,14 @@ import React, {useEffect, useState} from 'react';
 import Animated, {SlideInLeft, SlideOutLeft} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
+import {CommonActions} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'react-native-image-picker';
 import {useUserContext} from '../../Context';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
   const {userEmail, userName} = useUserContext();
-  const [profileImage, setProfileImage] = useState(
-    'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-  );
+  const [profileImage, setProfileImage] = useState(null  );
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -43,7 +42,12 @@ const SideMenu = ({toggleSideMenu}) => {
         text: 'Logout',
         onPress: async () => {
           await AsyncStorage.clear();
-          navigation.popTo('SplashScreen');
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: 'SplashScreen'}],
+            }),
+          );
         },
       },
     ]);
@@ -79,7 +83,11 @@ const SideMenu = ({toggleSideMenu}) => {
         </View>
         <View style={styles.avatarContainer}>
           <TouchableOpacity onPress={selectProfileImage}>
-            <Image source={{uri: profileImage}} style={styles.avatar} />
+            <Image source={
+                profileImage
+                  ? {uri: profileImage}
+                  : require('../../../assets/account-pic.png')
+              } style={styles.avatar} />
           </TouchableOpacity>
         </View>
         <Text style={styles.userName}>{userName}</Text>
@@ -87,9 +95,17 @@ const SideMenu = ({toggleSideMenu}) => {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
+              navigation.navigate('PendingEnrollments');
+            }}>
+            <MaterialCommunityIcons name="account-search" size={20} color="grey" />
+            <Text style={styles.menuItemText}>Pending Enrollment Requests</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
               Linking.openURL('mailto:digital.attendance.nits@gmail.com,');
             }}>
-            <MaterialCommunityIcons name="account-box" size={20} color="grey" />
+            <MaterialCommunityIcons name="phone-outline" size={20} color="grey" />
             <Text style={styles.menuItemText}>Contact Us</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>
@@ -99,7 +115,7 @@ const SideMenu = ({toggleSideMenu}) => {
           <TouchableOpacity
             style={[styles.menuItem, styles.logout]}
             onPress={handleLogout}>
-            <MaterialCommunityIcons name="account" size={20} color="grey" />
+            <MaterialCommunityIcons name="logout" size={20} color="grey" />
             <Text style={styles.menuItemText}>Logout</Text>
           </TouchableOpacity>
         </View>

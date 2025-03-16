@@ -38,8 +38,6 @@ const ArchivedSubjects = () => {
     return ['#86e83c', '#2bb539'];
   };
 
-  // const progressColors = getProgressColor(averageAttendance);
-
   const toggleMenu = useCallback(() => {
     setMenuVisible(prev => !prev);
   }, []);
@@ -47,12 +45,22 @@ const ArchivedSubjects = () => {
   useEffect(() => {
     const fetchArchivedSubjects = async () => {
       try {
-        const response = await fetch(
-          `${BASE_URL}/faculty/get-archived-subjects/${userEmail}`,
-        );
-        const data = await response.json();
+        // const response = await fetch(
+        //   `${BASE_URL}/faculty/get-archived-subjects/${userEmail}`,
+        // );
+        // const data = await response.json();
 
-        if (response.ok) {
+        const response = await axios.get(
+          `${BASE_URL}/faculty/get-archived-subjects/${userEmail}`,
+          {
+            validateStatus: function (status) {
+              return status < 500;
+            },
+          },
+        );
+        const data = await response.data;
+
+        if (response.status === 200) {
           const processedSubjects = data.archivedSubjects.map(subject => {
             let totalClasses = subject.attendanceRecords.length;
             let totalPresent = 0;
@@ -80,7 +88,7 @@ const ArchivedSubjects = () => {
           });
 
           setArchivedSubjects(processedSubjects);
-          console.log(processedSubjects);
+          
         } else {
           Toast.show({type: 'error', text1: data.error});
         }
@@ -239,7 +247,7 @@ const ArchivedSubjects = () => {
                   <AnimatedCircularProgress
                     size={80}
                     width={9}                
-                    fill={Number(item.averageAttendance)}
+                    fill={Number(Math.ceil(item.averageAttendance))}
                     rotation={-90}
                     arcSweepAngle={180}
                     backgroundColor="#005758"

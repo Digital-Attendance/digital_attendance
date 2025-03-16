@@ -9,40 +9,20 @@ import {
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {format} from 'date-fns';
-import Snackbar from 'react-native-snackbar';
-import { useUserContext } from '../../Context';
+import Toast from 'react-native-toast-message';
+import {useUserContext} from '../../Context';
 import axios from 'axios';
 import BASE_URL from '../../../url';
 
-const convertUTCtoIST = utcDate => {
-  const istDate = new Date(utcDate);
-  return format(istDate, 'yyyy-MM-dd');
-};
-
-const Records = ({
-  selectedDate,
-  attendanceRecords,
-  subjectID,
-  onAttendanceUpdated,
-  onAttendanceDeleted,
-}) => {
-  const recordForDate = attendanceRecords.find(record => {
-    return convertUTCtoIST(record.date) === selectedDate;
-  });
+const Records = ({selectedDate, subjectID, onAttendanceDeleted}) => {
   const {isSwipeActive} = useUserContext();
-  const students = recordForDate ? recordForDate.Students : [];
-  const [latestAttendance, setLatestAttendance] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [latestAttendance, setLatestAttendance] = useState([]);
   const [updatedAttendance, setUpdatedAttendance] = useState([]);
-
-  // useEffect(() => {
-  //   setUpdatedAttendance([...students]);
-  // }, [selectedDate]);
 
   const toggleEditing = () => {
     if (isEditing) {
-      setUpdatedAttendance([...students]);
+      setUpdatedAttendance(latestAttendance);
     }
     setIsEditing(!isEditing);
   };
@@ -57,7 +37,6 @@ const Records = ({
 
   const fetchAttendanceData = async () => {
     try {
-      console.log(selectedDate);
       const response = await axios.get(
         `${BASE_URL}/faculty/get-attendance/${subjectID}/${selectedDate}`,
         {
@@ -68,18 +47,25 @@ const Records = ({
       );
       if (response.status === 200) {
         setLatestAttendance(response.data.Students || []);
-      }
-      else {
-        console.log('Error :', response.data);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Error fetching attendance data',
+          text2: 'Please try again',
+        });
       }
     } catch (error) {
-      console.error('Error fetching attendance data:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Network error',
+        text2: 'Please try again',
+      });
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchAttendanceData();
-  },[]);
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -112,42 +98,44 @@ const Records = ({
           text: 'Delete',
           onPress: async () => {
             try {
-              if (!recordForDate || !recordForDate.date) {
-                Snackbar.show({
-                  text: 'No attendance record found for this date',
-                  duration: Snackbar.LENGTH_SHORT,
-                });
-                return;
-              }
               const response = await axios.delete(
                 `${BASE_URL}/faculty/delete-attendance`,
                 {
                   data: {
                     subjectID,
-                    date: recordForDate.date,
+                    date: selectedDate,
                   },
                 },
               );
 
               if (response.status === 200) {
-                Snackbar.show({
-                  text: 'Attendance record deleted successfully',
-                  duration: Snackbar.LENGTH_SHORT,
+                Toast.show({
+                  type: 'success',
+                  text1: 'Record deleted successfully',
+                  position: 'top',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
                 });
-                // if (onAttendanceDeleted) {
-                //   onAttendanceDeleted(recordForDate.date);
-                // }
+                onAttendanceDeleted(selectedDate);
               } else {
-                Snackbar.show({
-                  text: 'An error occurred while deleting attendance record',
-                  duration: Snackbar.LENGTH_SHORT,
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error deleting record',
+                  position: 'top',
+                  visibilityTime: 1000,
+                  autoHide: true,
+                  topOffset: 10,
                 });
               }
             } catch (error) {
-              console.error('Error deleting attendance record:', error);
-              Snackbar.show({
-                text: 'Network error. Please try again.',
-                duration: Snackbar.LENGTH_SHORT,
+              Toast.show({
+                type: 'error',
+                text1: 'Network error',
+                position: 'top',
+                visibilityTime: 1000,
+                autoHide: true,
+                topOffset: 10,
               });
             }
           },
@@ -158,20 +146,12 @@ const Records = ({
 
   const saveChanges = async () => {
     try {
-      if (!recordForDate || !recordForDate.date) {
-        Snackbar.show({
-          text: 'No attendance record found for this date',
-          duration: Snackbar.LENGTH_SHORT,
-        });
-        return;
-      }
-
       const response = await fetch(`${BASE_URL}/faculty/update-attendance`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           subjectID,
-          date: recordForDate.date,
+          date: selectedDate,
           updatedAttendance: updatedAttendance.map(({_id, present}) => ({
             _id,
             present,
@@ -181,26 +161,34 @@ const Records = ({
 
       const data = await response.json();
 
-      if (response.ok) {
-        Snackbar.show({
-          text: 'Attendance updated successfully',
-          duration: Snackbar.LENGTH_SHORT,
+      if (response.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: 'Attendance updated successfully',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
         setIsEditing(false);
-        // if (onAttendanceUpdated) {
-        //   onAttendanceUpdated({...recordForDate, Students: updatedAttendance});
-        // }
       } else {
-        Snackbar.show({
-          text: data.error || 'An error occurred while updating attendance',
-          duration: Snackbar.LENGTH_SHORT,
+        Toast.show({
+          type: 'error',
+          text1: 'Error updating attendance',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
     } catch (error) {
-      console.error('Error updating attendance:', error);
-      Snackbar.show({
-        text: 'Network error. Please try again.',
-        duration: Snackbar.LENGTH_SHORT,
+      Toast.show({
+        type: 'error',
+        text1: 'Network error',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
     }
   };

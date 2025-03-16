@@ -26,7 +26,11 @@ const EnrollSubject = ({navigation, route}) => {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/student/subjects`);
+        const response = await axios.get(`${BASE_URL}/student/subjects`, {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        });
         setSubjectData(response.data);
       } catch (error) {
         Toast.show({
@@ -60,10 +64,18 @@ const EnrollSubject = ({navigation, route}) => {
     setEnroll(true);
 
     try {
-      const response = await axios.post(`${BASE_URL}/student/enroll`, {
-        studentEmail: userEmail,
-        subjectID: subject,
-      });
+      const response = await axios.post(
+        `${BASE_URL}/student/enroll`,
+        {
+          studentEmail: userEmail,
+          subjectID: subject,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
       if (response.status === 200) {
         Toast.show({
@@ -75,27 +87,25 @@ const EnrollSubject = ({navigation, route}) => {
           topOffset: 10,
         });
         navigation.goBack();
-      }
-    } catch (error) {
-      if (error.response) {
-        Toast.show({
-          type: 'error',
-          text1: error.response.data.error || 'Enrollment failed!',
-          position: 'top',
-          visibilityTime: 1000,
-          autoHide: true,
-          topOffset: 10,
-        });
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Network error! Please try again.',
+          text1: response.data.error || 'Enrollment failed!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
           topOffset: 10,
         });
       }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Network error! Please try again.',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
+      });
     }
 
     setEnroll(false);

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import {BASE_URL} from '@env';
-import Snackbar from 'react-native-snackbar';
+import { CommonActions } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
 const ResetPassword = ({navigation, route}) => {
@@ -77,7 +77,9 @@ const ResetPassword = ({navigation, route}) => {
         });
 
         setInterval(() => {
-          navigation.navigate('Login');
+          navigation.dispatch(
+            CommonActions.reset({index: 0, routes: [{name: 'Start'}]}),
+          );
         }, 500);
       } else {
         Toast.show({

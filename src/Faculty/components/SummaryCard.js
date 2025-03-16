@@ -6,6 +6,7 @@ import LottieView from 'lottie-react-native';
 import {format} from 'date-fns';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import {useUserContext} from '../../Context';
 import {
   LinearGradient as SVGLinearGradient,
   Stop,
@@ -22,10 +23,12 @@ const getProgressColor = progress => {
 };
 
 const SummaryCard = ({subjectRecord}) => {
+  const {isSwipeActive} = useUserContext();
   const [progress, setProgress] = useState(0);
   const navigation = useNavigation();
   useEffect(() => {
-    setProgress(subjectRecord.averageAttendance);
+    setProgress(Math.ceil(subjectRecord.averageAttendance));
+    console.log('Subject Record:', subjectRecord);
   }, [subjectRecord]);
   const progressColors = getProgressColor(progress);
 
@@ -70,21 +73,52 @@ const SummaryCard = ({subjectRecord}) => {
               numberOfLines={1}
               ellipsizeMode="tail"
               style={styles.subjectSubName}>
-              {subjectRecord.subjectName}  ({subjectRecord.department} - {subjectRecord.section})
+              {subjectRecord.subjectName} ({subjectRecord.department} -{' '}
+              {subjectRecord.section})
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-            <View>
-              <LottieView
-                source={require('../../../assets/animations/loading.json')}
-                autoPlay
-                loop
-                style={{width: 50, height: 50}}
-              />
-              <View style={{position: 'absolute', top: 21, left: 21}}>
-                <MaterialCommunityIcons name="circle" size={8} color={'#fff'} />
+            {isSwipeActive ? (
+              <View>
+                <LottieView
+                  source={require('../../../assets/animations/loading.json')}
+                  autoPlay
+                  loop
+                  style={{width: 50, height: 50}}
+                />
+                <View style={{position: 'absolute', top: 21, left: 21}}>
+                  <MaterialCommunityIcons
+                    name="circle"
+                    size={8}
+                    color={'#fff'}
+                  />
+                </View>
               </View>
-            </View>
+            ) : (
+              <View
+                style={{
+                  position: 'relative',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 12,
+                }}>
+                <View
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 50,
+                    borderWidth: 2,
+                    borderColor: 'skyblue',
+                  }}></View>
+                <View style={{position: 'absolute'}}>
+                  <MaterialCommunityIcons
+                    name="circle"
+                    size={8}
+                    color={'#fff'}
+                  />
+                </View>
+              </View>
+            )}
           </View>
         </TouchableOpacity>
         <View style={styles.statsContainer}>
@@ -93,7 +127,6 @@ const SummaryCard = ({subjectRecord}) => {
               {CircularProgress}
               <Text style={styles.progressText}>{progress}%</Text>
               <Text style={styles.progressTitle}>AVG Attendance</Text>
-              {/* <Text style={styles.progressSubTitle}>Last 5 Days</Text> */}
             </View>
           </View>
           <View style={styles.statsDataContainer}>

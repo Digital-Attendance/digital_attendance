@@ -28,7 +28,7 @@ const SWIPE_RANGE = BUTTON_WIDTH - BUTTON_HEIGHT;
 
 const SwipeButton = ({onRefresh, subjectID}) => {
   const translateX = useSharedValue(0);
-  const {userEmail, setIsSwipeActive} = useUserContext();
+  const {userEmail, isSwipeActive, setIsSwipeActive} = useUserContext();
   const [isStarted, setIsStarted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -179,10 +179,12 @@ const SwipeButton = ({onRefresh, subjectID}) => {
           topOffset: 10,
         });
         setTimeout(() => {
-          stopAttendance();
-          translateX.value = withTiming(0);
-          runOnJS(setIsStarted)(false);
-          runOnJS(setIsSwipeActive)(false);
+          if (isSwipeActive) {
+            stopAttendance();
+            translateX.value = withTiming(0);
+            runOnJS(setIsStarted)(false);
+            runOnJS(setIsSwipeActive)(false);
+          }
         }, 300000);
       } else {
         Toast.show({

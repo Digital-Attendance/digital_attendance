@@ -17,16 +17,18 @@ const SubjectCard = ({refresh}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [subjects, setSubjects] = useState([]);
 
-  
-
-  const fetchSubjects =async () => {
+  const fetchSubjects = async () => {
     const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
     if (cachedSubjects) {
       const parsedSubjects = JSON.parse(cachedSubjects);
       setSubjects(parsedSubjects);
     }
     axios
-      .get(`${BASE_URL}/student/dashboard/${userEmail}`)
+      .get(`${BASE_URL}/student/dashboard/${userEmail}`, {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      })
       .then(response => {
         setSubjects(response.data);
         AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
@@ -36,7 +38,6 @@ const SubjectCard = ({refresh}) => {
 
   useEffect(() => {
     fetchSubjects();
-    console.log(subjects);  
   }, [refresh]);
 
   const renderItem = useCallback(({item, index}) => {
@@ -78,7 +79,10 @@ const SubjectCard = ({refresh}) => {
             cumulativeAttendance={subjects[activeIndex]?.cumulativeAttendance}
           />
 
-          <AttendanceButton key={activeIndex} subjectID={subjects[activeIndex]?.subjectID} />
+          <AttendanceButton
+            key={activeIndex}
+            subjectID={subjects[activeIndex]?.subjectID}
+          />
         </>
       ) : (
         <View style={styles.noSubjectContainer}>

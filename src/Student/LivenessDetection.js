@@ -15,9 +15,10 @@ import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
+import axios from 'axios';
 
 const LivenessDetection = ({route}) => {
   const {subjectID} = route.params;
@@ -50,12 +51,28 @@ const LivenessDetection = ({route}) => {
   const markAttendance = async () => {
     setAttendanceStatus('loading');
     try {
-      const response = await fetch(`${BASE_URL}/student/mark-attendance`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({studentEmail: userEmail, subjectID}),
-      });
-      const data = await response.json();
+      // const response = await fetch(`${BASE_URL}/student/mark-attendance`, {
+      //   method: 'POST',
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: JSON.stringify({studentEmail: userEmail, subjectID}),
+      // });
+      // const data = await response.json();
+
+      const response = await axios.post(
+        `${BASE_URL}/student/mark-attendance`,
+        {
+          studentEmail: userEmail,
+          subjectID,
+        },
+        {
+          validationStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
+
+      const data = response.data;
+
       setAttendanceStatus(response.status === 200 ? 'success' : 'failed');
       Toast.show({
         type: 'info',
@@ -63,7 +80,7 @@ const LivenessDetection = ({route}) => {
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
-        topOffset: 10,      
+        topOffset: 10,
       });
       if (response.status === 200) {
         setTimeout(() => {
@@ -78,19 +95,33 @@ const LivenessDetection = ({route}) => {
   const verifyFace = async base64Data => {
     setFaceVerificationStatus('loading');
     try {
-      const response = await fetch(
+      // const response = await fetch(
+      //   'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
+      //   {
+      //     method: 'POST',
+      //     headers: {'Content-Type': 'application/json'},
+      //     body: JSON.stringify({
+      //       email: userEmail,
+      //       image: base64Data,
+      //       registration: false,
+      //     }),
+      //   },
+      // );
+
+      const response = await axios.post(
         'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
         {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            email: userEmail,
-            image: base64Data,
-            registration: false,
-          }),
+          email: userEmail,
+          image: base64Data,
+          registration: false,
+        },
+        {
+          validationStatus: function (status) {
+            return status < 500;
+          },
         },
       );
-      const resultJSON = await response.json();
+
       setFaceVerificationStatus(response.status === 200 ? 'success' : 'failed');
       if (response.status === 200) {
         await markAttendance();
@@ -109,21 +140,33 @@ const LivenessDetection = ({route}) => {
     try {
       const photo = await cameraRef.current.takePhoto({quality: 10});
       const base64Data = await RNFS.readFile(photo.path, 'base64');
-      const response = await fetch(
+      // const response = await fetch(
+      //   'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
+      //   {
+      //     method: 'POST',
+      //     headers: {'Content-Type': 'application/json'},
+      //     body: JSON.stringify({image: base64Data}),
+      //   },
+      // );
+
+      const response = await axios.post(
         'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
         {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({image: base64Data}),
+          image: base64Data,
+        },
+        {
+          validationStatus: function (status) {
+            return status < 500;
+          },
         },
       );
-      const responseData = await response.json();
+
       setLivenessStatus(
-        responseData.label === 1 && responseData.confidence > 0.7
+        response.data.label === 1 && response.data.confidence > 0.7
           ? 'success'
           : 'failed',
       );
-      if (responseData.label === 1 && responseData.confidence > 0.7) {
+      if (response.data.label === 1 && response.data.confidence > 0.7) {
         await verifyFace(base64Data);
       }
     } catch (error) {
