@@ -25,7 +25,7 @@ export default function SplashScreen({navigation}) {
           selectedRole === 'Faculty' ? 'Faculty_Home' : 'Student_Home',
         );
       } else {
-        navigation.replace('GetStarted');
+        navigation.replace('Start');
       }
     } catch (error) {
       Toast.show({

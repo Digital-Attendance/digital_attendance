@@ -30,7 +30,8 @@ import ArchivedSubjects from './src/Faculty/ArchivedSubjects';
 import EnrollRequests from './src/Faculty/EnrollRequests';
 import CollabRequests from './src/Faculty/CollabRequests';
 import PendingEnrollments from './src/Student/PendingEnrollments';
-import GetStartedScreen from './src/GetStartedScreen';
+import GetStartedFaculty from './src/Faculty/GetStartedFaculty';
+import GetStartedStudent from './src/Student/GetStartedStudent';
 
 const toastConfig = {
   success: (props : ToastConfigParams<any>) => (
@@ -100,7 +101,6 @@ const App = () => {
                 animation: 'fade',
               }}>
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
-              <Stack.Screen name="GetStarted" component={GetStartedScreen} />
               <Stack.Screen name="Start" component={Start} />
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Register" component={Register} />
@@ -119,6 +119,7 @@ const App = () => {
               />
               <Stack.Screen name="ResetPassword" component={ResetPassword} />
               {/* Faculty Screens */}
+              <Stack.Screen name="GetStartedFaculty" component={GetStartedFaculty} />
               <Stack.Screen name="Faculty_Home" component={Faculty_Home} />
               <Stack.Screen name="AddSubject" component={AddSubject} />
               <Stack.Screen name="EnrollRequests" component={EnrollRequests} />
@@ -129,6 +130,7 @@ const App = () => {
               />
               <Stack.Screen name="ArchivedSubjects" component={ArchivedSubjects} />
               {/* Student Screens */}
+              <Stack.Screen name="GetStartedStudent" component={GetStartedStudent} />
               <Stack.Screen name="Student_Home" component={Student_Home} />
               <Stack.Screen name="SubjectInfo" component={SubjectInfo} />
               <Stack.Screen name="EnrollSubject" component={EnrollSubject} />

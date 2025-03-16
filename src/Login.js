@@ -126,8 +126,8 @@ export default function Login({navigation}) {
                 {
                   name:
                     selectedRole === 'Faculty'
-                      ? 'Faculty_Home'
-                      : 'Student_Home',
+                      ? 'GetStartedFaculty'
+                      : 'GetStartedStudent',
                 },
               ],
             }),
