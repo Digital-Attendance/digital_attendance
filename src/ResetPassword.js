@@ -84,7 +84,7 @@ const ResetPassword = ({navigation, route}) => {
       } else {
         Toast.show({
           type: 'error',
-          text1: response.data.message,
+          text1: response.data.error,
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,
@@ -94,7 +94,7 @@ const ResetPassword = ({navigation, route}) => {
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: error,
+        text1: 'An error occurred while resetting the password!',
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,

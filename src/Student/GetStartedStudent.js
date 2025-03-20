@@ -17,9 +17,13 @@ const tutorialData = [
     image: require('../../assets/tutorials/tutorial_9.jpg'),
     title: 'Subject Information',
     description:
-      'The centered Card displays the Subject Information. Press the subject name to navigate into the subject. Swipe the below  Mark Attendance Button the start the Attendance procedure. Tap the Date to open the Side Menu',
+      'The centered Card displays the Subject Information. Press the subject name to navigate into the subject. Swipe the below Mark Attendance Button the start the Attendance procedure. Tap the Date to open the Side Menu',
   },
-
+  {
+    image: require('../../assets/tutorials/tutorial_12.jpg'),
+    title: 'Side Menu',
+    description: 'Explore the options available in the Side Menu.',
+  },
   {
     image: require('../../assets/tutorials/tutorial_4.jpg'),
     title: 'Attendance Record',
@@ -29,7 +33,18 @@ const tutorialData = [
     image: require('../../assets/tutorials/tutorial_5.jpg'),
     title: 'Attendance Procedure',
     description:
-      'Location Based Attendance Procedure. When location is verified, you are moved to next procedure of liveness detection and facial Recognition.',
+      'When your location is verified, you proceed to the next step. If you are outside the designated location, you cannot proceed further.',
+  },
+  {
+    image: require('../../assets/tutorials/tutorial_13.jpg'),
+    title: 'Attendance Procedure',
+    description: 'Press the Mark Button to mark the Attendance.',
+  },
+  {
+    image: require('../../assets/tutorials/tutorial_14.jpg'),
+    title: 'Attendance Procedure',
+    description:
+      'After Successful Liveness Detection and Facial Recognition, you are marked present. If any issue occurs in-between, press the Mark Button again to restart the procedure.',
   },
 ];
 

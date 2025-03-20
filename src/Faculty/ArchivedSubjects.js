@@ -45,11 +45,6 @@ const ArchivedSubjects = () => {
   useEffect(() => {
     const fetchArchivedSubjects = async () => {
       try {
-        // const response = await fetch(
-        //   `${BASE_URL}/faculty/get-archived-subjects/${userEmail}`,
-        // );
-        // const data = await response.json();
-
         const response = await axios.get(
           `${BASE_URL}/faculty/get-archived-subjects/${userEmail}`,
           {
@@ -88,14 +83,24 @@ const ArchivedSubjects = () => {
           });
 
           setArchivedSubjects(processedSubjects);
-          
         } else {
-          Toast.show({type: 'error', text1: data.error});
+          Toast.show({
+            type: 'error',
+            text1: data.error,
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
+          });
         }
       } catch (error) {
         Toast.show({
           type: 'error',
           text1: 'An error occurred. Please try again later.',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       } finally {
         setLoading(false);
@@ -246,7 +251,7 @@ const ArchivedSubjects = () => {
                 <View style={styles.progressContainer}>
                   <AnimatedCircularProgress
                     size={80}
-                    width={9}                
+                    width={9}
                     fill={Number(Math.ceil(item.averageAttendance))}
                     rotation={-90}
                     arcSweepAngle={180}
@@ -383,7 +388,7 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     alignItems: 'center',
-    // justifyContent: 'center',    
+    // justifyContent: 'center',
   },
   progressText: {
     position: 'absolute',

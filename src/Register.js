@@ -12,17 +12,14 @@ import {
   Keyboard,
   Modal,
 } from 'react-native';
-// import {BASE_URL} from '@env';
-import BASE_URL from '../url';
+
+import {ScrollView} from 'react-native-gesture-handler';
 import Snackbar from 'react-native-snackbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import axios from 'axios';
-import {ScrollView} from 'react-native-gesture-handler';
+import BASE_URL from '../url';
 
 const Register = ({navigation}) => {
-  // const BASE_URL = process.env.BASE_URL;
-
   const [form, setForm] = useState({
     firstname: '',
     lastname: '',
@@ -133,7 +130,7 @@ const Register = ({navigation}) => {
         }, 500);
       } else {
         Snackbar.show({
-          text: response.data.message,
+          text: response.data.error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -141,7 +138,7 @@ const Register = ({navigation}) => {
       }
     } catch (error) {
       Snackbar.show({
-        text: error.message,
+        text: 'Something went wrong!',
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',

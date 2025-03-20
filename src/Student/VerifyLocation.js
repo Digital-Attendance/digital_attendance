@@ -17,7 +17,6 @@ import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import BASE_URL from '../../url';
 
-// const THRESHOLD_METERS = 500;
 
 const VerifyLocation = ({route}) => {
   const watchId = useRef(null);
@@ -93,8 +92,6 @@ const VerifyLocation = ({route}) => {
     }
     const facultyLocation = await fetchFacultyLocation();
     if (!facultyLocation) {
-      // setErrorMsg('Faculty location not found, Retry !');
-      // setVerifying(false);
       return;
     }
     setErrorMsg('');
@@ -152,10 +149,6 @@ const VerifyLocation = ({route}) => {
         );
 
         const isVerified = distance < 16;
-
-        // const isVerified =
-        //   Math.abs(facultyLocation.latitude - latitude) < THRESHOLD_METERS &&
-        //   Math.abs(facultyLocation.longitude - longitude) < THRESHOLD_METERS;
         
         setLocationVerified(isVerified);
         setVerifying(false);

@@ -116,7 +116,7 @@ const PasswordResetOTPVerification = ({navigation, route}) => {
           setTimer(30);
         } else {
           Snackbar.show({
-            text: response.data.message,
+            text: response.data.error,
             duration: Snackbar.LENGTH_SHORT,
             backgroundColor: '#D9534F',
             textColor: '#fff',

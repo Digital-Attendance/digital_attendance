@@ -20,7 +20,7 @@ const DeleteSubject = ({toggleMenu, subjectID, setArchivedSubjects}) => {
       const response = await axios.delete(
         `${BASE_URL}/faculty/delete-subject/${subjectID}`,
         {
-          validationStatus: function (status) {
+          validateStatus: function (status) {
             return status < 500;
           },
         },

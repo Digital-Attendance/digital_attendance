@@ -17,12 +17,12 @@ import * as ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import {useUserContext} from '../../Context';
 import BASE_URL from '../../../url';
-import { CommonActions } from '@react-navigation/native';
+import {CommonActions} from '@react-navigation/native';
 const {width, height} = Dimensions.get('window');
 const SideMenu = ({toggleSideMenu}) => {
-  const {userEmail, userName} = useUserContext();  
+  const {userEmail, userName} = useUserContext();
   const [profileImage, setProfileImage] = useState(null);
-  const [enrollnotification,setEnrollNotification] = useState(false);
+  const [enrollnotification, setEnrollNotification] = useState(false);
   const [collabNotifications, setCollabNotifications] = useState(false);
   const navigation = useNavigation();
 
@@ -33,32 +33,42 @@ const SideMenu = ({toggleSideMenu}) => {
         setProfileImage(image);
       }
     };
-    
+
     const fetchRequests = async () => {
       try {
         const response = await axios.get(
           `${BASE_URL}/faculty/new-requests`,
           {
             params: {facultyEmail: userEmail},
-          },
-          {
             validateStatus: function (status) {
               return status < 500;
             },
           }
         );
 
-        if (
-          response.status === 200
-        ) {
-          
+        if (response.status === 200) {
           setEnrollNotification(response.data.enrollmentRequest);
           setCollabNotifications(response.data.collabRequest);
+          
         } else {
-          Toast.show({type: 'error', text1: response.data.error});
+          Toast.show({
+            type: 'error',
+            text1: response.data.error,
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
+          });
         }
       } catch (error) {
-        Toast.show({type: 'error', text1: 'Failed to fetch requests'});
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to fetch requests',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
       } finally {
         setLoading(false);
       }
@@ -67,7 +77,6 @@ const SideMenu = ({toggleSideMenu}) => {
     fetchRequests();
   }, []);
 
- 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       {
@@ -177,7 +186,11 @@ const SideMenu = ({toggleSideMenu}) => {
             onPress={() => {
               Linking.openURL('mailto:digital.attendance.nits@gmail.com,');
             }}>
-            <MaterialCommunityIcons name="phone-outline" size={20} color="grey" />
+            <MaterialCommunityIcons
+              name="phone-outline"
+              size={20}
+              color="grey"
+            />
             <Text style={styles.menuItemText}>Contact Us</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem}>

@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import Snackbar from 'react-native-snackbar';
 import Toast from 'react-native-toast-message';
-import { CommonActions } from '@react-navigation/native';
+import {CommonActions} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const windowHeight = Dimensions.get('window').height;
@@ -45,21 +45,11 @@ export default function Login({navigation}) {
         autoHide: true,
         topOffset: 10,
       });
-      // Snackbar.show({
-      //   text: 'Username and password cannot be empty!',
-      //   duration: Snackbar.LENGTH_SHORT,
-      //   backgroundColor: '#D9534F',
-      //   textColor: '#fff',
-      // });
+
       return;
     }
     setLogging(true);
-    // Snackbar.show({
-    //   text: 'Logging in...',
-    //   duration: Snackbar.LENGTH_LONG,
-    //   backgroundColor: '#2B8781',
-    //   textColor: '#fff',
-    // });
+
     Toast.show({
       type: 'info',
       text1: 'Logging in...',
@@ -81,8 +71,6 @@ export default function Login({navigation}) {
           headers: {
             'ngrok-skip-browser-warning': 'true',
           },
-        },
-        {
           validateStatus: function (status) {
             return status < 500;
           },
@@ -100,12 +88,7 @@ export default function Login({navigation}) {
         await AsyncStorage.setItem('name', response.data.name);
         await AsyncStorage.setItem('email', email);
         await AsyncStorage.setItem('role', selectedRole);
-        // Snackbar.show({
-        //   text: 'Login Successful!',
-        //   duration: Snackbar.LENGTH_SHORT,
-        //   backgroundColor: '#5CB85C',
-        //   textColor: '#fff',
-        // });
+
         Toast.show({
           type: 'success',
           text1: 'Login Successful!',
@@ -132,15 +115,8 @@ export default function Login({navigation}) {
               ],
             }),
           );
-          
         }, 500);
       } else {
-        // Snackbar.show({
-        //   text: 'Invalid Credentials',
-        //   duration: Snackbar.LENGTH_SHORT,
-        //   backgroundColor: '#D9534F',
-        //   textColor: '#fff',
-        // });
         Toast.show({
           type: 'error',
           text1: 'Invalid Credentials',
@@ -152,56 +128,14 @@ export default function Login({navigation}) {
         setPassword('');
       }
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          Toast.show({
-            type: 'error',
-            text1: 'Invalid Username or password !',
-            position: 'top',
-            visibilityTime: 1000,
-            autoHide: true,
-            topOffset: 10,
-          });
-        } else if (error.response.status === 500) {
-          Toast.show({
-            type: 'error',
-            text1: 'Server Error !',
-            position: 'top',
-            visibilityTime: 1000,
-            autoHide: true,
-            topOffset: 10,
-          });
-        } else {
-          Toast.show({
-            type: 'info',
-            text1: `Error: ${
-              error.response.data.message || 'Something went wrong'
-            }`,
-            position: 'top',
-            visibilityTime: 1000,
-            autoHide: true,
-            topOffset: 10,
-          });
-        }
-      } else if (error.request) {
-        Toast.show({
-          type: 'info',
-          text1: 'No response from server. Check your internet.',
-          position: 'top',
-          visibilityTime: 1000,
-          autoHide: true,
-          topOffset: 10,
-        });
-      } else {
-        Toast.show({
-          type: 'info',
-          text1: 'An unexpected error occured!',
-          position: 'top',
-          visibilityTime: 1000,
-          autoHide: true,
-          topOffset: 10,
-        });
-      }
+      Toast.show({
+        type: 'info',
+        text1: 'Something went wrong!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
+      });
     } finally {
       setLogging(false);
     }

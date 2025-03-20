@@ -65,7 +65,7 @@ const ForgotPassword = ({navigation}) => {
       } else {
         Toast.show({
           type: 'error',
-          text1: response.data.message,
+          text1: response.data.error,
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,

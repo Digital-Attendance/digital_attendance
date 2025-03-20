@@ -27,9 +27,6 @@ const AttendanceGraph = ({students,barData}) => {
           showValuesAsTopLabel
           hideRules
           topLabelTextStyle={{fontSize: 8, color: 'gray'}}
-          // yAxisLabelTexts={Array.from({ length: students }, (_, i) => String(i * 10))} 
-          // rulesLength={500}
-          // rulesColor="#333" 
                 
         />
       ) : (

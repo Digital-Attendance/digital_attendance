@@ -25,8 +25,6 @@ const CollabRequests = () => {
           `${BASE_URL}/faculty/pending-requests`,
           {
             params: {email: userEmail},
-          },
-          {
             validateStatus: function (status) {
               return status < 500;
             },
@@ -37,6 +35,10 @@ const CollabRequests = () => {
         Toast.show({
           type: 'error',
           text1: 'Failed to fetch requests',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
     };
@@ -45,24 +47,50 @@ const CollabRequests = () => {
 
   const handleRequestResponse = async (subjectID, action) => {
     try {
-      const response = await axios.post(`${BASE_URL}/faculty/respond-request`, {
-        subjectID,
-        email: userEmail,
-        action,
-      });
-
-      Toast.show({
-        type: 'success',
-        text1: response.data.message,
-      });
-      setRequests(prevRequests =>
-        prevRequests.filter(req => req.subjectID !== subjectID),
+      const response = await axios.post(
+        `${BASE_URL}/faculty/respond-request`,
+        {
+          subjectID,
+          email: userEmail,
+          action,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
       );
+
+      if (response.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: 'Request responded successfully',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
+        setRequests(prevRequests =>
+          prevRequests.filter(req => req.subjectID !== subjectID),
+        );
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: response.data.error,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
+      }
     } catch (error) {
-      
       Toast.show({
         type: 'error',
         text1: 'Error responding to request',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
     }
   };

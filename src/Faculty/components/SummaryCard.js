@@ -28,7 +28,7 @@ const SummaryCard = ({subjectRecord}) => {
   const navigation = useNavigation();
   useEffect(() => {
     setProgress(Math.ceil(subjectRecord.averageAttendance));
-    console.log('Subject Record:', subjectRecord);
+    
   }, [subjectRecord]);
   const progressColors = getProgressColor(progress);
 
@@ -125,7 +125,7 @@ const SummaryCard = ({subjectRecord}) => {
           <View style={styles.progressContainer}>
             <View style={styles.progressSection}>
               {CircularProgress}
-              <Text style={styles.progressText}>{progress}%</Text>
+              <Text style={styles.progressText}>{Math.ceil(progress)}%</Text>
               <Text style={styles.progressTitle}>AVG Attendance</Text>
             </View>
           </View>

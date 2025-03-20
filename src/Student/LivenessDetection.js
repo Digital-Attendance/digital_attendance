@@ -12,13 +12,13 @@ import {
   useCameraFormat,
 } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
-import Snackbar from 'react-native-snackbar';
+import axios from 'axios';
+import {CommonActions} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {useUserContext} from '../Context';
 import BASE_URL from '../../url';
-import axios from 'axios';
 
 const LivenessDetection = ({route}) => {
   const {subjectID} = route.params;
@@ -51,13 +51,6 @@ const LivenessDetection = ({route}) => {
   const markAttendance = async () => {
     setAttendanceStatus('loading');
     try {
-      // const response = await fetch(`${BASE_URL}/student/mark-attendance`, {
-      //   method: 'POST',
-      //   headers: {'Content-Type': 'application/json'},
-      //   body: JSON.stringify({studentEmail: userEmail, subjectID}),
-      // });
-      // const data = await response.json();
-
       const response = await axios.post(
         `${BASE_URL}/student/mark-attendance`,
         {
@@ -65,7 +58,7 @@ const LivenessDetection = ({route}) => {
           subjectID,
         },
         {
-          validationStatus: function (status) {
+          validateStatus: function (status) {
             return status < 500;
           },
         },
@@ -84,7 +77,9 @@ const LivenessDetection = ({route}) => {
       });
       if (response.status === 200) {
         setTimeout(() => {
-          navigation.replace('Student_Home');
+          navigation.dispatch(
+            CommonActions.reset({index: 0, routes: [{name: 'Student_Home'}]}),
+          );
         }, 500);
       }
     } catch (error) {
@@ -95,19 +90,6 @@ const LivenessDetection = ({route}) => {
   const verifyFace = async base64Data => {
     setFaceVerificationStatus('loading');
     try {
-      // const response = await fetch(
-      //   'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
-      //   {
-      //     method: 'POST',
-      //     headers: {'Content-Type': 'application/json'},
-      //     body: JSON.stringify({
-      //       email: userEmail,
-      //       image: base64Data,
-      //       registration: false,
-      //     }),
-      //   },
-      // );
-
       const response = await axios.post(
         'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
         {
@@ -116,7 +98,7 @@ const LivenessDetection = ({route}) => {
           registration: false,
         },
         {
-          validationStatus: function (status) {
+          validateStatus: function (status) {
             return status < 500;
           },
         },
@@ -140,22 +122,13 @@ const LivenessDetection = ({route}) => {
     try {
       const photo = await cameraRef.current.takePhoto({quality: 10});
       const base64Data = await RNFS.readFile(photo.path, 'base64');
-      // const response = await fetch(
-      //   'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
-      //   {
-      //     method: 'POST',
-      //     headers: {'Content-Type': 'application/json'},
-      //     body: JSON.stringify({image: base64Data}),
-      //   },
-      // );
-
       const response = await axios.post(
         'https://zl77aqpwm5yvlrocwtw4c5nc7y0xxkco.lambda-url.ap-south-1.on.aws/',
         {
           image: base64Data,
         },
         {
-          validationStatus: function (status) {
+          validateStatus: function (status) {
             return status < 500;
           },
         },

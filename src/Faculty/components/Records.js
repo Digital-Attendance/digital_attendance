@@ -51,14 +51,20 @@ const Records = ({selectedDate, subjectID, onAttendanceDeleted}) => {
         Toast.show({
           type: 'error',
           text1: 'Error fetching attendance data',
-          text2: 'Please try again',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: 'Network error',
-        text2: 'Please try again',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
     }
   };
@@ -105,6 +111,9 @@ const Records = ({selectedDate, subjectID, onAttendanceDeleted}) => {
                     subjectID,
                     date: selectedDate,
                   },
+                  validateStatus: function (status) {
+                    return status < 500;
+                  },
                 },
               );
 
@@ -146,20 +155,24 @@ const Records = ({selectedDate, subjectID, onAttendanceDeleted}) => {
 
   const saveChanges = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/faculty/update-attendance`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${BASE_URL}/faculty/update-attendance`,
+        {
           subjectID,
           date: selectedDate,
           updatedAttendance: updatedAttendance.map(({_id, present}) => ({
             _id,
             present,
           })),
-        }),
-      });
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        },
+      );
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (response.status === 200) {
         Toast.show({

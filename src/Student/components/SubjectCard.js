@@ -9,6 +9,7 @@ import SummaryCard from './SummaryCard';
 import AttendanceGraph from './AttendanceGraph';
 import AttendanceButton from './AttendanceButton';
 import BASE_URL from '../../../url';
+import Toast from 'react-native-toast-message';
 
 const {width} = Dimensions.get('window');
 
@@ -22,7 +23,11 @@ const SubjectCard = ({refresh}) => {
     if (cachedSubjects) {
       const parsedSubjects = JSON.parse(cachedSubjects);
       setSubjects(parsedSubjects);
+      if (activeIndex >= parsedSubjects.length) {
+        setActiveIndex(0);
+      }
     }
+
     axios
       .get(`${BASE_URL}/student/dashboard/${userEmail}`, {
         validateStatus: function (status) {
@@ -31,9 +36,21 @@ const SubjectCard = ({refresh}) => {
       })
       .then(response => {
         setSubjects(response.data);
+        if (activeIndex >= response.data.length) {
+          setActiveIndex(0);
+        }
         AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
       })
-      .catch(error => console.log(error));
+      .catch(error =>
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to fetch subjects',
+          visibilityTime: 1000,
+          autoHide: true,
+        }),
+      );
+
+    
   };
 
   useEffect(() => {

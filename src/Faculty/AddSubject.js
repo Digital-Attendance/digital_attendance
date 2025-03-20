@@ -60,8 +60,6 @@ const AddSubject = ({navigation}) => {
     section: 'NA',
   });
 
-  
-
   const handleChange = (field, value) => {
     setForm(prev => ({...prev, [field]: value}));
   };
@@ -90,24 +88,6 @@ const AddSubject = ({navigation}) => {
     }
 
     try {
-      // const response = await fetch(`${BASE_URL}/faculty/add-subject`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     subjectID: `${subjectCode}_${department}_${section}`,
-      //     subjectCode,
-      //     subjectName,
-      //     programme,
-      //     semester,
-      //     department,
-      //     section,
-      //     facultyEmail: userEmail,
-      //   }),
-      // });
-
-      // const data = await response.json();
       const response = await axios.post(
         `${BASE_URL}/faculty/add-subject`,
         {
@@ -128,7 +108,6 @@ const AddSubject = ({navigation}) => {
       );
 
       const data = response.data;
-      
 
       if (response.status === 201) {
         Toast.show({

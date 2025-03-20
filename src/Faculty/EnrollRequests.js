@@ -12,11 +12,11 @@ import {
   Platform,
 } from 'react-native';
 import axios from 'axios';
-import {useUserContext} from '../Context';
-import BASE_URL from '../../url';
 import Toast from 'react-native-toast-message';
 import LinearGradient from 'react-native-linear-gradient';
 import {ChevronDown, ChevronUp} from 'lucide-react-native';
+import {useUserContext} from '../Context';
+import BASE_URL from '../../url';
 
 if (
   Platform.OS === 'android' &&
@@ -41,8 +41,6 @@ const EnrollRequests = () => {
         `${BASE_URL}/faculty/enrollment-requests`,
         {
           params: {facultyEmail: userEmail},
-        },
-        {
           validateStatus: function (status) {
             return status < 500;
           },
@@ -61,10 +59,24 @@ const EnrollRequests = () => {
         );
         setExpandedSubject(autoExpandSubject);
       } else {
-        Toast.show({type: 'error', text1: response.data.error});
+        Toast.show({
+          type: 'info',
+          text1: response.data.error,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
       }
     } catch (error) {
-      Toast.show({type: 'error', text1: 'Failed to fetch requests'});
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to fetch enrollment requests!',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
+      });
     } finally {
       setLoading(false);
     }
@@ -91,13 +103,31 @@ const EnrollRequests = () => {
         Toast.show({
           type: 'success',
           text1: `Successfully ${action}ed enrollment`,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
         fetchEnrollmentRequests();
       } else {
-        Toast.show({type: 'error', text1: `Failed to ${action} enrollment`});
+        Toast.show({
+          type: 'error',
+          text1: `Failed to ${action} enrollment`,
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
       }
     } catch (error) {
-      Toast.show({type: 'error', text1: `Failed to ${action} enrollment`});
+      Toast.show({
+        type: 'error',
+        text1: `Failed to ${action} enrollment`,
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
+      });
     }
   };
 

@@ -29,11 +29,11 @@ const StudentList = ({name, scholarID, attended, progress}) => {
         <AnimatedCircularProgress
           size={30}
           width={2}
-          fill={progress}
+          fill={Math.ceil(progress)}
           tintColor="orange"
           backgroundColor="skyblue"
         />
-        <Text style={styles.progressText}>{progress}%</Text>
+        <Text style={styles.progressText}>{Math.ceil(progress)}%</Text>
       </View>
     </View>
   );

@@ -4,8 +4,6 @@ import {
   Text,
   View,
   FlatList,
-  TouchableOpacity,
-  Alert,
 } from 'react-native';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
@@ -23,10 +21,21 @@ const PendingEnrollments = () => {
       try {
         const response = await axios.post(`${BASE_URL}/student/pending-enrollments`, {
           studentEmail: userEmail,
+        },{
+          validateStatus: function (status) {
+            return status < 500;
+          },
         });
         setPendingSubjects(response.data.pendingSubjects || []);
       } catch (error) {
-        Toast.show({ type: 'error', text1: 'Failed to fetch pending enrollments' });
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to fetch pending enrollments',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
+        });
       }
     };
     fetchPendingEnrollments();

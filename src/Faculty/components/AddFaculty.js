@@ -21,6 +21,10 @@ const AddFaculty = ({toggleFacultyModal, subjectID}) => {
       Toast.show({
         type: 'error',
         text1: 'Please enter a valid email',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
       return;
     }
@@ -39,11 +43,15 @@ const AddFaculty = ({toggleFacultyModal, subjectID}) => {
           },
         },
       );
-      
+
       if (response.status === 200) {
         Toast.show({
           type: 'success',
-          text1: 'Faculty added successfully',
+          text1: 'Request sent successfully',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
         setFacultyEmail('');
         toggleFacultyModal();
@@ -51,12 +59,20 @@ const AddFaculty = ({toggleFacultyModal, subjectID}) => {
         Toast.show({
           type: 'error',
           text1: response.data.error || 'Error adding faculty',
+          position: 'top',
+          visibilityTime: 1000,
+          autoHide: true,
+          topOffset: 10,
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: 'Network error, try again',
+        position: 'top',
+        visibilityTime: 1000,
+        autoHide: true,
+        topOffset: 10,
       });
     }
   };

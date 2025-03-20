@@ -16,6 +16,7 @@ import {
 import RNFS from 'react-native-fs';
 import Snackbar from 'react-native-snackbar';
 import {CommonActions} from '@react-navigation/native';
+import axios from 'axios';
 import BASE_URL from '../url';
 const Registration_FaceVerification = ({navigation, route}) => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -81,6 +82,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
   };
 
   const saveEmbedding = async () => {
+    
     if (!base64Data) {
       Snackbar.show({
         text: 'Please capture a photo first.',
@@ -90,19 +92,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
       });
       return;
     }
+    
     try {
-      // const res = await fetch(
-      //   'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
-      //   {
-      //     method: 'POST',
-      //     headers: {'Content-Type': 'application/json'},
-      //     body: JSON.stringify({
-      //       email: email,
-      //       image: base64Data,
-      //       registration: true,
-      //     }),
-      //   },
-      // );
       const res = await axios.post(
         'https://zjaxli24s5wu5anukwvvodgtoy0vckbn.lambda-url.ap-south-1.on.aws/',
         {
@@ -111,15 +102,16 @@ const Registration_FaceVerification = ({navigation, route}) => {
           registration: true,
         },
         {
-          validationStatus: function (status) {
+          validateStatus: function (status) {
             return status < 500;
           },
         },
       );
 
+
       if (res.status !== 200) {
         Snackbar.show({
-          text: response.data.error,
+          text: res.data.error,
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#D9534F',
           textColor: '#fff',
@@ -128,7 +120,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
       }
 
       Snackbar.show({
-        text: response.data.message,
+        text: res.data.message,
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#5CB85C',
         textColor: '#fff',
@@ -138,7 +130,7 @@ const Registration_FaceVerification = ({navigation, route}) => {
       );
     } catch (error) {
       Snackbar.show({
-        text: error,
+        text: 'An error occurred while saving the embedding!',
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',
@@ -174,16 +166,8 @@ const Registration_FaceVerification = ({navigation, route}) => {
     };
 
     try {
-      // const response = await fetch(`${BASE_URL}/register`, {
-      //   method: 'POST',
-      //   body: JSON.stringify(requestBody),
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-
       const response = await axios.post(`${BASE_URL}/register`, requestBody, {
-        validationStatus: function (status) {
+        validateStatus: function (status) {
           return status < 500;
         },
       });
@@ -198,11 +182,11 @@ const Registration_FaceVerification = ({navigation, route}) => {
         });
         return;
       }
-
+      
       await saveEmbedding();
     } catch (error) {
       Snackbar.show({
-        text: error,
+        text: 'An error occurred while registering!',
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: '#D9534F',
         textColor: '#fff',

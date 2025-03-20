@@ -25,15 +25,22 @@ const SubjectCard = ({onRefresh, refresh}) => {
 
   const fetchSubjects = async () => {
     const cachedSubjects = await AsyncStorage.getItem('cachedSubjects');
-    
+
     if (cachedSubjects) {
       const parsedSubjects = JSON.parse(cachedSubjects);
-      console.log('Parsed: ',subjects.length);
       setSubjects(parsedSubjects);
+      setActiveIndex(prevIndex =>
+        Math.min(prevIndex, parsedSubjects.length - 1),
+      );
+
       if (parsedSubjects.length > 0) {
-        updateGraphData(0, parsedSubjects);
+        updateGraphData(
+          Math.min(activeIndex, parsedSubjects.length - 1),
+          parsedSubjects,
+        );
       }
     }
+
     axios
       .get(`${BASE_URL}/faculty/dashboard/${userEmail}`, {
         validateStatus: function (status) {
@@ -41,11 +48,21 @@ const SubjectCard = ({onRefresh, refresh}) => {
         },
       })
       .then(response => {
-        setSubjects(response.data);
-        if (response.data.length > 0) {
-          updateGraphData(activeIndex, response.data);
+        const newSubjects = response.data;
+
+        setSubjects(newSubjects);
+        setActiveIndex(prevIndex =>
+          Math.min(prevIndex, newSubjects.length - 1),
+        );
+
+        if (newSubjects.length > 0) {
+          updateGraphData(
+            Math.min(activeIndex, newSubjects.length - 1),
+            newSubjects,
+          );
         }
-        AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
+
+        AsyncStorage.setItem('cachedSubjects', JSON.stringify(newSubjects));
       })
       .catch(error =>
         Toast.show({
@@ -56,6 +73,8 @@ const SubjectCard = ({onRefresh, refresh}) => {
           topOffset: 10,
         }),
       );
+
+      console.log('Active Index: ', activeIndex);
   };
 
   useEffect(() => {

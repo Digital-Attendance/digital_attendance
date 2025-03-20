@@ -35,7 +35,7 @@ const EnrollSubject = ({navigation, route}) => {
       } catch (error) {
         Toast.show({
           type: 'error',
-          text1: error.response?.data?.message || 'Failed to fetch subjects!',
+          text1: 'Failed to fetch subjects!',
           position: 'top',
           visibilityTime: 1000,
           autoHide: true,

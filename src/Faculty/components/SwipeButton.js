@@ -83,7 +83,7 @@ const SwipeButton = ({onRefresh, subjectID}) => {
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: error,
+        text1: 'An error occurred while fetching your location',
         position: 'top',
         visibilityTime: 1000,
         autoHide: true,
@@ -210,6 +210,9 @@ const SwipeButton = ({onRefresh, subjectID}) => {
         autoHide: true,
         topOffset: 10,
       });
+      translateX.value = withTiming(0);
+      runOnJS(setIsStarted)(false);
+      runOnJS(setIsSwipeActive)(false);
     }
   };
 

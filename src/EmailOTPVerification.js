@@ -152,14 +152,6 @@ const EmailOTPVerification = ({navigation, route}) => {
     };
 
     try {
-      // const response = await fetch(`${BASE_URL}/register`, {
-      //   method: 'POST',
-      //   body: JSON.stringify(requestBody),
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-
       const response = await axios.post(`${BASE_URL}/register`, requestBody, {
         validateStatus: status => status < 500,
       });
