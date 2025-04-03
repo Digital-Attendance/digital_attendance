@@ -35,19 +35,31 @@ const SubjectCard = ({refresh}) => {
         },
       })
       .then(response => {
-        setSubjects(response.data);
+        if (response.status !== 200) {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to fetch subjects',
+            visibilityTime: 1000,
+            autoHide: true,
+          });
+          return;
+        }
+        const newSubjects = response.data || [];
+        setSubjects(newSubjects);
         if (activeIndex >= response.data.length) {
           setActiveIndex(0);
         }
         AsyncStorage.setItem('cachedSubjects', JSON.stringify(response.data));
       })
-      .catch(error =>
+      .catch(error =>{
         Toast.show({
           type: 'error',
           text1: 'Failed to fetch subjects',
           visibilityTime: 1000,
           autoHide: true,
-        }),
+        });
+        setSubjects([]); 
+      }
       );
 
     

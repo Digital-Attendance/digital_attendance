@@ -48,8 +48,17 @@ const SubjectCard = ({onRefresh, refresh}) => {
         },
       })
       .then(response => {
-        const newSubjects = response.data;
-
+        if (response.status !== 200) {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to fetch subjects',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
+          });
+          return;
+        }
+        const newSubjects = response.data || [];
         setSubjects(newSubjects);
         setActiveIndex(prevIndex =>
           Math.min(prevIndex, newSubjects.length - 1),
@@ -64,17 +73,16 @@ const SubjectCard = ({onRefresh, refresh}) => {
 
         AsyncStorage.setItem('cachedSubjects', JSON.stringify(newSubjects));
       })
-      .catch(error =>
+      .catch(error => {
         Toast.show({
           type: 'error',
           text1: 'Failed to fetch subjects',
           visibilityTime: 1000,
           autoHide: true,
           topOffset: 10,
-        }),
-      );
-
-      console.log('Active Index: ', activeIndex);
+        });
+        setSubjects([]);
+      });
   };
 
   useEffect(() => {

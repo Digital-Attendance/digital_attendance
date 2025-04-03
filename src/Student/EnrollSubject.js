@@ -31,6 +31,17 @@ const EnrollSubject = ({navigation, route}) => {
             return status < 500;
           },
         });
+        if (response.status !== 200) {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to fetch subjects!',
+            position: 'top',
+            visibilityTime: 1000,
+            autoHide: true,
+            topOffset: 10,
+          });
+          navigation.goBack();
+        }
         setSubjectData(response.data);
       } catch (error) {
         Toast.show({
